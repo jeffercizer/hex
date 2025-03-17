@@ -37,7 +37,7 @@ struct GameBoard
     public int left;
     public int right;
 
-        public void PrintGameBoard()
+    public void PrintGameBoard()
     {
         //terraintype
         GameHex test;
@@ -77,7 +77,8 @@ struct GameBoard
         Console.WriteLine();
 
         //features
-        for(int r = top; r <= bottom; r++){
+        for(int r = top; r <= bottom; r++)
+        {
             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
             String mapRow = ""; 
             if (r%2 == 1)
@@ -104,4 +105,9 @@ struct GameBoard
         }
         Console.WriteLine();
     }
+}
+
+struct GameBoardTest
+{
+    
 }
