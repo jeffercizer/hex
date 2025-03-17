@@ -743,7 +743,8 @@ struct Tests
 }
 
 
-
+struct HexMain
+{
     static public void Main()
     {
         Tests.TestAll();
