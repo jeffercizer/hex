@@ -319,6 +319,16 @@ struct UnitTests
 
 struct Unit
 {
+    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
+    {
+        this.name = name;
+        this.movementCosts = movementCosts;
+        this.currentGameHex = currentGameHex;
+    }
+
+    public String name;
+    public Dictionary<TerrainMoveType, float> movementCosts;
+    public GameHex currentGameHex;
     
     public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
     {
