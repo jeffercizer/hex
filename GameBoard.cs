@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-struct GameBoardTests
+struct UnitTests
 {   
     static public void TestSimpleMountainPathFinding(bool printGameBoard)
     {
@@ -255,8 +255,9 @@ struct GameBoardTests
         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(2, 4, -6));
     }
 
-    static public void TestSimpleRoadPathFinding(bool printGameBoard)
+    static public void TestLineofSightFlat(bool printGameBoard)
     {
+        String name = "TestLineofSightFlat";
         int top = 0;
         int bottom = 10;
         int left = 0;
@@ -267,7 +268,7 @@ struct GameBoardTests
             for (int q = left - r_offset; q <= right - r_offset; q++){
                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
                 {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>(){}));
+                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>(){}));
                 }
                 else
                 {
@@ -280,24 +281,22 @@ struct GameBoardTests
         {
             mainBoard.PrintGameBoard();
         }
-        Dictionary<TerrainMoveType,float> scoutVisionCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 1 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0 },
-        };
+        
         float scoutSightRange = 3.0f;
 
         Hex start = new Hex(2, 4, -6);
+        Hex[] visible = {new Hex(2, 4, -6), }
         //Hex end = new Hex(4, 6, -10);
         //Dictionary<Hex, Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
         //Hex cur = end;
        
-
+        foreach (Hex visibleHex in visible)
+        {
+            if(!visibleHexDictionary.contains(visibleHex))
+            {
+                Tests.Complain(name);
+            }
+        }
         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(4, 6, -10));
         cur = path[cur];
         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(4, 5, -9));
@@ -318,39 +317,9 @@ struct GameBoardTests
 
 }
 
-struct GameBoard
+struct Unit
 {
-    public GameBoard(int top, int bottom, int left, int right)
-    {
-        this.top = top;
-        this.bottom = bottom;
-        this.left = left;
-        this.right = right;
-        gameHexDict = new();
-        Random rnd = new Random();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-            }
-        }
-    }
-
-    public GameBoard(Dictionary<Hex, GameHex> gameHexDict, int top, int bottom, int left, int right)
-    {
-        this.gameHexDict = gameHexDict;
-        this.top = top;
-        this.bottom = bottom;
-        this.left = left;
-        this.right = right;
-    }
-
-    public Dictionary<Hex,GameHex> gameHexDict;
-    public int top;
-    public int bottom;
-    public int left;
-    public int right;
-
+    
     public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
     {
         //cost for river, embark, disembark are custom (0 = end turn to enter, 1/2/3/4 = normal cost)\\
@@ -492,74 +461,6 @@ struct GameBoard
             }
         }
         return came_from;
-    }
-
-    public void PrintGameBoard()
-    {
-        //terraintype
-        GameHex test;
-        for(int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            String mapRow = ""; 
-            if (r%2 == 1)
-            {
-                mapRow += " ";
-            }
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(gameHexDict.TryGetValue(new Hex(q, r, -q-r), out test)){
-                    if(test.terrainType == TerrainType.Flat)
-                    {
-                        mapRow += "F ";
-                    }
-                    else if(test.terrainType == TerrainType.Rough)
-                    {
-                        mapRow += "R ";
-                    }
-                    else if(test.terrainType == TerrainType.Mountain)
-                    {
-                        mapRow += "M ";
-                    }
-                    else if(test.terrainType == TerrainType.Coast)
-                    {
-                        mapRow += "C ";
-                    }
-                    else if(test.terrainType == TerrainType.Ocean)
-                    {
-                        mapRow += "O ";
-                    }
-                }
-            }
-            Console.WriteLine(mapRow);
-        }
-        Console.WriteLine();
-
-        //features
-        for(int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            String mapRow = ""; 
-            if (r%2 == 1)
-            {
-                mapRow += " ";
-            }
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(gameHexDict.TryGetValue(new Hex(q, r, -q-r), out test)){
-                    foreach (FeatureType feature in test.featureSet)
-                    {
-                        if (feature == FeatureType.Road)
-                        {
-                            mapRow += "R ";
-                            break;
-                        }
-                        else
-                        {
-                            mapRow += "* ";
-                        }
-                    }
-                }
-            }
-            Console.WriteLine(mapRow);
-        }
-        Console.WriteLine();
     }
 
     static public void Main()
