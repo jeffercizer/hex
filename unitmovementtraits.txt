@@ -1,0 +1,5 @@
+This is a list of concepts directly supported:
+ - if river move != 0 then they have free river moving
+ - if embarkment/disembarking != 0 then they have free embarking/disembarking
+ - set forest movement to what ever the penalty is for a forest when moving
+ - mountain movement is >= 9999 otherwise could set to a real cost to allow mountain movement
