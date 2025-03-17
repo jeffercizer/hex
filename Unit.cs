@@ -16,6 +16,12 @@ struct Unit
     public String name;
     public Dictionary<TerrainMoveType, float> movementCosts;
     public GameHex currentGameHex;
+
+    public bool SetGameHex(GameHex newGameHex)
+    {
+        currentGameHex = newGameHex;
+        return true;
+    }
     
     public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
     {
