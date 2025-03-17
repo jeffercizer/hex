@@ -4,6 +4,169 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
+struct Unit
+{
+    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
+    {
+        this.name = name;
+        this.movementCosts = movementCosts;
+        this.currentGameHex = currentGameHex;
+    }
+
+    public String name;
+    public Dictionary<TerrainMoveType, float> movementCosts;
+    public GameHex currentGameHex;
+    
+    public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
+    {
+        //cost for river, embark, disembark are custom (0 = end turn to enter, 1/2/3/4 = normal cost)\\
+        GameHex firstHex;
+        GameHex secondHex;
+        if (!gameHexDict.TryGetValue(first, out firstHex)) //if firstHex is somehow off the table return max
+        {
+            return 111111;
+        }
+        if (!gameHexDict.TryGetValue(second, out secondHex)) //if secondHex is off the table return max
+        {
+            return 333333;
+        }
+        float moveCost = 222222; //default value should be set
+        if (firstHex.terrainType == TerrainType.Coast || firstHex.terrainType == TerrainType.Ocean) //first hex is on water
+        {
+            if (secondHex.terrainType == TerrainType.Coast || secondHex.terrainType == TerrainType.Ocean) //second hex is on coast so we pay the normal cost
+            {
+                moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
+                foreach (FeatureType feature in secondHex.featureSet)
+                {
+                    if (feature == FeatureType.Coral)
+                    {
+                        moveCost += movementCosts[TerrainMoveType.Coral];
+                    }
+                }
+                moveCost = movementCosts[TerrainMoveType.Coast];
+            }
+            else //second hex is on land so we are disembarking
+            {
+                if (movementCosts[TerrainMoveType.Disembark] == 0) //we must use all remaining movement to disembark
+                {
+                    moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
+                }
+                else //otherwise treat it like a normal land move
+                {
+                    moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
+                    foreach (FeatureType feature in secondHex.featureSet)
+                    {
+                        if (feature == FeatureType.Road)
+                        {
+                            moveCost = movementCosts[TerrainMoveType.Road];
+                            break;
+                        }
+                        if (feature == FeatureType.River && movementCosts[TerrainMoveType.River] == 0) //if river apply river penalty
+                        {
+                            moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
+                        }
+                        if (feature == FeatureType.Forest) //if there is a forest add movement penalty
+                        {
+                            moveCost += movementCosts[TerrainMoveType.Forest];
+                        }
+                    }
+                }
+            }
+        }
+        else //first hex is on land
+        {
+            if (secondHex.terrainType == TerrainType.Coast || secondHex.terrainType == TerrainType.Ocean) //second hex is on water
+            {
+                //embark costs all remaining movement and requires at least 1 so costSoFar % unitMovementSpeed = cost or if == 0 then = unitMovementSpeed
+                if (movementCosts[TerrainMoveType.Embark] == 0)
+                {
+                    moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
+                }
+                else//if we have a non-0 embark speed work like normal water
+                {
+                    moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
+                    foreach (FeatureType feature in secondHex.featureSet)
+                    {
+                        if (feature == FeatureType.Coral)
+                        {
+                            moveCost += movementCosts[TerrainMoveType.Coral];
+                        }
+                    }
+                    moveCost = movementCosts[TerrainMoveType.Coast];
+                }
+            }
+            else //second hex is on land
+            {
+                moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
+                foreach (FeatureType feature in secondHex.featureSet)
+                {
+                    if (feature == FeatureType.Road)
+                    {
+                        moveCost = movementCosts[TerrainMoveType.Road];
+                        break;
+                    }
+                    if (feature == FeatureType.River && movementCosts[TerrainMoveType.River] == 0) //if river apply river penalty
+                    {
+                        moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
+                    }
+                    if (feature == FeatureType.Forest) //if there is a forest add movement penalty
+                    {
+                        moveCost += movementCosts[TerrainMoveType.Forest];
+                    }
+                }
+            }
+        }
+        return moveCost;
+    }
+
+
+
+    private int AstarHeuristic(Hex start, Hex end)
+    {
+        return start.WrapDistance(end);
+    }
+
+    public Dictionary<Hex, Hex> PathFind(Hex start, Hex end, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed)
+    {
+        PriorityQueue<Hex, float> frontier = new();
+        frontier.Enqueue(start, 0);
+        Dictionary<Hex, Hex> came_from = new();
+        Dictionary<Hex, float> cost_so_far = new();
+        came_from[start] = new Hex(-1, -1, 2);
+        cost_so_far[start] = 0;
+
+        Hex current;
+        float priority;
+        while (frontier.TryDequeue(out current, out priority))
+        {
+            if (current.Equals(end))
+            {
+                break;
+            }
+            foreach (Hex next in current.WrappingNeighbors())
+            {
+                float new_cost = cost_so_far[current] + TravelCost(current, next, movementCosts, unitMovementSpeed, cost_so_far[current]);
+                //if cost_so_far doesn't have next as a key yet or the new cost is lower than the lowest cost of this node previously
+                if (!cost_so_far.Keys.Contains(next) || new_cost < cost_so_far[next]) 
+                {
+                    cost_so_far[next] = new_cost;
+                    priority = new_cost + AstarHeuristic(end, next);
+                    frontier.Enqueue(next, priority);
+                    came_from[next] = current;
+                    //Console.Write("|"+next.q + "," + next.r + ", " + priority+"|");
+                }
+            }
+        }
+        return came_from;
+    }
+
+    static public void Main()
+    {
+        Tests.TestAll();
+    }
+}
+
+
 struct UnitTests
 {   
     static public void TestSimpleMountainPathFinding(bool printGameBoard)
@@ -315,166 +478,4 @@ struct UnitTests
         GameBoardTests.TestSimpleRoadPathFinding(true);
     }
 
-}
-
-struct Unit
-{
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
-    {
-        this.name = name;
-        this.movementCosts = movementCosts;
-        this.currentGameHex = currentGameHex;
-    }
-
-    public String name;
-    public Dictionary<TerrainMoveType, float> movementCosts;
-    public GameHex currentGameHex;
-    
-    public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
-    {
-        //cost for river, embark, disembark are custom (0 = end turn to enter, 1/2/3/4 = normal cost)\\
-        GameHex firstHex;
-        GameHex secondHex;
-        if (!gameHexDict.TryGetValue(first, out firstHex)) //if firstHex is somehow off the table return max
-        {
-            return 111111;
-        }
-        if (!gameHexDict.TryGetValue(second, out secondHex)) //if secondHex is off the table return max
-        {
-            return 333333;
-        }
-        float moveCost = 222222; //default value should be set
-        if (firstHex.terrainType == TerrainType.Coast || firstHex.terrainType == TerrainType.Ocean) //first hex is on water
-        {
-            if (secondHex.terrainType == TerrainType.Coast || secondHex.terrainType == TerrainType.Ocean) //second hex is on coast so we pay the normal cost
-            {
-                moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
-                foreach (FeatureType feature in secondHex.featureSet)
-                {
-                    if (feature == FeatureType.Coral)
-                    {
-                        moveCost += movementCosts[TerrainMoveType.Coral];
-                    }
-                }
-                moveCost = movementCosts[TerrainMoveType.Coast];
-            }
-            else //second hex is on land so we are disembarking
-            {
-                if (movementCosts[TerrainMoveType.Disembark] == 0) //we must use all remaining movement to disembark
-                {
-                    moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
-                }
-                else //otherwise treat it like a normal land move
-                {
-                    moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
-                    foreach (FeatureType feature in secondHex.featureSet)
-                    {
-                        if (feature == FeatureType.Road)
-                        {
-                            moveCost = movementCosts[TerrainMoveType.Road];
-                            break;
-                        }
-                        if (feature == FeatureType.River && movementCosts[TerrainMoveType.River] == 0) //if river apply river penalty
-                        {
-                            moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
-                        }
-                        if (feature == FeatureType.Forest) //if there is a forest add movement penalty
-                        {
-                            moveCost += movementCosts[TerrainMoveType.Forest];
-                        }
-                    }
-                }
-            }
-        }
-        else //first hex is on land
-        {
-            if (secondHex.terrainType == TerrainType.Coast || secondHex.terrainType == TerrainType.Ocean) //second hex is on water
-            {
-                //embark costs all remaining movement and requires at least 1 so costSoFar % unitMovementSpeed = cost or if == 0 then = unitMovementSpeed
-                if (movementCosts[TerrainMoveType.Embark] == 0)
-                {
-                    moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
-                }
-                else//if we have a non-0 embark speed work like normal water
-                {
-                    moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
-                    foreach (FeatureType feature in secondHex.featureSet)
-                    {
-                        if (feature == FeatureType.Coral)
-                        {
-                            moveCost += movementCosts[TerrainMoveType.Coral];
-                        }
-                    }
-                    moveCost = movementCosts[TerrainMoveType.Coast];
-                }
-            }
-            else //second hex is on land
-            {
-                moveCost = movementCosts[(TerrainMoveType)secondHex.terrainType];
-                foreach (FeatureType feature in secondHex.featureSet)
-                {
-                    if (feature == FeatureType.Road)
-                    {
-                        moveCost = movementCosts[TerrainMoveType.Road];
-                        break;
-                    }
-                    if (feature == FeatureType.River && movementCosts[TerrainMoveType.River] == 0) //if river apply river penalty
-                    {
-                        moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
-                    }
-                    if (feature == FeatureType.Forest) //if there is a forest add movement penalty
-                    {
-                        moveCost += movementCosts[TerrainMoveType.Forest];
-                    }
-                }
-            }
-        }
-        return moveCost;
-    }
-
-
-
-    private int AstarHeuristic(Hex start, Hex end)
-    {
-        return start.WrapDistance(end);
-    }
-
-    public Dictionary<Hex, Hex> PathFind(Hex start, Hex end, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed)
-    {
-        PriorityQueue<Hex, float> frontier = new();
-        frontier.Enqueue(start, 0);
-        Dictionary<Hex, Hex> came_from = new();
-        Dictionary<Hex, float> cost_so_far = new();
-        came_from[start] = new Hex(-1, -1, 2);
-        cost_so_far[start] = 0;
-
-        Hex current;
-        float priority;
-        while (frontier.TryDequeue(out current, out priority))
-        {
-            if (current.Equals(end))
-            {
-                break;
-            }
-            foreach (Hex next in current.WrappingNeighbors())
-            {
-                float new_cost = cost_so_far[current] + TravelCost(current, next, movementCosts, unitMovementSpeed, cost_so_far[current]);
-                //if cost_so_far doesn't have next as a key yet or the new cost is lower than the lowest cost of this node previously
-                if (!cost_so_far.Keys.Contains(next) || new_cost < cost_so_far[next]) 
-                {
-                    cost_so_far[next] = new_cost;
-                    priority = new_cost + AstarHeuristic(end, next);
-                    frontier.Enqueue(next, priority);
-                    came_from[next] = current;
-                    //Console.Write("|"+next.q + "," + next.r + ", " + priority+"|");
-                }
-            }
-        }
-        return came_from;
-    }
-
-    static public void Main()
-    {
-        Tests.TestAll();
-    }
 }
