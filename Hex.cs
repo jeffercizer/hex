@@ -143,16 +143,44 @@ struct Hex
         return Add(Hex.Direction(direction));
     }
 
+    public Hex WrappingNeighbor(int direction, int left, int right)
+    {
+        Hex target = Add(Hex.Direction(direction)).q;
+        if(target.q < left)
+        {
+            return(new Hex(right, target.r, target.s));
+        }
+        else if(target.q > right)
+        {
+            return(new Hex(left, target.r, target.s));
+        }
+        return Add(Hex.Direction(direction));
+    }
+
     public Hex[] Neighbors()
     {
         Hex[] neighbors =
         [
-            Add(Hex.Direction(0)),
-            Add(Hex.Direction(1)),
-            Add(Hex.Direction(2)),
-            Add(Hex.Direction(3)),
-            Add(Hex.Direction(4)),
-            Add(Hex.Direction(5)),
+            Neighbor(0),
+            Neighbor(1),
+            Neighbor(2),
+            Neighbor(3),
+            Neighbor(4),
+            Neighbor(5),
+        ];
+        return neighbors;
+    }
+
+    public Hex[] WrappingNeighbors(int left, int right)
+    {
+        Hex[] neighbors =
+        [
+            WrappingNeighbor(0, left, right),
+            WrappingNeighbor(1, left, right),
+            WrappingNeighbor(2, left, right),
+            WrappingNeighbor(3, left, right),
+            WrappingNeighbor(4, left, right),
+            WrappingNeighbor(5, left, right),
         ];
         return neighbors;
     }
@@ -790,7 +818,7 @@ struct Tests
         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(2, 4, -6));
     }
 
-        static public void TestSimpleRoadPathFinding(bool printGameBoard)
+    static public void TestSimpleRoadPathFinding(bool printGameBoard)
     {
         int top = 0;
         int bottom = 10;
