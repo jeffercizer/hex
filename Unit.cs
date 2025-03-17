@@ -22,6 +22,14 @@ struct Unit
         currentGameHex = newGameHex;
         return true;
     }
+
+    public bool MoveToGameHex(GameHex targetGameHex)
+    {
+        currentGameHex.unitsList.Remove(this);
+        currentGameHex = targetGameHex;
+        currentGameHex.unitsList.Add(this);
+        return true;
+    }
     
     public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
     {
