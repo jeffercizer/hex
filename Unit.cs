@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
-
 enum TerrainMoveType
 {
     Flat,
@@ -28,13 +27,14 @@ struct Unit
         this.currentGameHex = currentGameHex;
     }
 
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex, float movementSpeed, int teamNum)
+    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex, float movementSpeed, float, combatStrength, int teamNum)
     {
         this.name = name;
         this.movementCosts = movementCosts;
         this.currentGameHex = currentGameHex;
         this.movementSpeed = movementSpeed;
         this.teamNum = teamNum;
+        this.combatStrength = combatStrength;
     }
 
     public String name;
@@ -42,8 +42,11 @@ struct Unit
     public GameHex currentGameHex;
     public float movementSpeed = 2.0f;
     public float remainingMovement = 2.0f;
+    public float currentHealth = 100.0f;
+    public float combatStrength = 10.0f;
     public int teamNum = 1;
     public List<Hex> currentPath;
+    public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
     {
@@ -53,7 +56,26 @@ struct Unit
 
     public void OnTurnEnded(int turnNumber)
     {
+        if(remainingMovement > 0.0f & currentPath.Any())
+        {
+            MoveTowards(currentPath.Last(), isTargetEnemy);
+        }
         Console.WriteLine($"Unit ({name}): Ended turn {turnNumber}.");
+    }
+
+    public bool AttackTarget(GameHex targetGameHex, TeamManager teamManager)
+    {
+        if (targetGameHex.unitsList.Any())
+        {
+            foreach (Unit unit in targetGameHex.unitsList)
+            {
+                if (teamManager.GetEnemies(team).Contains(unit.team)
+                {
+                    //combat
+                    break;
+                }
+            }
+        }
     }
 
     public bool SetGameHex(GameHex newGameHex)
@@ -62,20 +84,27 @@ struct Unit
         return true;
     }
 
-    public bool MoveToGameHex(GameHex targetGameHex)
+    public bool TryMoveToGameHex(GameHex targetGameHex, TeamManager teamManager)
     {
         if(targetGameHex.unitsList.Any())
         {
             return false;
         }
-        moveCost = TravelCost(currentGameHex.hex, targetGameHex.hex, movementCosts, movementSpeed, movementSpeed-remainingMovement);
+        moveCost = TravelCost(currentGameHex.hex, targetGameHex.hex, teamManager, isTargetEnemy, movementCosts, movementSpeed, movementSpeed-remainingMovement);
         if(moveCost <= remainingMovement)
         {
-            remainingMovement -= moveCost;
-            currentGameHex.unitsList.Remove(this);
-            currentGameHex = targetGameHex;
-            currentGameHex.unitsList.Add(this);
-            return true;
+            if(isTargetEnemy & targetGameHex.Equals(currentPath.Last()))
+            {
+                AttackTarget(targetGameHex.hex, teamManager);
+            }
+            else
+            {
+                remainingMovement -= moveCost;
+                currentGameHex.unitsList.Remove(this);
+                currentGameHex = targetGameHex;
+                currentGameHex.unitsList.Add(this);
+                return true;
+            }
         }
         else
         {
@@ -83,14 +112,23 @@ struct Unit
         }
     }
 
-    public bool MoveTowards(GameHex targetGameHex)
+    public bool MoveToGameHex(GameHex targetGameHex)
     {
+        currentGameHex.unitsList.Remove(this);
+        currentGameHex = targetGameHex;
+        currentGameHex.unitsList.Add(this);
+        return true;
+    }
+
+    public bool MoveTowards(GameHex targetGameHex, TeamManager teamManager, bool isTargetEnemy)
+    {
+        this.isTargetEnemy = isTargetEnemy;
         currentPath = mainBoard.PathFind(currentGameHex, targetGameHex, movementCosts, movementSpeed);
         currentPath.Remove(currentGameHex);
         while (currentPath.Count > 0)
         {
             GameHex nextHex = currentPath[0];
-            if (!MoveToGameHex(nextHex))
+            if (!TryMoveToGameHex(nextHex, targetEnemy, teamManager))
             {
                 return false;
             }
@@ -99,7 +137,7 @@ struct Unit
         return true;
     }
     
-    public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
+    public float TravelCost(Hex first, Hex second, TeamManager teamManager, bool isTargetEnemy, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
     {
         //cost for river, embark, disembark are custom (0 = end turn to enter, 1/2/3/4 = normal cost)\\
         GameHex firstHex;
@@ -200,9 +238,15 @@ struct Unit
         }
         foreach (Unit unit in secondHex.unitsList)
         {
-            moveCost += 555555;
-            break;
-            // if (unit.teamNum != this.teamNum | stacking) //add back if we allow units of the same team to stack or for war movement attack
+            if(isTargetEnemy & teamManager.GetEnemies(team).Contains(unit.team))
+            {
+                break;
+            }
+            else
+            {
+                moveCost += 555555;
+            }
+            // if (unit.teamNum != this.teamNum | stacking) //add back if we allow units of the same team to stack
             // {
             //     break;
             // }
@@ -230,6 +274,10 @@ struct Unit
         {
             if (current.Equals(end))
             {
+                if (cost_so_far[current] > 10000)
+                {
+                    return List<Hex>();
+                }
                 List<Hex> path = new List<Hex>();
                 while (!current.Equals(start))
                 {
@@ -462,7 +510,7 @@ struct UnitTests
         int bottom = 10;
         int left = 0;
         int right = 30;
-        String name = "";
+        String name = "TestSimpleUnitMovement";
         Dictionary<Hex, GameHex> gameHexDict = new();
         for (int r = top; r <= bottom; r++){
             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
@@ -529,6 +577,74 @@ struct UnitTests
         testUnit.OnTurnEnded();
         testUnit.OnTurnStarted();
         if(!testUnit.MoveTowards(end))
+        {
+            Tests.Complain(name);
+        }
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(1, 6, -7))
+        if(testUnit.remainingMovement != 1.0f)
+        {
+            Tests.Complain(name);
+        }
+    }
+
+    static public void TestMoveIntoNeutralOrEnemy(bool printGameBoard)
+    {
+        int top = 0;
+        int bottom = 10;
+        int left = 0;
+        int right = 30;
+        String name = "TestMoveIntoNeutralOrEnemy";
+        Dictionary<Hex, GameHex> gameHexDict = new();
+        for (int r = top; r <= bottom; r++){
+            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+            for (int q = left - r_offset; q <= right - r_offset; q++){
+                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+                {
+                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                }
+                else
+                {
+                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                }
+            }
+        }
+        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+        if (printGameBoard)
+        {
+            mainBoard.PrintGameBoard();
+        }
+        
+        Dictionary<TerrainMoveType, float> movementCosts = {
+            { TerrainMoveType.Flat, 1 },
+            { TerrainMoveType.Rough, 2 },
+            { TerrainMoveType.Mountain, 9999 },
+            { TerrainMoveType.Coast, 1 },
+            { TerrainMoveType.Ocean, 1 },
+            { TerrainMoveType.Forest, 1 },
+            { TerrainMoveType.River, 0 },
+            { TerrainMoveType.Road, 0.5f },
+            { TerrainMoveType.Embark, 0 },
+            { TerrainMoveType.Disembark, 0 },
+        };
+        Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
+        Unit testEnemyUnit = new Unit("testEnemyUnit", movementCosts, null, 2.0f, 2);
+        Unit testNeutralUnit = new Unit("testNeutralUnit", movementCosts, null, 2.0f, 0);
+        Hex start = new Hex(3, 3, -6);
+        Hex enemyStart = new Hex(4, 3, -7);
+        Hex neutralStart = new Hex(2, 3, -5);
+        if (!mainBoard.gameHexDict[start].SpawnUnit(testUnit, false, true) | !mainBoard.gameHexDict[enemyStart].SpawnUnit(testEnemyUnit, false, true) | !mainBoard.gameHexDict[neutralStart].SpawnUnit(testNeutralUnit, false, true))
+        {
+            Tests.Complain(name);
+        }
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+        if(testUnit.MoveTowards(enemyStart))
+        {
+            Tests.Complain(name);
+        }
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+        testUnit.OnTurnEnded();
+        testUnit.OnTurnStarted();
+        if(!testUnit.MoveTowards(neutralStart))
         {
             Tests.Complain(name);
         }
