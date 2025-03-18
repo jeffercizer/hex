@@ -43,6 +43,7 @@ struct Unit
     public float movementSpeed = 2.0f;
     public float remainingMovement = 2.0f;
     public int teamNum = 1;
+    public List<Hex> currentPath;
 
     public void OnTurnStarted(int turnNumber)
     {
@@ -84,14 +85,18 @@ struct Unit
 
     public bool MoveTowards(GameHex targetGameHex)
     {
-        Dictionary<Hex, Hex> path = mainBoard.PathFind(currentGameHex, targetGameHex, movementCosts, movementSpeed);
-        foreach (GameHex target in path)
+        currentPath = mainBoard.PathFind(currentGameHex, targetGameHex, movementCosts, movementSpeed);
+        currentPath.Remove(currentGameHex);
+        while (currentPath.Count > 0)
         {
-            if(!MoveToGameHex(target))
+            GameHex nextHex = currentPath[0];
+            if (!MoveToGameHex(nextHex))
             {
-                return false
+                return false;
             }
+            currentPath.Remove(nextHex);
         }
+        return true;
     }
     
     public float TravelCost(Hex first, Hex second, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
@@ -493,10 +498,10 @@ struct UnitTests
 
         Hex start = new Hex(2, 4, -6);
         Hex end = new Hex(1, 6, -7);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Tests.EqualHex(name, path[2], new Hex(1, 6, -7));
-        Tests.EqualHex(name, path[1], new Hex(2, 5, -7));
-        Tests.EqualHex(name, path[0], new Hex(2, 4, -6));
+        currentPath = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+        Tests.EqualHex(name, currentPath[2], new Hex(1, 6, -7));
+        Tests.EqualHex(name, currentPath[1], new Hex(2, 5, -7));
+        Tests.EqualHex(name, currentPath[0], new Hex(2, 4, -6));
         
         Dictionary<TerrainMoveType, float> movementCosts = {
             { TerrainMoveType.Flat, 1 },
