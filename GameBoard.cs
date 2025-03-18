@@ -46,6 +46,15 @@ struct GameBoard
         Console.WriteLine($"GameBoard: Started turn {turnNumber}.");
     }
 
+    public void OnTurnEnded(int turnNumber)
+    {
+        foreach (GameHex hex in gameHexDict)
+        {
+            hex.OnTurnEnded();
+        }
+        Console.WriteLine($"GameBoard: Ended turn {turnNumber}.");
+    }
+
     public void PrintGameBoard()
     {
         //terraintype
