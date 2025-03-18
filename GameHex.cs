@@ -58,6 +58,14 @@ struct GameHex
         Console.WriteLine($"GameHex ({hex.q},{hex.r}): Started turn {turnNumber}.");
     }
 
+    public void OnTurnEnded(int turnNumber)
+    {
+        foreach (Unit unit in unitsList)
+        {
+            unit.OnTurnEnded();
+        }
+        Console.WriteLine($"GameHex ({hex.q},{hex.r}): Ended turn {turnNumber}.");
+    }
     public bool SetTerrainType(TerrainType newTerrainType)
     {
         this.terrainType = newTerrainType;
