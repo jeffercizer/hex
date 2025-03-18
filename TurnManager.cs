@@ -12,11 +12,15 @@ struct TurnManager
     }
     GameBoard mainBoard;
 
-    private int currentTurn = 0;
+    public int currentTurn = 0;
 
-    public void StartNextTurn()
+    public void StartNewTurn()
     {
         currentTurn++;
-        mainBoard.OnTurnStarted();
+        mainBoard.OnTurnStarted(currentTurn);
+    }
+    public void EndCurrentTurn()
+    {
+        mainBoard.OnTurnEnded(currentTurn);
     }
 }
