@@ -71,14 +71,9 @@ struct Unit
             {
                 if (teamManager.GetEnemies(team).Contains(unit.team))
                 {
-                    //combat TODO
-                    if(unit.decreaseCurrentHealth(25.0f))
-                    {
-                        //the enemy has died so we can move in
-                        return true;
-                    }
-                    currentHealth -= 25.0f;
-                    return false;
+                    //combat math TODO
+                    //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
+                    return !decreaseCurrentHealth(25.0f) & unit.decreaseCurrentHealth(25.0f);
                 }
             }
         }
@@ -132,7 +127,7 @@ struct Unit
             {
                 if(AttackTarget(targetGameHex.hex, teamManager))
                 {
-                     remainingMovement -= moveCost;
+                    remainingMovement -= moveCost;
                     currentGameHex.unitsList.Remove(this);
                     currentGameHex = targetGameHex;
                     currentGameHex.unitsList.Add(this);
@@ -148,10 +143,7 @@ struct Unit
                 return true;
             }
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     public bool MoveToGameHex(GameHex targetGameHex)
@@ -679,21 +671,36 @@ struct UnitTests
             Tests.Complain(name);
         }
         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
-        if(testUnit.MoveTowards(enemyStart))
+        if(testUnit.MoveTowards(neutralStart))
         {
             Tests.Complain(name);
         }
         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
         testUnit.OnTurnEnded();
         testUnit.OnTurnStarted();
-        if(!testUnit.MoveTowards(neutralStart))
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+        if(!testUnit.MoveTowards(enemyStart))
         {
             Tests.Complain(name);
         }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(1, 6, -7))
-        if(testUnit.remainingMovement != 1.0f)
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+        if(testUnit.currentHealth != 50.0f | testEnemyUnit.currentHealth != 50.0f)
         {
             Tests.Complain(name);
+        }
+        
+        testUnit.OnTurnEnded();
+        testUnit.OnTurnStarted();
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+        if(!testUnit.MoveTowards(enemyStart))
+        {
+            Tests.Complain(name+"part2");
+        }
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, null)
+        Tests.EqualHex(name, testEnemyUnit.currentGameHex.hex, null)
+        if(testUnit.currentHealth != 0.0f | testEnemyUnit.currentHealth != 0.0f)
+        {
+            Tests.Complain(name+"part2");
         }
     }
 
