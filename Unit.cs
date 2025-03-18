@@ -438,7 +438,19 @@ struct UnitTests
         Tests.EqualHex("TestRoughPathFinding", path[1], new Hex(2, 5, -7));
         Tests.EqualHex("TestRoughPathFinding", path[0], new Hex(2, 4, -6));
     }
-
+    
+    static public void TestUnitMovementRefreshOnNewTurn()
+    {
+        Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
+        testUnit.remainingMovement = 0.0f;
+        testUnit.OnTurnEnded();
+        testUnit.OnTurnStarted();
+        if(testUnit.remainingMovement != 2.0f)
+        {
+            Tests.Complain("TestUnitMovementRefreshOnNewTurn");
+        }
+    }
+    
     static public void TestSimpleUnitMovement(bool printGameBoard)
     {
         int top = 0;
@@ -503,17 +515,23 @@ struct UnitTests
         {
             Tests.Complain(name);
         }
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(2, 4, -6))
         if(testUnit.MoveTowards(end))
         {
             Tests.Complain(name);
         }
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(2, 5, -7))
         testUnit.OnTurnEnded();
         testUnit.OnTurnStarted();
         if(!testUnit.MoveTowards(end))
         {
             Tests.Complain(name);
         }
-        Tests.EqualHex(name, testUnit., new Hex(1, 6, -7))
+        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(1, 6, -7))
+        if(testUnit.remainingMovement != 1.0f)
+        {
+            Tests.Complain(name);
+        }
     }
 
     static public void TestSimpleEmbarkDisembarkPathFinding(bool printGameBoard)
