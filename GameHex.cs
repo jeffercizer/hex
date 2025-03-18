@@ -49,6 +49,15 @@ struct GameHex
     public HashSet<FeatureType> featureSet;
     public List<Unit> unitsList = new List<Unit>();
 
+    public void OnTurnStarted(int turnNumber)
+    {
+        foreach (Unit unit in unitsList)
+        {
+            unit.OnTurnStarted();
+        }
+        Console.WriteLine($"GameHex ({hex.q},{hex.r}): Started turn {turnNumber}.");
+    }
+
     public bool SetTerrainType(TerrainType newTerrainType)
     {
         this.terrainType = newTerrainType;
