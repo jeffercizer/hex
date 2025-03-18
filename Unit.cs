@@ -69,14 +69,49 @@ struct Unit
         {
             foreach (Unit unit in targetGameHex.unitsList)
             {
-                if (teamManager.GetEnemies(team).Contains(unit.team)
+                if (teamManager.GetEnemies(team).Contains(unit.team))
                 {
-                    //combat
-                    break;
+                    //combat TODO
+                    if(unit.decreaseCurrentHealth(25.0f))
+                    {
+                        //the enemy has died so we can move in
+                        return true;
+                    }
+                    currentHealth -= 25.0f;
+                    return false;
                 }
             }
         }
+        else
+        {
+            return true;
+        }
     }
+    
+    public void increaseCurrentHealth(float amount)
+    {
+        currentHealth += amount;
+    }
+
+    public bool decreaseCurrentHealth(float amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth <= 0.0f)
+        {
+            onDeathEffects();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void onDeathEffects()
+    {
+        currentGameHex.unitsList.Remove(this);
+    }
+    
 
     public bool SetGameHex(GameHex newGameHex)
     {
@@ -95,7 +130,14 @@ struct Unit
         {
             if(isTargetEnemy & targetGameHex.Equals(currentPath.Last()))
             {
-                AttackTarget(targetGameHex.hex, teamManager);
+                if(AttackTarget(targetGameHex.hex, teamManager))
+                {
+                     remainingMovement -= moveCost;
+                    currentGameHex.unitsList.Remove(this);
+                    currentGameHex = targetGameHex;
+                    currentGameHex.unitsList.Add(this);
+                    return true;
+                }
             }
             else
             {
