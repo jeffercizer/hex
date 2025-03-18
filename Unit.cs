@@ -4,6 +4,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
+enum TerrainMoveType
+{
+    Flat,
+    Rough,
+    Mountain,
+    Coast,
+    Ocean,
+    Forest,
+    River,
+    Road,
+    Coral,
+    Embark,
+    Disembark
+}
+
 struct Unit
 {
     public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
@@ -16,6 +31,11 @@ struct Unit
     public String name;
     public Dictionary<TerrainMoveType, float> movementCosts;
     public GameHex currentGameHex;
+
+    public void OnTurnStarted(int turnNumber)
+    {
+        Console.WriteLine($"Unit ({name}): Started turn {turnNumber}.");
+    }
 
     public bool SetGameHex(GameHex newGameHex)
     {
