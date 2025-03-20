@@ -50,6 +50,7 @@ struct Unit
     public int teamNum = 1;
     public List<Hex>? currentPath;
     public List<Hex> ourVisibleHexes;
+    public List<Effect> ourEffects;
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
@@ -76,6 +77,13 @@ struct Unit
                 if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                 {
                     //combat math TODO
+                    foreach(Effect effect in ourEffects)
+                    {
+                        if(effect.type == EffectType.Combat)
+                        {
+                            effect.applyEffect(this);
+                        }
+                    }
                     //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
                     return !decreaseCurrentHealth(25.0f) & unit.decreaseCurrentHealth(25.0f);
                 }
