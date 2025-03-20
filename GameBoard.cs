@@ -12,26 +12,28 @@ struct GameBoard
         this.bottom = bottom;
         this.left = left;
         this.right = right;
-        gameTileDict = new();
+        gameHexDict = new();
         Random rnd = new Random();
         for (int r = top; r <= bottom; r++){
             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
             for (int q = left - r_offset; q <= right - r_offset; q++){
-                gameTileDict.Add(new Hex(q, r, -q-r), new GameTile(new GameHex(new Hex(q, r, -q-r), left, right, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>())));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), left, right, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
             }
         }
     }
 
-    public GameBoard(Dictionary<Hex, GameTile> gameTileDict, int top, int bottom, int left, int right)
+    public GameBoard(Dictionary<Hex, GameHex> gameHexDict, int top, int bottom, int left, int right)
     {
-        this.gameTileDict = gameTileDict;
+        this.gameHexDict = gameHexDict;
         this.top = top;
         this.bottom = bottom;
         this.left = left;
         this.right = right;
     }
 
-    public Dictionary<Hex, GameTile> gameTileDict;
+    public Dictionary<Hex, GameHex> gameHexDict;
+    public Dictionary<Hex, int> visibleGameHexDict;
+    public Dictionary<Hex, bool> seenGameHexDict;
     public int top;
     public int bottom;
     public int left;
@@ -39,18 +41,18 @@ struct GameBoard
 
     public void OnTurnStarted(int turnNumber)
     {
-        foreach (GameTile tile in gameTileDict.Values)
+        foreach (GameHex hex in gameHexDict.Values)
         {
-            tile.gameHex.OnTurnStarted(turnNumber);
+            hex.OnTurnStarted(turnNumber);
         }
         Console.WriteLine($"GameBoard: Started turn {turnNumber}.");
     }
 
     public void OnTurnEnded(int turnNumber)
     {
-        foreach (GameTile tile in gameTileDict.Values)
+        foreach (GameHex hex in gameHexDict.Values)
         {
-            tile.gameHex.OnTurnEnded(turnNumber);
+            hex.OnTurnEnded(turnNumber);
         }
         Console.WriteLine($"GameBoard: Ended turn {turnNumber}.");
     }
@@ -59,7 +61,6 @@ struct GameBoard
     {
         //terraintype
         GameHex test;
-        GameTile tile;
         for(int r = top; r <= bottom; r++){
             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
             String mapRow = ""; 
@@ -68,8 +69,7 @@ struct GameBoard
                 mapRow += " ";
             }
             for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(gameTileDict.TryGetValue(new Hex(q, r, -q-r), out tile)){
-                    test = tile.gameHex;
+                if(gameHexDict.TryGetValue(new Hex(q, r, -q-r), out test)){
                     if(test.terrainType == TerrainType.Flat)
                     {
                         mapRow += "F ";
@@ -106,8 +106,7 @@ struct GameBoard
                 mapRow += " ";
             }
             for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(gameTileDict.TryGetValue(new Hex(q, r, -q-r), out tile)){
-                    test = tile.gameHex;
+                if(gameHexDict.TryGetValue(new Hex(q, r, -q-r), out test)){
                     foreach (FeatureType feature in test.featureSet)
                     {
                         if (feature == FeatureType.Road)
