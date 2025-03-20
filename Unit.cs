@@ -113,7 +113,7 @@ struct Unit
         RemoveVision();
     }
 
-    public void UpdateVision() //TODO
+    public void UpdateVision()
     {
         RemoveVision();
         ourVisibleHexes = CalculateVision().Keys.ToList();
