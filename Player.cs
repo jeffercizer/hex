@@ -24,4 +24,22 @@ struct Player
     public Dictionary<Hex, int> visibleGameHexDict;
     public Dictionary<Hex, bool> seenGameHexDict;
     public List<Unit> unitList;
+    
+    public void OnTurnStarted(int turnNumber)
+    {
+        foreach (Unit unit in unitList)
+        {
+            unit.OnTurnStarted(turnNumber);
+        }
+        Console.WriteLine($"Player{teamNum}: Started turn {turnNumber}.");
+    }
+
+    public void OnTurnEnded(int turnNumber)
+    {
+        foreach (Unit unit in unitList)
+        {
+            unit.OnTurnEnded(turnNumber);
+        }
+        Console.WriteLine($"Player{teamNum}: Ended turn {turnNumber}.");
+    }
 }
