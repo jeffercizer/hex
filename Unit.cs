@@ -27,10 +27,11 @@ struct Unit
         this.currentGameHex = currentGameHex;
     }
 
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex, float movementSpeed, float combatStrength, int teamNum)
+    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, Dictionary<TerrainMoveType, float> sightCosts, GameHex currentGameHex, float movementSpeed, float combatStrength, int teamNum)
     {
         this.name = name;
         this.movementCosts = movementCosts;
+        this.sightCosts = sightCosts;
         this.currentGameHex = currentGameHex;
         this.movementSpeed = movementSpeed;
         this.teamNum = teamNum;
@@ -39,14 +40,16 @@ struct Unit
 
     public String name;
     public Dictionary<TerrainMoveType, float> movementCosts;
+    public Dictionary<TerrainMoveType, float> sightCosts;
     public GameHex currentGameHex;
     public float movementSpeed = 2.0f;
     public float remainingMovement = 2.0f;
+    public float sightRange = 3.0f;
     public float currentHealth = 100.0f;
     public float combatStrength = 10.0f;
     public int teamNum = 1;
     public List<Hex>? currentPath;
-    public List<Hex> visibleHexes;
+    public List<Hex> ourVisibleHexes;
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
@@ -112,30 +115,19 @@ struct Unit
 
     public void UpdateVision() //TODO
     {
-        foreach (Hex hex in visibleHexes)
+        RemoveVision();
+        ourVisibleHexes = CalculateVision().Keys.ToList();
+        foreach (Hex hex in ourVisibleHexes)
         {
+            currentGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.Add(hex, true); //add to the seen dict no matter what since duplicates are thrown out
             int count;
-            if(currentGameHex.ourGameBoard.visibleGameHexDict.TryGetValue(currentGameHex.hex, out count))
+            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
             {
-                currentGameHex.ourGameBoard.visibleGameHexDict[currentGameHex.hex] = count + 1;
+                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
             }
             else
             {
-                currentGameHex.ourGameBoard.visibleGameHexDict.Add(currentGameHex.hex, 1);
-            }
-        }
-        visibleHexes = CalculateVision();
-        foreach (Hex hex in visibleHexes)
-        {
-            currentGameHex.ourGameBoard.seenGameHexDict.Add(currentGameHex.hex, true); //add to the seen dict no matter what, duplicates are thrown out
-            int count;
-            if(currentGameHex.ourGameBoard.visibleGameHexDict.TryGetValue(currentGameHex.hex, out count))
-            {
-                currentGameHex.ourGameBoard.visibleGameHexDict[currentGameHex.hex] = count + 1;
-            }
-            else
-            {
-                currentGameHex.ourGameBoard.visibleGameHexDict.Add(currentGameHex.hex, 1);
+                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.Add(hex, 1);
             }
         }
     }
@@ -143,18 +135,88 @@ struct Unit
     public void RemoveVision()
     {
         int count;
-        if(currentGameHex.ourGameBoard.visibleGameHexDict.TryGetValue(currentGameHex.hex, out count))
-        {
-            if(count <= 1)
+        foreach (Hex hex in ourVisibleHexes)
+        {            
+            int count;
+            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
             {
-                currentGameHex.ourGameBoard.visibleGameHexDict.Remove(currentGameHex.hex);
-            }
-            else
-            {
-                currentGameHex.ourGameBoard.visibleGameHexDict[currentGameHex.hex] = count - 1;
+                if(count <= 1)
+                {
+                    currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.Remove(hex);
+                }
+                else
+                {
+                    currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count - 1;
+                }
             }
         }
-        visibleHexes.RemoveAll();
+        ourVisibleHexes.RemoveAll();
+    }
+
+    public void CalculateVision()
+    {
+        Queue<Hex> frontier = new();
+        frontier.Enqueue(currentGameHex.hex);
+        Dictionary<Hex, float> reached = new();
+        reached.Add(currentGameHex.hex, 0.0f);
+
+        while (frontier.Count > 0)
+        {
+            Hex current = frontier.Dequeue();
+
+            foreach (Hex next in currentGameHex.hex.WrappingNeighbors(currentGameHex.ourGameBoard.left, currentGameHex.ourGameBoard.right))
+            {
+                float sightLeft = sightRange - reached[current];
+                float visionCost = VisionCost(currentGameHex.ourGameBoard.gameHexDict[next], sightLeft); //vision cost is at most the cost of our remaining sight if we have atleast 1
+                if (visionCost <= sightLeft)
+                {
+                    if (!reached.Contains(next))
+                    {
+                        if(reached[current]+visionCost < sightRange)
+                        {
+                            frontier.Enqueue(next);
+                        }
+                        reached.Add(next, reached[current]+visionCost);
+                    }
+                    else if(reached[next] > reached[current]+visionCost)
+                    {
+                        reached[next] = reached[current]+visionCost;
+                    }
+                }
+            }
+        }
+        return reached;
+    }
+    
+
+    public void VisionCost(GameHex targetGameHex, float sightLeft)
+    {
+        float visionCost = 0.0f;
+        float cost = 0.0f;
+        foreach (FeatureType feature in featureSet)
+        {
+            if(sightCosts.TryGetValue(feature, out cost))
+            {
+                visionCost += cost;
+            }
+        }
+        if(sightCosts.TryGetValue((TerrainMoveType)targetGameHex.TerrainType, out cost))
+        {
+            visionCost += cost;
+        }
+        if(sightLeft >= 1)
+        {
+            return Math.Min(visionCost, sightLeft);
+        }
+        else
+        {
+            return visionCost;
+        }
+    }
+
+    public void MovementRange()
+    {
+        //breadth first using movement speed and move costs
     }
     
 
