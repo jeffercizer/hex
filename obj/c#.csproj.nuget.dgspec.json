@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jeffe\\Desktop\\Stuff\\misc\\dev\\c#\\c#.csproj": {}
+    "C:\\Users\\jeffe\\Desktop\\Stuff\\c#\\c#.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jeffe\\Desktop\\Stuff\\misc\\dev\\c#\\c#.csproj": {
+    "C:\\Users\\jeffe\\Desktop\\Stuff\\c#\\c#.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jeffe\\Desktop\\Stuff\\misc\\dev\\c#\\c#.csproj",
+        "projectUniqueName": "C:\\Users\\jeffe\\Desktop\\Stuff\\c#\\c#.csproj",
         "projectName": "c#",
-        "projectPath": "C:\\Users\\jeffe\\Desktop\\Stuff\\misc\\dev\\c#\\c#.csproj",
+        "projectPath": "C:\\Users\\jeffe\\Desktop\\Stuff\\c#\\c#.csproj",
         "packagesPath": "C:\\Users\\jeffe\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jeffe\\Desktop\\Stuff\\misc\\dev\\c#\\obj\\",
+        "outputPath": "C:\\Users\\jeffe\\Desktop\\Stuff\\c#\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Users\\jeffe\\AppData\\Roaming\\Godot\\mono\\GodotNuGetFallbackFolder"

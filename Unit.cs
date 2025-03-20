@@ -27,7 +27,7 @@ struct Unit
         this.currentGameHex = currentGameHex;
     }
 
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex, float movementSpeed, float, combatStrength, int teamNum)
+    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex, float movementSpeed, float combatStrength, int teamNum)
     {
         this.name = name;
         this.movementCosts = movementCosts;
@@ -45,7 +45,7 @@ struct Unit
     public float currentHealth = 100.0f;
     public float combatStrength = 10.0f;
     public int teamNum = 1;
-    public List<Hex> currentPath;
+    public List<Hex>? currentPath;
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
@@ -69,13 +69,14 @@ struct Unit
         {
             foreach (Unit unit in targetGameHex.unitsList)
             {
-                if (teamManager.GetEnemies(team).Contains(unit.team))
+                if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                 {
                     //combat math TODO
                     //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
                     return !decreaseCurrentHealth(25.0f) & unit.decreaseCurrentHealth(25.0f);
                 }
             }
+            return false;
         }
         else
         {
@@ -120,12 +121,12 @@ struct Unit
         {
             return false;
         }
-        moveCost = TravelCost(currentGameHex.hex, targetGameHex.hex, teamManager, isTargetEnemy, movementCosts, movementSpeed, movementSpeed-remainingMovement);
+        float moveCost = TravelCost(currentGameHex.hex, targetGameHex.hex, teamManager, isTargetEnemy, movementCosts, movementSpeed, movementSpeed-remainingMovement);
         if(moveCost <= remainingMovement)
         {
             if(isTargetEnemy & targetGameHex.Equals(currentPath.Last()))
             {
-                if(AttackTarget(targetGameHex.hex, teamManager))
+                if(AttackTarget(targetGameHex, teamManager))
                 {
                     remainingMovement -= moveCost;
                     currentGameHex.unitsList.Remove(this);
@@ -157,7 +158,7 @@ struct Unit
     public bool MoveTowards(GameHex targetGameHex, TeamManager teamManager, bool isTargetEnemy)
     {
         this.isTargetEnemy = isTargetEnemy;
-        currentPath = mainBoard.PathFind(currentGameHex, targetGameHex, movementCosts, movementSpeed);
+        currentPath = currentGameHex.ourGameBoard.PathFind(currentGameHex, targetGameHex, movementCosts, movementSpeed);
         currentPath.Remove(currentGameHex);
         while (currentPath.Count > 0)
         {
@@ -272,7 +273,7 @@ struct Unit
         }
         foreach (Unit unit in secondHex.unitsList)
         {
-            if(isTargetEnemy & teamManager.GetEnemies(team).Contains(unit.team))
+            if(isTargetEnemy & teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
             {
                 break;
             }
@@ -310,7 +311,7 @@ struct Unit
             {
                 if (cost_so_far[current] > 10000)
                 {
-                    return List<Hex>();
+                    return new List<Hex>();
                 }
                 List<Hex> path = new List<Hex>();
                 while (!current.Equals(start))
