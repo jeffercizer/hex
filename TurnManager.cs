@@ -10,7 +10,7 @@ struct TurnManager
     {
       this.game = game;
     }
-    Game game;
+    public Game game;
 
     public int currentTurn = 0;
 
