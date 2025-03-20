@@ -63,20 +63,12 @@ struct GameHex
 
     public void OnTurnStarted(int turnNumber)
     {
-        foreach (Unit unit in unitsList)
-        {
-            unit.OnTurnStarted(turnNumber);
-        }
-        Console.WriteLine($"GameHex ({hex.q},{hex.r}): Started turn {turnNumber}.");
+        //Console.WriteLine($"GameHex ({hex.q},{hex.r}): Started turn {turnNumber}.");
     }
 
     public void OnTurnEnded(int turnNumber)
     {
-        foreach (Unit unit in unitsList)
-        {
-            unit.OnTurnEnded(turnNumber);
-        }
-        Console.WriteLine($"GameHex ({hex.q},{hex.r}): Ended turn {turnNumber}.");
+        //Console.WriteLine($"GameHex ({hex.q},{hex.r}): Ended turn {turnNumber}.");
     }
     public bool SetTerrainType(TerrainType newTerrainType)
     {
