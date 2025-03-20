@@ -47,15 +47,15 @@ struct GameHex
     public GameHex(Hex hex, GameBoard ourGameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, HashSet<FeatureType> featureSet, List<Unit> unitsList)
     {
         this.hex = hex;
-                this.ourGameBoard = ourGameBoard;
+        this.ourGameBoard = ourGameBoard;
         this.terrainType = terrainType;
         this.terrainTemp = terrainTemp;
         this.featureSet = featureSet;
         this.unitsList = unitsList;
     }
 
-    public readonly Hex hex;
-    public readonly GameBoard ourGameBoard;
+    public Hex hex;
+    public GameBoard ourGameBoard;
     public TerrainType terrainType;
     public TerrainTemperature terrainTemp;
     public HashSet<FeatureType> featureSet = new();
