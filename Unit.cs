@@ -89,7 +89,7 @@ struct Unit
         Effect effect;
         while(orderedEffects.TryDequeue(out effect))
         {
-            effect.applyEffect(this);
+            effect.ApplyEffect(this);
         }
     }
 
