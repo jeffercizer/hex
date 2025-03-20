@@ -81,6 +81,15 @@ struct Unit
     
     public void RecalculateEffects()
     {
+        //must reset all to base and recalculate
+        movementCosts = baseMovementCosts;
+        sightCosts = baseSightCosts
+        movementSpeed = baseMovementSpeed;
+        sightRange = baseSightRange;
+        combatStrength = baseCombatStrength;
+        //also order all effects, multiply/divide after add/subtract priority
+        //0 means it is applied first 100 means it is applied "last" (highest number last)
+        //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
         PriorityQueue<Effect, int> orderedEffects = new();
         foreach(Effect effect in ourEffects)
         {
