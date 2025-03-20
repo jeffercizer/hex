@@ -36,18 +36,18 @@ enum TerrainTemperature
 
 struct GameHex
 {
-    public GameHex(Hex hex, int boardLeft, int boardRight, TerrainType terrainType, TerrainTemperature terrainTemp, HashSet<FeatureType> featureSet)
+    public GameHex(Hex hex, GameBoard ourGameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, HashSet<FeatureType> featureSet)
     {
         this.hex = hex;
-        this.boardLeft = boardLeft;
-        this.boardRight = boardRight;
+        this.ourGameBoard = ourGameBoard;
         this.terrainType = terrainType;
         this.terrainTemp = terrainTemp;
         this.featureSet = featureSet;
     }
-    public GameHex(Hex hex, int boardLeft, int boardRight, TerrainType terrainType, TerrainTemperature terrainTemp, HashSet<FeatureType> featureSet, List<Unit> unitsList)
+    public GameHex(Hex hex, GameBoard ourGameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, HashSet<FeatureType> featureSet, List<Unit> unitsList)
     {
         this.hex = hex;
+                this.ourGameBoard = ourGameBoard;
         this.terrainType = terrainType;
         this.terrainTemp = terrainTemp;
         this.featureSet = featureSet;
@@ -55,8 +55,6 @@ struct GameHex
     }
 
     public readonly Hex hex;
-    public int boardLeft;
-    public int boardRight;
     public readonly GameBoard ourGameBoard;
     public TerrainType terrainType;
     public TerrainTemperature terrainTemp;
@@ -102,7 +100,7 @@ struct GameHex
             {
                 for (int i = 0; i < 6; i++) //ask all our neighbors if they have space
                 {
-                    if(ourGameBoard.gameTileDict[hex.WrappingNeighbor(i, boardLeft, boardRight)].gameHex.SpawnUnit(newUnit, stackable, flexible))
+                    if(ourGameBoard.gameTileDict[hex.WrappingNeighbor(i, ourGameBoard.left, ourGameBoard.left)].gameHex.SpawnUnit(newUnit, stackable, flexible))
                     {
                         return true;
                     }
