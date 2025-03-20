@@ -46,6 +46,7 @@ struct Unit
     public float combatStrength = 10.0f;
     public int teamNum = 1;
     public List<Hex>? currentPath;
+    public List<Hex> visibleHexes;
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
@@ -106,6 +107,54 @@ struct Unit
     public void onDeathEffects()
     {
         currentGameHex.unitsList.Remove(this);
+        RemoveVision();
+    }
+
+    public void UpdateVision() //TODO
+    {
+        foreach (Hex hex in visibleHexes)
+        {
+            int count;
+            if(currentGameHex.ourGameBoard.visibleGameHexDict.TryGetValue(currentGameHex.hex, out count))
+            {
+                currentGameHex.ourGameBoard.visibleGameHexDict[currentGameHex.hex] = count + 1;
+            }
+            else
+            {
+                currentGameHex.ourGameBoard.visibleGameHexDict.Add(currentGameHex.hex, 1);
+            }
+        }
+        visibleHexes = CalculateVision();
+        foreach (Hex hex in visibleHexes)
+        {
+            currentGameHex.ourGameBoard.seenGameHexDict.Add(currentGameHex.hex, true); //add to the seen dict no matter what, duplicates are thrown out
+            int count;
+            if(currentGameHex.ourGameBoard.visibleGameHexDict.TryGetValue(currentGameHex.hex, out count))
+            {
+                currentGameHex.ourGameBoard.visibleGameHexDict[currentGameHex.hex] = count + 1;
+            }
+            else
+            {
+                currentGameHex.ourGameBoard.visibleGameHexDict.Add(currentGameHex.hex, 1);
+            }
+        }
+    }
+
+    public void RemoveVision()
+    {
+        int count;
+        if(currentGameHex.ourGameBoard.visibleGameHexDict.TryGetValue(currentGameHex.hex, out count))
+        {
+            if(count <= 1)
+            {
+                currentGameHex.ourGameBoard.visibleGameHexDict.Remove(currentGameHex.hex);
+            }
+            else
+            {
+                currentGameHex.ourGameBoard.visibleGameHexDict[currentGameHex.hex] = count - 1;
+            }
+        }
+        visibleHexes.RemoveAll();
     }
     
 
@@ -129,6 +178,7 @@ struct Unit
                 if(AttackTarget(targetGameHex, teamManager))
                 {
                     remainingMovement -= moveCost;
+                    UpdateVision();
                     currentGameHex.unitsList.Remove(this);
                     currentGameHex = targetGameHex;
                     currentGameHex.unitsList.Add(this);
@@ -138,6 +188,7 @@ struct Unit
             else
             {
                 remainingMovement -= moveCost;
+                UpdateVision();
                 currentGameHex.unitsList.Remove(this);
                 currentGameHex = targetGameHex;
                 currentGameHex.unitsList.Add(this);
@@ -149,6 +200,7 @@ struct Unit
 
     public bool MoveToGameHex(GameHex targetGameHex)
     {
+        UpdateVision();
         currentGameHex.unitsList.Remove(this);
         currentGameHex = targetGameHex;
         currentGameHex.unitsList.Add(this);
@@ -296,7 +348,7 @@ struct Unit
         return start.WrapDistance(end);
     }
 
-    public List<Hex> PathFind(Hex start, Hex end, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed)
+    public List<Hex> PathFind(Hex start, Hex end, TeamManager teamManager, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed)
     {
         PriorityQueue<Hex, float> frontier = new();
         frontier.Enqueue(start, 0);
@@ -326,7 +378,7 @@ struct Unit
     
             foreach (Hex next in current.WrappingNeighbors())
             {
-                float new_cost = cost_so_far[current] + TravelCost(current, next, movementCosts, unitMovementSpeed, cost_so_far[current]);
+                float new_cost = cost_so_far[current] + TravelCost(current, next, teamManager, movementCosts, unitMovementSpeed, cost_so_far[current]);
                 //if cost_so_far doesn't have next as a key yet or the new cost is lower than the lowest cost of this node previously
                 if (!cost_so_far.ContainsKey(next) || new_cost < cost_so_far[next])
                 {
