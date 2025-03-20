@@ -27,25 +27,36 @@ struct Unit
         this.currentGameHex = currentGameHex;
     }
 
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, Dictionary<TerrainMoveType, float> sightCosts, GameHex currentGameHex, float movementSpeed, float combatStrength, int teamNum)
+    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, Dictionary<TerrainMoveType, float> sightCosts, GameHex currentGameHex, float sightRange, float movementSpeed, float combatStrength, int teamNum)
     {
         this.name = name;
+        this.baseMovementCosts = movementCosts;
         this.movementCosts = movementCosts;
+        this.baseSightCosts = sightCosts;
         this.sightCosts = sightCosts;
         this.currentGameHex = currentGameHex;
+        this.baseSightRange = sightRange;
+        this.sightRange = sightRange;
+        this.baseMovementSpeed = movementSpeed;
         this.movementSpeed = movementSpeed;
         this.teamNum = teamNum;
+        this.baseCombatStrength = combatStrength;
         this.combatStrength = combatStrength;
     }
 
     public String name;
+    public Dictionary<TerrainMoveType, float> baseMovementCosts;
     public Dictionary<TerrainMoveType, float> movementCosts;
+    public Dictionary<TerrainMoveType, float> baseSightCosts;
     public Dictionary<TerrainMoveType, float> sightCosts;
     public GameHex currentGameHex;
+    public float baseMovementSpeed = 2.0f;
     public float movementSpeed = 2.0f;
     public float remainingMovement = 2.0f;
+    public float baseSightRange = 3.0f;
     public float sightRange = 3.0f;
     public float currentHealth = 100.0f;
+    public float baseCombatStrength = 10.0f;
     public float combatStrength = 10.0f;
     public int teamNum = 1;
     public List<Hex>? currentPath;
@@ -66,6 +77,32 @@ struct Unit
             MoveTowards(currentPath.Last(), isTargetEnemy);
         }
         Console.WriteLine($"Unit ({name}): Ended turn {turnNumber}.");
+    }
+    
+    public void RecalculateEffects()
+    {
+        PriorityQueue<Effect, int> orderedEffects = new();
+        foreach(Effect effect in ourEffects)
+        {
+            orderedEffects.Enqueue(effect, effect.priority);
+        }
+        Effect effect;
+        while(orderedEffects.TryDequeue(out effect))
+        {
+            effect.applyEffect(this);
+        }
+    }
+
+    public void AddEffect(Effect effect)
+    {
+        ourEffects.Add(effect);
+        RecalculateEffects();
+    }
+
+    public void RemoveEffect(Effect effect)
+    {
+        ourEffects.Remove(effect);
+        RecalculateEffects();
     }
 
     public bool AttackTarget(GameHex targetGameHex, TeamManager teamManager)
