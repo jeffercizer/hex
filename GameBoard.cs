@@ -6,8 +6,9 @@ using System.Data;
 
 struct GameBoard
 {
-    public GameBoard(int top, int bottom, int left, int right)
+    public GameBoard(Game game, int top, int bottom, int left, int right)
     {
+        this.game = game;
         this.top = top;
         this.bottom = bottom;
         this.left = left;
@@ -22,8 +23,9 @@ struct GameBoard
         }
     }
 
-    public GameBoard(Dictionary<Hex, GameHex> gameHexDict, int top, int bottom, int left, int right)
+    public GameBoard(Game game, Dictionary<Hex, GameHex> gameHexDict, int top, int bottom, int left, int right)
     {
+        this.game = game;
         this.gameHexDict = gameHexDict;
         this.top = top;
         this.bottom = bottom;
@@ -31,9 +33,8 @@ struct GameBoard
         this.right = right;
     }
 
+    public Game game;
     public Dictionary<Hex, GameHex> gameHexDict;
-    public Dictionary<Hex, int> visibleGameHexDict;
-    public Dictionary<Hex, bool> seenGameHexDict;
     public int top;
     public int bottom;
     public int left;
