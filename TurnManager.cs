@@ -6,21 +6,29 @@ using System.Data;
 
 struct TurnManager
 {
-    public TurnManager(GameBoard mainBoard)
+    public TurnManager(Game game)
     {
-      this.mainBoard = mainBoard;
+      this.game = game;
     }
-    GameBoard mainBoard;
+    Game game;
 
     public int currentTurn = 0;
 
     public void StartNewTurn()
     {
         currentTurn++;
-        mainBoard.OnTurnStarted(currentTurn);
+        foreach (Player player in game.playerDictionary)
+        {
+            player.OnTurnStarted(currentTurn)
+        }
+        game.mainGameBoard.OnTurnStarted(currentTurn);
     }
-    public void EndCurrentTurn()
+    public void EndCurrentTurn(int teamNum)
     {
-        mainBoard.OnTurnEnded(currentTurn);
+        foreach (Player player in game.playerDictionary)
+        {
+            player.OnTurnEnded(currentTurn)
+        }
+        game.mainGameBoard.OnTurnEnded(currentTurn);
     }
 }
