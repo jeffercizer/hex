@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
+[Serializable]
 public class TurnManager
 {
     public TurnManager(Game game)
