@@ -28,14 +28,26 @@ public class Building
     public int baseHappinessYield;
     public int happinessYield;
 
-    public Building()
+    public Building(String name)
     {
+        this.name = name;
         buildingEffects = new();
+        //LOAD INFORMATION FROM XML USING NAME
+        baseBuildCost = 100;
+        baseGoldCost = 50;
+        baseMaintenanceCost = 1;
+        baseFoodYield = 1;
+        baseYieldYield = 2;
+        baseGoldYield = 3;
+        baseScienceYield = 4;
+        baseCultureYield = 5;
+        baseHappinessYield = 6;
     }
     public Building(String name, District ourDistrict)
     {
         this.name = name;
         this.ourDistrict = ourDistrict;
+        buildingEffects = new();
         //LOAD INFORMATION FROM XML USING NAME
         baseBuildCost = 100;
         baseGoldCost = 50;
