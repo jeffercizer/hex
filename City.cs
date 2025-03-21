@@ -82,7 +82,7 @@ public class City
 
     public void BuildOnHex(Hex hex, Building building)
     {
-        if(!)
+        if(ourGameHex.ourGameBoard.gameHexDict[hex].district == null)
         {
             District district = new District(ourGameHex, building, false, this);
             building.district = district;
@@ -173,7 +173,7 @@ public class City
                 //hex is unowned or owned by us so continue
                 if(ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == -1 | ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
-                    //hex does not have a district or it is not urban
+                    //hex does not have a district or it is not urban or has less than the max buildings TODO
                     if (ourGameHex.ourGameBoard.gameHexDict[hex].district == null | !ourGameHex.ourGameBoard.gameHexDict[hex].district.isUrban)
                     {
                         //hex doesnt have a non-friendly unit
