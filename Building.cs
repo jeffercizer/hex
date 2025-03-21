@@ -15,18 +15,18 @@ public class Building
     public int goldCost;
     public int baseMaintenanceCost;
     public int maintenanceCost;
-    public int baseFoodProduction;
-    public int foodProduction;
-    public int baseProduction;
+    public int baseFoodYield;
+    public int foodYield;
+    public int baseYield;
     public int production;
-    public int baseGoldProduction;
-    public int goldProduction;
-    public int baseScienceProduction;
-    public int scienceProduction;
-    public int baseCultureProduction;
-    public int cultureProduction;
-    public int baseHappinessProduction;
-    public int happinessProduction;
+    public int baseGoldYield;
+    public int goldYield;
+    public int baseScienceYield;
+    public int scienceYield;
+    public int baseCultureYield;
+    public int cultureYield;
+    public int baseHappinessYield;
+    public int happinessYield;
 
     public Building()
     {
@@ -40,12 +40,12 @@ public class Building
         baseBuildCost = 100;
         baseGoldCost = 50;
         baseMaintenanceCost = 1;
-        baseFoodProduction = 1;
-        baseProductionProduction = 2;
-        baseGoldProduction = 3;
-        baseScienceProduction = 4;
-        baseCultureProduction = 5;
-        baseHappinessProduction = 6;
+        baseFoodYield = 1;
+        baseYieldYield = 2;
+        baseGoldYield = 3;
+        baseScienceYield = 4;
+        baseCultureYield = 5;
+        baseHappinessYield = 6;
     }
 
     public RecalculateValues()
@@ -54,12 +54,12 @@ public class Building
         baseBuildCost = buildCost;
         baseGoldCost = goldCost;
         baseMaintenanceCost = maintenanceCost;
-        baseFoodProduction = foodProduction;
-        baseProductionProduction = productionProduction;
-        baseGoldProduction = goldProduction;
-        baseScienceProduction = scienceProduction;
-        baseCultureProduction = cultureProduction;
-        baseHappinessProduction = happinessProduction;
+        baseFoodYield = foodYield;
+        baseYieldYield = productionYield;
+        baseGoldYield = goldYield;
+        baseScienceYield = scienceYield;
+        baseCultureYield = cultureYield;
+        baseHappinessYield = happinessYield;
         //also order all effects, multiply/divide after add/subtract priority
         //0 means it is applied first 100 means it is applied "last" (highest number last)
         //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
