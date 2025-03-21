@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
+[Serializable]
 public class City
 {
     public City(int id, int teamNum, String name, GameHex ourGameHex)
@@ -14,7 +15,9 @@ public class City
         this.ourGameHex = ourGameHex;
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddCity(this);
         districts = new();
-        districts.Add(new District(ourGameHex, new Building("City Center"), true, this));
+        District district = new District(ourGameHex, new Building("City Center"), true, this)
+        ourGameHex.districts.Add(district);
+        districts.Add(district);
     }
     public int id;
     public int teamNum;
