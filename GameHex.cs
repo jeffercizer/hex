@@ -69,6 +69,7 @@ public class GameHex
     public GameBoard ourGameBoard;
     public TerrainType terrainType;
     public TerrainTemperature terrainTemp;
+    public int ownedBy;
     public HashSet<FeatureType> featureSet = new();
     public List<Unit> unitsList = new();
     public District district;
@@ -92,6 +93,21 @@ public class GameHex
     {
         this.featureSet.Add(newFeature);
         return true;
+    }
+
+    public void ClaimHex(int teamNum)
+    {
+        ownedBy = teamNum;
+    }
+
+    public bool TryClaimHex(int teamNum)
+    {
+        if(ownedBy == -1)
+        {
+            ownedBy = teamNum;
+            return true;
+        }
+        return false;
     }
 
     //if stackable is true allow multiple units to stack
