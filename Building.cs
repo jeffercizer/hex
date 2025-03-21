@@ -7,6 +7,7 @@ using System.Data;
 [Serializable]
 public class Building
 {
+    public District ourDistrict;
     public List<BuildingEffect> buildingEffects;
     public int baseBuildCost;
     public int buildCost;
@@ -31,9 +32,10 @@ public class Building
     {
         buildingEffects = new();
     }
-    public Building(String name)
+    public Building(String name, District ourDistrict)
     {
         this.name = name;
+        this.ourDistrict = ourDistrict;
         //LOAD INFORMATION FROM XML USING NAME
         baseBuildCost = 100;
         baseGoldCost = 50;
