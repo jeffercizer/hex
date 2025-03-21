@@ -21,6 +21,7 @@ enum EffectOperation
     Subtract
 }
 
+[Serializable]
 public class Effect
 {
     public Effect(EffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
