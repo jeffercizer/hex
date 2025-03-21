@@ -124,6 +124,20 @@ struct Hex
         return Add(Hex.diagonals[direction]);
     }
 
+    public List<Hex> Range(int range)
+    {
+        List<Hex> results = new();
+        for (int q = -range; q <= range; q++)
+        {
+            for (int r = Math.Max(-range, -q - range); r <= Math.Min(range, -q + range); r++)
+            {
+                int s = -q - r;
+                results.Add(new Hex(q, r, s));
+            }
+        }
+        return results;
+    }
+
 
     public int Length()
     {
