@@ -33,6 +33,8 @@ public class Building
         this.name = name;
         buildingEffects = new();
         //LOAD INFORMATION FROM XML USING NAME
+        //So far we have requested
+        // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
         baseBuildCost = 100;
         baseGoldCost = 50;
         baseMaintenanceCost = 1;
