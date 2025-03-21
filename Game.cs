@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-struct Game
+class Game
 {
     public Game(TeamManager teamManager)
     {
