@@ -33,7 +33,7 @@ enum TerrainTemperature
     Artic
 }
 
-
+[Serializable]
 public class GameHex
 {
     public GameHex(Hex hex, GameBoard ourGameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, HashSet<FeatureType> featureSet)
