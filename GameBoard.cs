@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-struct GameBoard
+class GameBoard
 {
     public GameBoard(Game game, int top, int bottom, int left, int right)
     {
