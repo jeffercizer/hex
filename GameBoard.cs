@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
+[Serializable]
 public class GameBoard
 {
     public GameBoard(Game game, int top, int bottom, int left, int right)
