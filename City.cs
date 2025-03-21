@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-class City
+public class City
 {
     public City(int id, int teamNum, String name, GameHex ourGameHex)
     {
