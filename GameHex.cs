@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-enum TerrainType
+public enum TerrainType
 {
     Flat,
     Rough,
@@ -15,7 +15,7 @@ enum TerrainType
 
 
 
-enum FeatureType
+public enum FeatureType
 {
     Forest,
     River,
@@ -24,7 +24,7 @@ enum FeatureType
     Coral
 }
 
-enum TerrainTemperature
+public enum TerrainTemperature
 {
     Desert,
     Grassland,
