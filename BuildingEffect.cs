@@ -28,7 +28,7 @@ enum EffectOperation
 [Serializable]
 public class BuildingEffect
 {
-    public BuildingEffect(BuildingEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority, Action<object, object> applyFunction = null)
+    public BuildingEffect(BuildingEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority, Action<object> applyFunction = null)
     {
         this.effectType = effectType;
         this.effectOperation = effectOperation;
