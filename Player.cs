@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-struct Player
+class Player
 {
     public Player(Game game, int teamNum)
     {
