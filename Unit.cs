@@ -18,7 +18,7 @@ enum TerrainMoveType
     Disembark
 }
 
-struct Unit
+class Unit
 {
     public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
     {
