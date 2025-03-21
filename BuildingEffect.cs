@@ -34,6 +34,15 @@ public class BuildingEffect
         this.effectOperation = effectOperation;
         this.effectMagnitude = effectMagnitude;
         this.priority = priority;
+    }
+    public BuildingEffect(Action<object> applyFunction, int priority)
+    {
+        //default values
+        this.effectType = BuildingEffectType.BuildCost;
+        this.effectOperation = EffectOperation.Add;
+        this.effectMagnitude = 0.0f;
+        //real values
+        this.priority = priority;
         this.applyFunction = applyFunction;
     }
     public EffectType effectType;
