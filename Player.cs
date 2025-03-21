@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
+[Serializable]
 public class Player
 {
     public Player(Game game, int teamNum)
