@@ -21,7 +21,7 @@ enum EffectOperation
     Subtract
 }
 
-struct Effect
+class Effect
 {
     public Effect(EffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
     {
