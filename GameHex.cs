@@ -53,6 +53,17 @@ public class GameHex
         this.featureSet = featureSet;
         this.unitsList = unitsList;
     }
+    
+    public GameHex(Hex hex, GameBoard ourGameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, HashSet<FeatureType> featureSet, List<Unit> unitsList, District district)
+    {
+        this.hex = hex;
+        this.ourGameBoard = ourGameBoard;
+        this.terrainType = terrainType;
+        this.terrainTemp = terrainTemp;
+        this.featureSet = featureSet;
+        this.unitsList = unitsList;
+        this.district = district;
+    }
 
     public Hex hex;
     public GameBoard ourGameBoard;
@@ -60,6 +71,7 @@ public class GameHex
     public TerrainTemperature terrainTemp;
     public HashSet<FeatureType> featureSet = new();
     public List<Unit> unitsList = new();
+    public District district;
 
     public void OnTurnStarted(int turnNumber)
     {
