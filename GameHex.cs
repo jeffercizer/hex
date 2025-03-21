@@ -20,7 +20,6 @@ public enum FeatureType
     Forest,
     River,
     Road,
-
     Coral
 }
 
