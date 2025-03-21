@@ -7,6 +7,7 @@ public class Team
     public string Name { get; set; }
 }
 
+[Serializable]
 public class TeamManager
 {
     private Dictionary<int, Team> teams = new Dictionary<int, Team>();
