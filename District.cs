@@ -11,6 +11,7 @@ public class District
     {
         buildings = new();
         buildings.Add(initialBuilding);
+        initialBuilding.ourDistrict = this;
         this.ourGameHex = ourGameHex;
         this.isCityCenter = isCityCenter;
         this.ourCity = ourCity;
