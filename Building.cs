@@ -60,6 +60,11 @@ public class Building
         baseHappinessYield = 6;
     }
 
+    public void AddEffect(BuildingEffect effect)
+    {
+        buildingEffects.Add(effect);
+    }
+
     public RecalculateValues()
     {
         //reset all values to base
