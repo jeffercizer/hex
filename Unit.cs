@@ -18,6 +18,7 @@ enum TerrainMoveType
     Disembark
 }
 
+[Serializable]
 public class Unit
 {
     public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
