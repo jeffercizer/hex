@@ -23,11 +23,17 @@ public class City
     public String name;
     public List<District> districts;
     public GameHex ourGameHex;
+    public int foodYield;
+    public int productionYield;
+    public int goldYield;
+    public int scienceYield;
+    public int cultureYield;
+    public int happinessYield;
 
     public void AddCityCenter()
     {
         Building building = new Building("City Center");
-        Action<Building> adjacentDistrictsFoodFunction = (building) =>
+        Action<Building> adjacentDistrictsGoldFunction = (building) =>
         {
             GameHex temp = building.ourDistrict.ourGameHex;
             int counter = 0;
@@ -38,7 +44,7 @@ public class City
                     counter++;
                 }
             }
-            building.foodYield += counter;
+            building.goldYield += counter;
         };
         BuildingEffect effect = new BuildingEffect(effectFunction);
         building.AddEffect(effect);
@@ -60,5 +66,21 @@ public class City
     public String ChangeName(String name)
     {
         this.name = name;
+    }
+    public void RecalculateYields()
+    {
+        foreach(District district in districts)
+        {
+            district.RecalculateYields();
+            foreach(Building building in district.buildings)
+            {
+                foodYield += building.foodYield;
+                productionYield += building.productionYield;
+                goldYield += building.goldYield;
+                scienceYield += building.scienceYield;
+                cultureYield += building.cultureYield;
+                happinessYield += building.happinessYield;
+            }
+        }
     }
 }
