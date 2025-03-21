@@ -63,11 +63,12 @@ public class Building
     public void AddEffect(BuildingEffect effect)
     {
         buildingEffects.Add(effect);
+        ourDistrict.ourCity.RecalculateYields();
     }
 
-    public RecalculateValues()
+    public RecalculateYields()
     {
-        //reset all values to base
+        //reset all Yields to base
         buildCost = baseBuildCost;
         goldCost = baseGoldCost;
         maintenanceCost = baseMaintenanceCost;
