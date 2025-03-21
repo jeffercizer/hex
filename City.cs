@@ -83,4 +83,12 @@ public class City
             }
         }
     }
+
+    public bool ExpandToHex(Hex hex)
+    {
+        foreach(Hex hex in hex.Range(3))
+        {
+            
+        }
+    }
 }
