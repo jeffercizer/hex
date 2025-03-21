@@ -15,15 +15,36 @@ public class City
         this.ourGameHex = ourGameHex;
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddCity(this);
         districts = new();
-        District district = new District(ourGameHex, new Building("City Center"), true, this)
+        AddCityCenter();
         ourGameHex.districts.Add(district);
-        districts.Add(district);
     }
     public int id;
     public int teamNum;
     public String name;
     public List<District> districts;
     public GameHex ourGameHex;
+
+    public void AddCityCenter()
+    {
+        Building building = new Building("City Center");
+        Action<Building> adjacentDistrictsFoodFunction = (building) =>
+        {
+            GameHex temp = building.ourDistrict.ourGameHex;
+            int counter = 0;
+            foreach(Hex hex in temp.hex.WrappingNeighbors(temp.ourGameBoard.left, temp.ourGameBoard.right))
+            {
+                if(temp.ourGameBoard.gameHexDict[hex].district)
+                {
+                    counter++;
+                }
+            }
+            building.foodYield += counter;
+        };
+        BuildingEffect effect = new BuildingEffect(effectFunction);
+        building.AddEffect(effect);
+        District district = new District(ourGameHex, building, true, this);
+        districts.Add(district);
+    }
 
     public bool ChangeTeam(int newTeamNum)
     {
