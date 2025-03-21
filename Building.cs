@@ -17,7 +17,7 @@ public class Building
     public int maintenanceCost;
     public int baseFoodYield;
     public int foodYield;
-    public int baseYield;
+    public int baseProductionYield;
     public int production;
     public int baseGoldYield;
     public int goldYield;
@@ -37,7 +37,7 @@ public class Building
         baseGoldCost = 50;
         baseMaintenanceCost = 1;
         baseFoodYield = 1;
-        baseYieldYield = 2;
+        baseProductionYield = 2;
         baseGoldYield = 3;
         baseScienceYield = 4;
         baseCultureYield = 5;
@@ -53,7 +53,7 @@ public class Building
         baseGoldCost = 50;
         baseMaintenanceCost = 1;
         baseFoodYield = 1;
-        baseYieldYield = 2;
+        baseProductionYield = 2;
         baseGoldYield = 3;
         baseScienceYield = 4;
         baseCultureYield = 5;
@@ -68,15 +68,15 @@ public class Building
     public RecalculateValues()
     {
         //reset all values to base
-        baseBuildCost = buildCost;
-        baseGoldCost = goldCost;
-        baseMaintenanceCost = maintenanceCost;
-        baseFoodYield = foodYield;
-        baseYieldYield = productionYield;
-        baseGoldYield = goldYield;
-        baseScienceYield = scienceYield;
-        baseCultureYield = cultureYield;
-        baseHappinessYield = happinessYield;
+        buildCost = baseBuildCost;
+        goldCost = baseGoldCost;
+        maintenanceCost = baseMaintenanceCost;
+        foodYield = baseFoodYield;
+        productionYield = baseProductionYield;
+        goldYield = baseGoldYield;
+        scienceYield = baseScienceYield;
+        cultureYield = baseCultureYield;
+        happinessYield = baseHappinessYield;
         //also order all effects, multiply/divide after add/subtract priority
         //0 means it is applied first 100 means it is applied "last" (highest number last)
         //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
