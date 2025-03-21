@@ -14,6 +14,11 @@ public class District
         initialBuilding.ourDistrict = this;
         
         this.ourGameHex = ourGameHex;
+        ourGameHex.ClaimHex(ourCity.teamNum);
+        foreach(Hex hex in ourGameHex.hex.WrappedNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
+        {
+            ourGameHex.ourGameBoard.gameHexDict[hex].TryClaimHex(ourCity.teamNum);
+        }
         this.isCityCenter = isCityCenter;
         
         this.ourCity = ourCity;
