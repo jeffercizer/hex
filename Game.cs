@@ -9,17 +9,25 @@ struct Game
     public Game(TeamManager teamManager)
     {
         this.teamManager = teamManager;
-        //this.turnManager = turnManager;
+        this.playerDictionary = new();
     }
-    public Game(GameBoard mainGameBoard, Dictionary<int, Player> playerDictionary, TeamManager teamManager)
+    public Game(Dictionary<int, Player> playerDictionary, TeamManager teamManager)
     {
-        this.mainGameBoard.Add(mainGameBoard);
         this.playerDictionary = playerDictionary;
         this.teamManager = teamManager;
-        //this.turnManager = turnManager;
     }
-    public List<GameBoard> mainGameBoard = new();
-    public Dictionary<int, Player> playerDictionary = new();
+
+    public void AssignGameBoard(GameBoard mainGameBoard)
+    {
+        this.mainGameBoard = mainGameBoard;
+    }
+
+    public void AssignTurnManager(TurnManager turnManager)
+    {
+        this.turnManager = turnManager;
+    }
+    public GameBoard? mainGameBoard;
+    public Dictionary<int, Player> playerDictionary;
     public TeamManager teamManager;
-    //public TurnManager turnManager;
+    public TurnManager? turnManager;
 }
