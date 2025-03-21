@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-class TurnManager
+public class TurnManager
 {
     public TurnManager(Game game)
     {
