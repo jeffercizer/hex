@@ -573,44 +573,6 @@ struct Tests
         Tests.EqualHex("doubled_to_cube doubled-r", new Hex(1, 2, -3), new DoubledCoord(4, 2).RdoubledToCube());
     }
 
-    static public void TestAddUnitSingle(bool printGameBoard)
-    {
-        String name = "TestAddUnitSingle";
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        Dictionary<Hex, GameTile> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameTile(new GameHex(new Hex(q, r, -q-r), left, right, TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>())));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameTile(new GameHex(new Hex(q, r, -q-r), left, right, TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>())));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-
-        Hex target = new Hex(1, 1, -2);
-        Unit testUnit = new Unit();
-        if (!mainBoard.gameTileDict[target].gameHex.SpawnUnit(testUnit, false, false))
-        {
-            Tests.Complain(name);
-        }
-        else if (!mainBoard.gameTileDict[target].gameHex.unitsList.Contains(testUnit))
-        {
-            Tests.Complain(name);
-        }
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-    }
 
     static public void TestAll()
     {

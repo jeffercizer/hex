@@ -18,7 +18,7 @@ struct GameBoard
         for (int r = top; r <= bottom; r++){
             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
             for (int q = left - r_offset; q <= right - r_offset; q++){
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), left, right, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
             }
         }
     }

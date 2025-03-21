@@ -23,7 +23,7 @@ enum EffectOperation
 
 struct Effect
 {
-    public Effect(EffectType effectType, EffectOperation effectOperation, float effectMagnitude)
+    public Effect(EffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
     {
         this.effectType = effectType;
         if(effectType == EffectType.MovementCosts | effectType == EffectType.SightCosts)
@@ -32,40 +32,71 @@ struct Effect
         }
         this.effectOperation = effectOperation;
         this.effectMagnitude = effectMagnitude;
+        this.priority = priority;
     }
-    public Effect(EffectType effectType, TerrainMoveType terrainMoveType, EffectOperation effectOperation, float effectMagnitude)
+    public Effect(EffectType effectType, TerrainMoveType terrainMoveType, EffectOperation effectOperation, float effectMagnitude, int priority)
     {
         this.effectType = effectType;
         this.effectOperation = effectOperation;
         this.effectMagnitude = effectMagnitude;
         this.terrainMoveType = terrainMoveType;
+        this.priority = priority;
     }
     public EffectType effectType;
     public EffectOperation effectOperation;
     public TerrainMoveType terrainMoveType;
     public float effectMagnitude;
+    public int priority;
 
     public void ApplyEffect(Unit unit)
     {
         if(effectType == EffectType.MovementSpeed)
         {
-            ApplyOperation(unit.movementSpeed);
+            ApplyOperation(ref unit.movementSpeed);
         }
         else if(effectType == EffectType.SightRange)
         {
-            ApplyOperation(unit.sightRange);
+            ApplyOperation(ref unit.sightRange);
         }
         else if(effectType == EffectType.SightRange)
         {
-            ApplyOperation(unit.combatPower);
+            ApplyOperation(ref unit.combatStrength);
         }
         else if(effectType == EffectType.MovementCosts)
         {
-            ApplyOperation(unit.MovementCosts[terrainMoveType]);
+            switch (effectOperation)
+            {
+                case EffectOperation.Multiply:
+                    unit.movementCosts[terrainMoveType] *= effectMagnitude;
+                    break;
+                case EffectOperation.Divide:
+                    unit.movementCosts[terrainMoveType] /= effectMagnitude;
+                    break;
+                case EffectOperation.Add:
+                    unit.movementCosts[terrainMoveType] += effectMagnitude;
+                    break;
+                case EffectOperation.Subtract:
+                    unit.movementCosts[terrainMoveType] -= effectMagnitude;
+                    break;
+            }
         }
         else if(effectType == EffectType.SightCosts)
         {
-            ApplyOperation(unit.SightCosts[terrainMoveType]);
+            switch (effectOperation)
+            {
+                case EffectOperation.Multiply:
+                    unit.sightCosts[terrainMoveType] *= effectMagnitude;
+                    break;
+                case EffectOperation.Divide:
+                    unit.sightCosts[terrainMoveType] /= effectMagnitude;
+                    break;
+                case EffectOperation.Add:
+                    unit.sightCosts[terrainMoveType] += effectMagnitude;
+                    break;
+                case EffectOperation.Subtract:
+                    unit.sightCosts[terrainMoveType] -= effectMagnitude;
+                    break;
+            }
         }
     }
     void ApplyOperation(ref float property)

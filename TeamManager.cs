@@ -15,7 +15,7 @@ public class TeamManager
     public void AddTeam(int id, string name)
     {
         teams[id] = new Team { Id = id, Name = name };
-        relationships[id] = new Dictionary<int, string>();
+        relationships[id] = new Dictionary<int, int>();
         foreach (int teamId in relationships.Keys)
         {
             if (teamId != id)
@@ -75,11 +75,12 @@ public class TeamManager
 
         if (relationships.ContainsKey(teamId))
         {
-            foreach (Dictionary<int, int> relationshipDict in relationships[teamId])
+            Dictionary<int, int> relationshipDict = relationships[teamId];
+            foreach (int relationshipID in relationshipDict.Keys)
             {
-                if (relationshipDict.Value > 80)
+                if (relationshipDict[relationshipID] > 80)
                 {
-                    allies.Add(relationshipDict.Key);
+                    allies.Add(relationshipID);
                 }
             }
         }
@@ -93,11 +94,12 @@ public class TeamManager
 
         if (relationships.ContainsKey(teamId))
         {
-            foreach (Dictionary<int, int> relationshipDict in relationships[teamId])
+            Dictionary<int, int> relationshipDict = relationships[teamId];
+            foreach (int relationshipID in relationshipDict.Keys)
             {
-                if (relationshipDict.Value == 0)
+                if (relationshipDict[relationshipID] == 0)
                 {
-                    enemies.Add(relationshipDict.Key);
+                    enemies.Add(relationshipID);
                 }
             }
         }

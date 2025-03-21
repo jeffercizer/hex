@@ -17,18 +17,24 @@ struct TurnManager
     public void StartNewTurn()
     {
         currentTurn++;
-        foreach (Player player in game.playerDictionary)
+        foreach (Player player in game.playerDictionary.Values)
         {
-            player.OnTurnStarted(currentTurn)
+            player.OnTurnStarted(currentTurn);
         }
-        game.mainGameBoard.OnTurnStarted(currentTurn);
+        foreach (GameBoard gameBoard in game.mainGameBoard)
+        {
+            gameBoard.OnTurnStarted(currentTurn);
+        }
     }
     public void EndCurrentTurn(int teamNum)
     {
-        foreach (Player player in game.playerDictionary)
+        foreach (Player player in game.playerDictionary.Values)
         {
-            player.OnTurnEnded(currentTurn)
+            player.OnTurnEnded(currentTurn);
         }
-        game.mainGameBoard.OnTurnEnded(currentTurn);
+        foreach (GameBoard gameBoard in game.mainGameBoard)
+        {
+            gameBoard.OnTurnStarted(currentTurn);
+        }
     }
 }

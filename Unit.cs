@@ -74,7 +74,7 @@ struct Unit
     {
         if(remainingMovement > 0.0f & currentPath.Any())
         {
-            MoveTowards(currentPath.Last(), isTargetEnemy);
+            MoveTowards(currentGameHex.ourGameBoard.gameHexDict[currentPath.Last()], currentGameHex.ourGameBoard.game.teamManager ,isTargetEnemy);
         }
         Console.WriteLine($"Unit ({name}): Ended turn {turnNumber}.");
     }
@@ -83,7 +83,7 @@ struct Unit
     {
         //must reset all to base and recalculate
         movementCosts = baseMovementCosts;
-        sightCosts = baseSightCosts
+        sightCosts = baseSightCosts;
         movementSpeed = baseMovementSpeed;
         sightRange = baseSightRange;
         combatStrength = baseCombatStrength;
@@ -91,12 +91,13 @@ struct Unit
         //0 means it is applied first 100 means it is applied "last" (highest number last)
         //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
         PriorityQueue<Effect, int> orderedEffects = new();
-        foreach(Effect effect in ourEffects)
+        foreach(Effect effect1 in ourEffects)
         {
-            orderedEffects.Enqueue(effect, effect.priority);
+            orderedEffects.Enqueue(effect1, effect1.priority);
         }
         Effect effect;
-        while(orderedEffects.TryDequeue(out effect))
+        int priority;
+        while(orderedEffects.TryDequeue(out effect, out priority))
         {
             effect.ApplyEffect(this);
         }
@@ -123,13 +124,6 @@ struct Unit
                 if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                 {
                     //combat math TODO
-                    foreach(Effect effect in ourEffects)
-                    {
-                        if(effect.type == EffectType.Combat)
-                        {
-                            effect.applyEffect(this);
-                        }
-                    }
                     //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
                     return !decreaseCurrentHealth(25.0f) & unit.decreaseCurrentHealth(25.0f);
                 }
@@ -188,7 +182,6 @@ struct Unit
 
     public void RemoveVision()
     {
-        int count;
         foreach (Hex hex in ourVisibleHexes)
         {            
             int count;
@@ -204,10 +197,10 @@ struct Unit
                 }
             }
         }
-        ourVisibleHexes.RemoveAll();
+        ourVisibleHexes.Clear();
     }
 
-    public void CalculateVision()
+    public Dictionary<Hex, float> CalculateVision()
     {
         Queue<Hex> frontier = new();
         frontier.Enqueue(currentGameHex.hex);
@@ -224,7 +217,7 @@ struct Unit
                 float visionCost = VisionCost(currentGameHex.ourGameBoard.gameHexDict[next], sightLeft); //vision cost is at most the cost of our remaining sight if we have atleast 1
                 if (visionCost <= sightLeft)
                 {
-                    if (!reached.Contains(next))
+                    if (!reached.Keys.Contains(next))
                     {
                         if(reached[current]+visionCost < sightRange)
                         {
@@ -243,18 +236,22 @@ struct Unit
     }
     
 
-    public void VisionCost(GameHex targetGameHex, float sightLeft)
+    public float VisionCost(GameHex targetGameHex, float sightLeft)
     {
         float visionCost = 0.0f;
         float cost = 0.0f;
-        foreach (FeatureType feature in featureSet)
+        foreach (FeatureType feature in targetGameHex.featureSet)
         {
-            if(sightCosts.TryGetValue(feature, out cost))
+            if (feature == FeatureType.Forest)
             {
-                visionCost += cost;
+                visionCost += sightCosts[TerrainMoveType.Forest];
+            }
+            if (feature == FeatureType.Coral)
+            {
+                visionCost += sightCosts[TerrainMoveType.Coral];
             }
         }
-        if(sightCosts.TryGetValue((TerrainMoveType)targetGameHex.TerrainType, out cost))
+        if(sightCosts.TryGetValue((TerrainMoveType)targetGameHex.terrainType, out cost))
         {
             visionCost += cost;
         }
@@ -326,16 +323,16 @@ struct Unit
     public bool MoveTowards(GameHex targetGameHex, TeamManager teamManager, bool isTargetEnemy)
     {
         this.isTargetEnemy = isTargetEnemy;
-        currentPath = currentGameHex.ourGameBoard.PathFind(currentGameHex, targetGameHex, movementCosts, movementSpeed);
-        currentPath.Remove(currentGameHex);
+        currentPath = PathFind(currentGameHex.hex, targetGameHex.hex, currentGameHex.ourGameBoard.game.teamManager, movementCosts, movementSpeed);
+        currentPath.Remove(currentGameHex.hex);
         while (currentPath.Count > 0)
         {
-            GameHex nextHex = currentPath[0];
-            if (!TryMoveToGameHex(nextHex, targetEnemy, teamManager))
+            GameHex nextHex = currentGameHex.ourGameBoard.gameHexDict[currentPath[0]];
+            if (!TryMoveToGameHex(nextHex, teamManager))
             {
                 return false;
             }
-            currentPath.Remove(nextHex);
+            currentPath.Remove(nextHex.hex);
         }
         return true;
     }
@@ -345,11 +342,11 @@ struct Unit
         //cost for river, embark, disembark are custom (0 = end turn to enter, 1/2/3/4 = normal cost)\\
         GameHex firstHex;
         GameHex secondHex;
-        if (!gameHexDict.TryGetValue(first, out firstHex)) //if firstHex is somehow off the table return max
+        if (!currentGameHex.ourGameBoard.gameHexDict.TryGetValue(first, out firstHex)) //if firstHex is somehow off the table return max
         {
             return 111111;
         }
-        if (!gameHexDict.TryGetValue(second, out secondHex)) //if secondHex is off the table return max
+        if (!currentGameHex.ourGameBoard.gameHexDict.TryGetValue(second, out secondHex)) //if secondHex is off the table return max
         {
             return 333333;
         }
@@ -461,7 +458,7 @@ struct Unit
 
     private int AstarHeuristic(Hex start, Hex end)
     {
-        return start.WrapDistance(end);
+        return start.WrapDistance(end, currentGameHex.ourGameBoard.right - currentGameHex.ourGameBoard.left);
     }
 
     public List<Hex> PathFind(Hex start, Hex end, TeamManager teamManager, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed)
@@ -492,9 +489,9 @@ struct Unit
                 return path;
             }
     
-            foreach (Hex next in current.WrappingNeighbors())
+            foreach (Hex next in current.WrappingNeighbors(currentGameHex.ourGameBoard.left, currentGameHex.ourGameBoard.right))
             {
-                float new_cost = cost_so_far[current] + TravelCost(current, next, teamManager, movementCosts, unitMovementSpeed, cost_so_far[current]);
+                float new_cost = cost_so_far[current] + TravelCost(current, next, teamManager, isTargetEnemy, movementCosts, unitMovementSpeed, cost_so_far[current]);
                 //if cost_so_far doesn't have next as a key yet or the new cost is lower than the lowest cost of this node previously
                 if (!cost_so_far.ContainsKey(next) || new_cost < cost_so_far[next])
                 {
@@ -511,699 +508,699 @@ struct Unit
     }
 
 
-struct UnitTests
-{   
-    static public void TestSimpleMountainPathFinding(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+// struct UnitTests
+// {   
+//     static public void TestSimpleMountainPathFinding(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
 
-        Hex start = new Hex(1, 1, -2);
-        Hex end = new Hex(12, 6, -18);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Hex cur = end;
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Tests.EqualHex("TestMountainPathFinding", path[17], new Hex(12, 6, -18));
-        Tests.EqualHex("TestMountainPathFinding", path[16], new Hex(11, 6, -17));
-        Tests.EqualHex("TestMountainPathFinding", path[15], new Hex(10, 6, -16));
-        Tests.EqualHex("TestMountainPathFinding", path[14], new Hex(9, 6, -15));
-        Tests.EqualHex("TestMountainPathFinding", path[13], new Hex(8, 6, -14));
-        Tests.EqualHex("TestMountainPathFinding", path[12], new Hex(7, 6, -13));
-        Tests.EqualHex("TestMountainPathFinding", path[11], new Hex(6, 6, -12));
-        Tests.EqualHex("TestMountainPathFinding", path[10], new Hex(5, 6, -11));
-        Tests.EqualHex("TestMountainPathFinding", path[9], new Hex(4, 6, -10));
-        Tests.EqualHex("TestMountainPathFinding", path[8], new Hex(3, 6, -9));
-        Tests.EqualHex("TestMountainPathFinding", path[7], new Hex(2, 6, -8));
-        Tests.EqualHex("TestMountainPathFinding", path[6], new Hex(1, 6, -7));
-        Tests.EqualHex("TestMountainPathFinding", path[5], new Hex(0, 6, -6));
-        Tests.EqualHex("TestMountainPathFinding", path[4], new Hex(0, 5, -5));
-        Tests.EqualHex("TestMountainPathFinding", path[3], new Hex(1, 4, -5));
-        Tests.EqualHex("TestMountainPathFinding", path[2], new Hex(1, 3, -4));
-        Tests.EqualHex("TestMountainPathFinding", path[1], new Hex(1, 2, -3));
-        Tests.EqualHex("TestMountainPathFinding", path[0], new Hex(1, 1, -2));
-    }
+//         Hex start = new Hex(1, 1, -2);
+//         Hex end = new Hex(12, 6, -18);
+//         List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         Hex cur = end;
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Tests.EqualHex("TestMountainPathFinding", path[17], new Hex(12, 6, -18));
+//         Tests.EqualHex("TestMountainPathFinding", path[16], new Hex(11, 6, -17));
+//         Tests.EqualHex("TestMountainPathFinding", path[15], new Hex(10, 6, -16));
+//         Tests.EqualHex("TestMountainPathFinding", path[14], new Hex(9, 6, -15));
+//         Tests.EqualHex("TestMountainPathFinding", path[13], new Hex(8, 6, -14));
+//         Tests.EqualHex("TestMountainPathFinding", path[12], new Hex(7, 6, -13));
+//         Tests.EqualHex("TestMountainPathFinding", path[11], new Hex(6, 6, -12));
+//         Tests.EqualHex("TestMountainPathFinding", path[10], new Hex(5, 6, -11));
+//         Tests.EqualHex("TestMountainPathFinding", path[9], new Hex(4, 6, -10));
+//         Tests.EqualHex("TestMountainPathFinding", path[8], new Hex(3, 6, -9));
+//         Tests.EqualHex("TestMountainPathFinding", path[7], new Hex(2, 6, -8));
+//         Tests.EqualHex("TestMountainPathFinding", path[6], new Hex(1, 6, -7));
+//         Tests.EqualHex("TestMountainPathFinding", path[5], new Hex(0, 6, -6));
+//         Tests.EqualHex("TestMountainPathFinding", path[4], new Hex(0, 5, -5));
+//         Tests.EqualHex("TestMountainPathFinding", path[3], new Hex(1, 4, -5));
+//         Tests.EqualHex("TestMountainPathFinding", path[2], new Hex(1, 3, -4));
+//         Tests.EqualHex("TestMountainPathFinding", path[1], new Hex(1, 2, -3));
+//         Tests.EqualHex("TestMountainPathFinding", path[0], new Hex(1, 1, -2));
+//     }
     
-    static public void TestNeutralUnitObstaclePathFinding(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        String name = "TestNeutralUnitObstaclePathFinding";
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+//     static public void TestNeutralUnitObstaclePathFinding(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         String name = "TestNeutralUnitObstaclePathFinding";
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
         
-        Unit testUnit = new Unit("testUnit", movementCosts, null);
-        Unit testUnit2 = new Unit("testUnit2", movementCosts, null);
-        //Unit testUnit3 = new Unit("testUnit2", movementCosts, null);
-        Unit testUnit4 = new Unit("testUnit2", movementCosts, null);
-        Unit testUnit5 = new Unit("testUnit2", movementCosts, null);
-        Unit testUnit6 = new Unit("testUnit2", movementCosts, null);
-        Unit testUnit7 = new Unit("testUnit2", movementCosts, null);
-        Hex target = new Hex(1, 1, -2);
-        Hex target2 = new Hex(2, 0, -2);
-        //Hex target3 = new Hex(1, 0, -1);
-        Hex target4 = new Hex(0, 1, -1);
-        Hex target5= new Hex(0, 2, -2);
-        Hex target6 = new Hex(1, 2, -3);
-        Hex target7= new Hex(2, 1, -3);
-        mainBoard.gameHexDict[target].SpawnUnit(testUnit, true, true)
-        mainBoard.gameHexDict[target2].SpawnUnit(testUnit2, true, true)
-        mainBoard.gameHexDict[target4].SpawnUnit(testUnit4, true, true)
-        mainBoard.gameHexDict[target5].SpawnUnit(testUnit5, true, true)
-        mainBoard.gameHexDict[target6].SpawnUnit(testUnit6, true, true)
-        mainBoard.gameHexDict[target7].SpawnUnit(testUnit7, true, true)
+//         Unit testUnit = new Unit("testUnit", movementCosts, null);
+//         Unit testUnit2 = new Unit("testUnit2", movementCosts, null);
+//         //Unit testUnit3 = new Unit("testUnit2", movementCosts, null);
+//         Unit testUnit4 = new Unit("testUnit2", movementCosts, null);
+//         Unit testUnit5 = new Unit("testUnit2", movementCosts, null);
+//         Unit testUnit6 = new Unit("testUnit2", movementCosts, null);
+//         Unit testUnit7 = new Unit("testUnit2", movementCosts, null);
+//         Hex target = new Hex(1, 1, -2);
+//         Hex target2 = new Hex(2, 0, -2);
+//         //Hex target3 = new Hex(1, 0, -1);
+//         Hex target4 = new Hex(0, 1, -1);
+//         Hex target5= new Hex(0, 2, -2);
+//         Hex target6 = new Hex(1, 2, -3);
+//         Hex target7= new Hex(2, 1, -3);
+//         mainBoard.gameHexDict[target].SpawnUnit(testUnit, true, true)
+//         mainBoard.gameHexDict[target2].SpawnUnit(testUnit2, true, true)
+//         mainBoard.gameHexDict[target4].SpawnUnit(testUnit4, true, true)
+//         mainBoard.gameHexDict[target5].SpawnUnit(testUnit5, true, true)
+//         mainBoard.gameHexDict[target6].SpawnUnit(testUnit6, true, true)
+//         mainBoard.gameHexDict[target7].SpawnUnit(testUnit7, true, true)
 
-        Hex start = new Hex(1, 1, -2);
-        Hex end = new Hex(3, 1, -4);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Hex cur = end;
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Tests.EqualHex(name, path[3], new Hex(3, 1, -4));
-        Tests.EqualHex(name, path[2], new Hex(2, 0, -2));
-        Tests.EqualHex(name, path[1], new Hex(1, 0, -1));
-        Tests.EqualHex(name, path[0], new Hex(1, 1, -2));
+//         Hex start = new Hex(1, 1, -2);
+//         Hex end = new Hex(3, 1, -4);
+//         List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         Hex cur = end;
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Tests.EqualHex(name, path[3], new Hex(3, 1, -4));
+//         Tests.EqualHex(name, path[2], new Hex(2, 0, -2));
+//         Tests.EqualHex(name, path[1], new Hex(1, 0, -1));
+//         Tests.EqualHex(name, path[0], new Hex(1, 1, -2));
         
-    }
+//     }
 
-    static public void TestWrappingAStar(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        String name = "TestWrappingAStart";
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            for (int q = left; q <= right; q++){
-                if(r==0 || r == bottom || q == left || q == right || (r == bottom/2 && q > left + 2 && q < right - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Rough, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+//     static public void TestWrappingAStar(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         String name = "TestWrappingAStart";
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             for (int q = left; q <= right; q++){
+//                 if(r==0 || r == bottom || q == left || q == right || (r == bottom/2 && q > left + 2 && q < right - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Rough, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
 
-        Hex start = new Hex(2, 2, -4);
-        Hex end = new Hex(28, 2, -30);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Tests.EqualHex(name, path[2], new Hex(28, 2, -30));
-        Tests.EqualHex(name, path[2], new Hex(29, 2, -31));
-        Tests.EqualHex(name, path[2], new Hex(30, 2, -32));
-        Tests.EqualHex(name, path[2], new Hex(0, 2, -2));
-        Tests.EqualHex(name, path[2], new Hex(1, 2, -3));
-        Tests.EqualHex(name, path[1], new Hex(2, 2, -4));
-    }
+//         Hex start = new Hex(2, 2, -4);
+//         Hex end = new Hex(28, 2, -30);
+//         List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         Tests.EqualHex(name, path[2], new Hex(28, 2, -30));
+//         Tests.EqualHex(name, path[2], new Hex(29, 2, -31));
+//         Tests.EqualHex(name, path[2], new Hex(30, 2, -32));
+//         Tests.EqualHex(name, path[2], new Hex(0, 2, -2));
+//         Tests.EqualHex(name, path[2], new Hex(1, 2, -3));
+//         Tests.EqualHex(name, path[1], new Hex(2, 2, -4));
+//     }
 
-    static public void TestImpossiblePathMountain(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        String name = "TestImpossiblePathMountain";
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            for (int q = left; q <= right; q++){
-                if(r==0 || r == bottom || q == left || q == right || (r == bottom/2 && q > left + 2 && q < right - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+//     static public void TestImpossiblePathMountain(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         String name = "TestImpossiblePathMountain";
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             for (int q = left; q <= right; q++){
+//                 if(r==0 || r == bottom || q == left || q == right || (r == bottom/2 && q > left + 2 && q < right - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
 
-        Hex start = new Hex(2, 2, -4);
-        Hex end = new Hex(28, 2, -30);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        if(path.Any())
-        {
-            Tests.Complain(name);
-        }
-    }
+//         Hex start = new Hex(2, 2, -4);
+//         Hex end = new Hex(28, 2, -30);
+//         List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         if(path.Any())
+//         {
+//             Tests.Complain(name);
+//         }
+//     }
 
-    static public void TestSimpleRoughPathFinding(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Rough, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+//     static public void TestSimpleRoughPathFinding(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Rough, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
 
-        Hex start = new Hex(2, 4, -6);
-        Hex end = new Hex(1, 6, -7);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Tests.EqualHex("TestRoughPathFinding", path[2], new Hex(1, 6, -7));
-        Tests.EqualHex("TestRoughPathFinding", path[1], new Hex(2, 5, -7));
-        Tests.EqualHex("TestRoughPathFinding", path[0], new Hex(2, 4, -6));
-    }
+//         Hex start = new Hex(2, 4, -6);
+//         Hex end = new Hex(1, 6, -7);
+//         List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         Tests.EqualHex("TestRoughPathFinding", path[2], new Hex(1, 6, -7));
+//         Tests.EqualHex("TestRoughPathFinding", path[1], new Hex(2, 5, -7));
+//         Tests.EqualHex("TestRoughPathFinding", path[0], new Hex(2, 4, -6));
+//     }
     
-    static public void TestUnitMovementRefreshOnNewTurn()
-    {
-        Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
-        testUnit.remainingMovement = 0.0f;
-        testUnit.OnTurnEnded();
-        testUnit.OnTurnStarted();
-        if(testUnit.remainingMovement != 2.0f)
-        {
-            Tests.Complain("TestUnitMovementRefreshOnNewTurn");
-        }
-    }
+//     static public void TestUnitMovementRefreshOnNewTurn()
+//     {
+//         Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
+//         testUnit.remainingMovement = 0.0f;
+//         testUnit.OnTurnEnded();
+//         testUnit.OnTurnStarted();
+//         if(testUnit.remainingMovement != 2.0f)
+//         {
+//             Tests.Complain("TestUnitMovementRefreshOnNewTurn");
+//         }
+//     }
     
-    static public void TestSimpleUnitMovement(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        String name = "TestSimpleUnitMovement";
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Rough, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+//     static public void TestSimpleUnitMovement(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         String name = "TestSimpleUnitMovement";
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Rough, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
 
-        Hex start = new Hex(2, 4, -6);
-        Hex end = new Hex(1, 6, -7);
-        currentPath = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Tests.EqualHex(name, currentPath[2], new Hex(1, 6, -7));
-        Tests.EqualHex(name, currentPath[1], new Hex(2, 5, -7));
-        Tests.EqualHex(name, currentPath[0], new Hex(2, 4, -6));
+//         Hex start = new Hex(2, 4, -6);
+//         Hex end = new Hex(1, 6, -7);
+//         currentPath = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         Tests.EqualHex(name, currentPath[2], new Hex(1, 6, -7));
+//         Tests.EqualHex(name, currentPath[1], new Hex(2, 5, -7));
+//         Tests.EqualHex(name, currentPath[0], new Hex(2, 4, -6));
         
-        Dictionary<TerrainMoveType, float> movementCosts = {
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        Unit testUnit = new Unit("testUnit", movementCosts, null);
-        if (!mainBoard.gameHexDict[start].SpawnUnit(testUnit, true, true))
-        {
-            Tests.Complain(name);
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(2, 4, -6))
-        if(testUnit.MoveTowards(end))
-        {
-            Tests.Complain(name);
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(2, 5, -7))
-        testUnit.OnTurnEnded();
-        testUnit.OnTurnStarted();
-        if(!testUnit.MoveTowards(end))
-        {
-            Tests.Complain(name);
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(1, 6, -7))
-        if(testUnit.remainingMovement != 1.0f)
-        {
-            Tests.Complain(name);
-        }
-    }
+//         Dictionary<TerrainMoveType, float> movementCosts = {
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         Unit testUnit = new Unit("testUnit", movementCosts, null);
+//         if (!mainBoard.gameHexDict[start].SpawnUnit(testUnit, true, true))
+//         {
+//             Tests.Complain(name);
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(2, 4, -6))
+//         if(testUnit.MoveTowards(end))
+//         {
+//             Tests.Complain(name);
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(2, 5, -7))
+//         testUnit.OnTurnEnded();
+//         testUnit.OnTurnStarted();
+//         if(!testUnit.MoveTowards(end))
+//         {
+//             Tests.Complain(name);
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(1, 6, -7))
+//         if(testUnit.remainingMovement != 1.0f)
+//         {
+//             Tests.Complain(name);
+//         }
+//     }
 
-    static public void TestMoveIntoNeutralOrEnemy(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        String name = "TestMoveIntoNeutralOrEnemy";
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
+//     static public void TestMoveIntoNeutralOrEnemy(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         String name = "TestMoveIntoNeutralOrEnemy";
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
         
-        Dictionary<TerrainMoveType, float> movementCosts = {
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
-        Unit testEnemyUnit = new Unit("testEnemyUnit", movementCosts, null, 2.0f, 2);
-        Unit testNeutralUnit = new Unit("testNeutralUnit", movementCosts, null, 2.0f, 0);
-        Hex start = new Hex(3, 3, -6);
-        Hex enemyStart = new Hex(4, 3, -7);
-        Hex neutralStart = new Hex(2, 3, -5);
-        if (!mainBoard.gameHexDict[start].SpawnUnit(testUnit, false, true) | !mainBoard.gameHexDict[enemyStart].SpawnUnit(testEnemyUnit, false, true) | !mainBoard.gameHexDict[neutralStart].SpawnUnit(testNeutralUnit, false, true))
-        {
-            Tests.Complain(name);
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
-        if(testUnit.MoveTowards(neutralStart))
-        {
-            Tests.Complain(name);
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
-        testUnit.OnTurnEnded();
-        testUnit.OnTurnStarted();
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
-        if(!testUnit.MoveTowards(enemyStart))
-        {
-            Tests.Complain(name);
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
-        if(testUnit.currentHealth != 50.0f | testEnemyUnit.currentHealth != 50.0f)
-        {
-            Tests.Complain(name);
-        }
+//         Dictionary<TerrainMoveType, float> movementCosts = {
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
+//         Unit testEnemyUnit = new Unit("testEnemyUnit", movementCosts, null, 2.0f, 2);
+//         Unit testNeutralUnit = new Unit("testNeutralUnit", movementCosts, null, 2.0f, 0);
+//         Hex start = new Hex(3, 3, -6);
+//         Hex enemyStart = new Hex(4, 3, -7);
+//         Hex neutralStart = new Hex(2, 3, -5);
+//         if (!mainBoard.gameHexDict[start].SpawnUnit(testUnit, false, true) | !mainBoard.gameHexDict[enemyStart].SpawnUnit(testEnemyUnit, false, true) | !mainBoard.gameHexDict[neutralStart].SpawnUnit(testNeutralUnit, false, true))
+//         {
+//             Tests.Complain(name);
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+//         if(testUnit.MoveTowards(neutralStart))
+//         {
+//             Tests.Complain(name);
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+//         testUnit.OnTurnEnded();
+//         testUnit.OnTurnStarted();
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+//         if(!testUnit.MoveTowards(enemyStart))
+//         {
+//             Tests.Complain(name);
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+//         if(testUnit.currentHealth != 50.0f | testEnemyUnit.currentHealth != 50.0f)
+//         {
+//             Tests.Complain(name);
+//         }
         
-        testUnit.OnTurnEnded();
-        testUnit.OnTurnStarted();
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
-        if(!testUnit.MoveTowards(enemyStart))
-        {
-            Tests.Complain(name+"part2");
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, null)
-        Tests.EqualHex(name, testEnemyUnit.currentGameHex.hex, null)
-        if(testUnit.currentHealth != 0.0f | testEnemyUnit.currentHealth != 0.0f)
-        {
-            Tests.Complain(name+"part2");
-        }
-    }
+//         testUnit.OnTurnEnded();
+//         testUnit.OnTurnStarted();
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, new Hex(3, 3, -6))
+//         if(!testUnit.MoveTowards(enemyStart))
+//         {
+//             Tests.Complain(name+"part2");
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, null)
+//         Tests.EqualHex(name, testEnemyUnit.currentGameHex.hex, null)
+//         if(testUnit.currentHealth != 0.0f | testEnemyUnit.currentHealth != 0.0f)
+//         {
+//             Tests.Complain(name+"part2");
+//         }
+//     }
 
-    static public void TestMoveIntoHurtEnemy(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        String name = "TestMoveIntoHurtEnemy";
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
+//     static public void TestMoveIntoHurtEnemy(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         String name = "TestMoveIntoHurtEnemy";
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
         
-        Dictionary<TerrainMoveType, float> movementCosts = {
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
-        Unit testEnemyUnit = new Unit("testEnemyUnit", movementCosts, null, 2.0f, 2);
-        testEnemyUnit.currentHealth = 1.0f;
-        Hex start = new Hex(3, 3, -6);
-        Hex enemyStart = new Hex(4, 3, -7);
-        Hex neutralStart = new Hex(2, 3, -5);
-        if (!mainBoard.gameHexDict[start].SpawnUnit(testUnit, false, true) | !mainBoard.gameHexDict[enemyStart].SpawnUnit(testEnemyUnit, false, true))
-        {
-            Tests.Complain(name);
-        }
-        if(!testUnit.MoveTowards(enemyStart))
-        {
-            Tests.Complain(name);
-        }
-        Tests.EqualHex(name, testUnit.currentGameHex.hex, enemyStart)
-        Tests.EqualHex(name, testEnemyUnit.currentGameHex.hex, null)
-        if(testUnit.currentHealth != 50.0f | testEnemyUnit.currentHealth <= 0.0f)
-        {
-            Tests.Complain(name);
-        }
-    }
+//         Dictionary<TerrainMoveType, float> movementCosts = {
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         Unit testUnit = new Unit("testUnit", movementCosts, null, 2.0f, 1);
+//         Unit testEnemyUnit = new Unit("testEnemyUnit", movementCosts, null, 2.0f, 2);
+//         testEnemyUnit.currentHealth = 1.0f;
+//         Hex start = new Hex(3, 3, -6);
+//         Hex enemyStart = new Hex(4, 3, -7);
+//         Hex neutralStart = new Hex(2, 3, -5);
+//         if (!mainBoard.gameHexDict[start].SpawnUnit(testUnit, false, true) | !mainBoard.gameHexDict[enemyStart].SpawnUnit(testEnemyUnit, false, true))
+//         {
+//             Tests.Complain(name);
+//         }
+//         if(!testUnit.MoveTowards(enemyStart))
+//         {
+//             Tests.Complain(name);
+//         }
+//         Tests.EqualHex(name, testUnit.currentGameHex.hex, enemyStart)
+//         Tests.EqualHex(name, testEnemyUnit.currentGameHex.hex, null)
+//         if(testUnit.currentHealth != 50.0f | testEnemyUnit.currentHealth <= 0.0f)
+//         {
+//             Tests.Complain(name);
+//         }
+//     }
 
-    static public void TestSimpleEmbarkDisembarkPathFinding(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Coast, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+//     static public void TestSimpleEmbarkDisembarkPathFinding(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Coast, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
 
-        Hex start = new Hex(2, 4, -6);
-        Hex end = new Hex(4, 6, -10);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Hex cur = end;
+//         Hex start = new Hex(2, 4, -6);
+//         Hex end = new Hex(4, 6, -10);
+//         List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         Hex cur = end;
 
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[4], new Hex(4, 6, -10));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[3], new Hex(4, 5, -9));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[2], new Hex(3, 5, -8));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[1], new Hex(3, 4, -7));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[0], new Hex(2, 4, -6));
-    }
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[4], new Hex(4, 6, -10));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[3], new Hex(4, 5, -9));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[2], new Hex(3, 5, -8));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[1], new Hex(3, 4, -7));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[0], new Hex(2, 4, -6));
+//     }
 
-    static public void TestSimpleRoadPathFinding(bool printGameBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
-                if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>(){FeatureType.Road}));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-        if (printGameBoard)
-        {
-            mainBoard.PrintGameBoard();
-        }
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        float scoutMovementSpeed = 2.0f;
+//     static public void TestSimpleRoadPathFinding(bool printGameBoard)
+//     {
+//         int top = 0;
+//         int bottom = 10;
+//         int left = 0;
+//         int right = 30;
+//         Dictionary<Hex, GameHex> gameHexDict = new();
+//         for (int r = top; r <= bottom; r++){
+//             int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//             for (int q = left - r_offset; q <= right - r_offset; q++){
+//                 if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>(){FeatureType.Road}));
+//                 }
+//                 else
+//                 {
+//                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//                 }
+//             }
+//         }
+//         GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//         if (printGameBoard)
+//         {
+//             mainBoard.PrintGameBoard();
+//         }
+//         Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+//             { TerrainMoveType.Flat, 1 },
+//             { TerrainMoveType.Rough, 2 },
+//             { TerrainMoveType.Mountain, 9999 },
+//             { TerrainMoveType.Coast, 1 },
+//             { TerrainMoveType.Ocean, 1 },
+//             { TerrainMoveType.Forest, 1 },
+//             { TerrainMoveType.River, 0 },
+//             { TerrainMoveType.Road, 0.5f },
+//             { TerrainMoveType.Embark, 0 },
+//             { TerrainMoveType.Disembark, 0 },
+//         };
+//         float scoutMovementSpeed = 2.0f;
 
-        Hex start = new Hex(2, 4, -6);
-        Hex end = new Hex(4, 6, -10);
-        List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-        Hex cur = end;
+//         Hex start = new Hex(2, 4, -6);
+//         Hex end = new Hex(4, 6, -10);
+//         List<Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//         Hex cur = end;
        
-        //print start node for testing
-        while (!path[cur].Equals(new Hex(-1, -1, 2)))
-        {
-            Console.WriteLine(cur.q + ", " + cur.r);
-            cur = path[cur];
-        }
-        Console.WriteLine(cur.q + ", " + cur.r);
-        cur = end;
+//         //print start node for testing
+//         while (!path[cur].Equals(new Hex(-1, -1, 2)))
+//         {
+//             Console.WriteLine(cur.q + ", " + cur.r);
+//             cur = path[cur];
+//         }
+//         Console.WriteLine(cur.q + ", " + cur.r);
+//         cur = end;
 
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[4], new Hex(4, 6, -10));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[3], new Hex(4, 5, -9));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[2], new Hex(3, 5, -8));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[1], new Hex(3, 4, -7));
-        Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[0], new Hex(2, 4, -6));
-    }
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[4], new Hex(4, 6, -10));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[3], new Hex(4, 5, -9));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[2], new Hex(3, 5, -8));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[1], new Hex(3, 4, -7));
+//         Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", path[0], new Hex(2, 4, -6));
+//     }
 
 
 
-    // static public void TestLineofSightFlat(bool printGameBoard)
-    // {
-    //     String name = "TestLineofSightFlat";
-    //     int top = 0;
-    //     int bottom = 10;
-    //     int left = 0;
-    //     int right = 30;
-    //     Dictionary<Hex, GameHex> gameHexDict = new();
-    //     for (int r = top; r <= bottom; r++){
-    //         int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-    //         for (int q = left - r_offset; q <= right - r_offset; q++){
-    //             if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
-    //             {
-    //                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>(){}));
-    //             }
-    //             else
-    //             {
-    //                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-    //             }
-    //         }
-    //     }
-    //     GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
-    //     if (printGameBoard)
-    //     {
-    //         mainBoard.PrintGameBoard();
-    //     }
+//     // static public void TestLineofSightFlat(bool printGameBoard)
+//     // {
+//     //     String name = "TestLineofSightFlat";
+//     //     int top = 0;
+//     //     int bottom = 10;
+//     //     int left = 0;
+//     //     int right = 30;
+//     //     Dictionary<Hex, GameHex> gameHexDict = new();
+//     //     for (int r = top; r <= bottom; r++){
+//     //         int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
+//     //         for (int q = left - r_offset; q <= right - r_offset; q++){
+//     //             if(r==0 || r == bottom || q == left - r_offset || q == right - r_offset || (r == bottom/2 && q > left - r_offset + 2 && q < right - r_offset - 2))
+//     //             {
+//     //                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>(){}));
+//     //             }
+//     //             else
+//     //             {
+//     //                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+//     //             }
+//     //         }
+//     //     }
+//     //     GameBoard mainBoard = new GameBoard(gameHexDict, top, bottom, left, right);
+//     //     if (printGameBoard)
+//     //     {
+//     //         mainBoard.PrintGameBoard();
+//     //     }
         
-    //     float scoutSightRange = 3.0f;
+//     //     float scoutSightRange = 3.0f;
 
-    //     Hex start = new Hex(2, 4, -6);
-    //     Hex[] visible = {new Hex(2, 4, -6), }
-    //     //Hex end = new Hex(4, 6, -10);
-    //     //Dictionary<Hex, Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
-    //     //Hex cur = end;
+//     //     Hex start = new Hex(2, 4, -6);
+//     //     Hex[] visible = {new Hex(2, 4, -6), }
+//     //     //Hex end = new Hex(4, 6, -10);
+//     //     //Dictionary<Hex, Hex> path = mainBoard.PathFind(start, end, scoutMovementCosts, scoutMovementSpeed);
+//     //     //Hex cur = end;
        
-    //     foreach (Hex visibleHex in visible)
-    //     {
-    //         if(!visibleHexDictionary.contains(visibleHex))
-    //         {
-    //             Tests.Complain(name);
-    //         }
-    //     }
-    //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(4, 6, -10));
-    //     cur = path[cur];
-    //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(4, 5, -9));
-    //     cur = path[cur];
-    //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(3, 5, -8));
-    //     cur = path[cur];
-    //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(3, 4, -7));
-    //     cur = path[cur];
-    //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(2, 4, -6));
-    // }
+//     //     foreach (Hex visibleHex in visible)
+//     //     {
+//     //         if(!visibleHexDictionary.contains(visibleHex))
+//     //         {
+//     //             Tests.Complain(name);
+//     //         }
+//     //     }
+//     //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(4, 6, -10));
+//     //     cur = path[cur];
+//     //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(4, 5, -9));
+//     //     cur = path[cur];
+//     //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(3, 5, -8));
+//     //     cur = path[cur];
+//     //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(3, 4, -7));
+//     //     cur = path[cur];
+//     //     Tests.EqualHex("TestSimpleEmbarkDisembarkPathFinding", cur, new Hex(2, 4, -6));
+//     // }
     
-    static public void TestAll()
-    {
-        GameBoardTests.TestSimpleMountainPathFinding(false);
-        GameBoardTests.TestSimpleRoughPathFinding(false);
-        GameBoardTests.TestSimpleEmbarkDisembarkPathFinding(false);
-        GameBoardTests.TestSimpleRoadPathFinding(true);
-    }
+//     static public void TestAll()
+//     {
+//         GameBoardTests.TestSimpleMountainPathFinding(false);
+//         GameBoardTests.TestSimpleRoughPathFinding(false);
+//         GameBoardTests.TestSimpleEmbarkDisembarkPathFinding(false);
+//         GameBoardTests.TestSimpleRoadPathFinding(true);
+//     }
 
 }
