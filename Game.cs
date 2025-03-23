@@ -7,6 +7,34 @@ using System.Data;
 [Serializable]
 public class Game
 {
+    public Game(int boardHeight, int boardWidth)
+    {
+        int top = 0;
+        int bottom = 10;
+        int left = 0;
+        int right = 30;
+        this.playerDictionary = new();
+        this.turnManager = new TurnManager();
+        this.teamManager = new TeamManager();
+        turnManager.game = this;
+        GameBoard mainBoard = new GameBoard(this, bottom, right);
+        this.mainGameBoard = mainBoard;
+        Dictionary<Hex, GameHex> gameHexDict = new();
+        for (int r = top; r <= bottom; r++){
+            for (int q = left; q <= right; q++){
+                if(r == bottom/2 && q > left + 2 && q < right - 2)
+                {
+                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                }
+                else
+                {
+                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                }
+            }
+        }
+        mainBoard.gameHexDict = gameHexDict;
+    }
+
     public Game(TeamManager teamManager)
     {
         this.teamManager = teamManager;
@@ -47,14 +75,14 @@ struct GameTests
 {
     static public void SampleTest()
     {
-        Game game;
-        GameBoard mainBoard;
-        StartGameTestHelper(out game, out mainBoard);
+        Game game = new(10, 30);
+        // GameBoard mainBoard;
+        // StartGameTestHelper(out game, out mainBoard);
         game.AddPlayer(50.0f, 1);
         game.AddPlayer(50.0f, 2);
         TestPlayerRelations(game);
-        City player1City = new City(1, 1, "MyCity", mainBoard.gameHexDict[new Hex(1, 1, -2)]);
-        City player2City = new City(2, 2, "Team2City", mainBoard.gameHexDict[new Hex(15, 7, -22)]);
+        City player1City = new City(1, 1, "MyCity", game.mainGameBoard.gameHexDict[new Hex(1, 1, -2)]);
+        City player2City = new City(2, 2, "Team2City", game.mainGameBoard.gameHexDict[new Hex(15, 7, -22)]);
 
         //Yields
         TestCityYields(player1City);
