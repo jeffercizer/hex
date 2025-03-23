@@ -10,9 +10,9 @@ public class Game
     public Game(int boardHeight, int boardWidth)
     {
         int top = 0;
-        int bottom = 10;
+        int bottom = boardHeight;
         int left = 0;
-        int right = 30;
+        int right = boardWidth;
         this.playerDictionary = new();
         this.turnManager = new TurnManager();
         this.teamManager = new TeamManager();
@@ -20,16 +20,64 @@ public class Game
         GameBoard mainBoard = new GameBoard(this, bottom, right);
         this.mainGameBoard = mainBoard;
         Dictionary<Hex, GameHex> gameHexDict = new();
+        Random rand = new();
         for (int r = top; r <= bottom; r++){
             for (int q = left; q <= right; q++){
-                if(r == bottom/2 && q > left + 2 && q < right - 2)
+                TerrainTemperature terrainTemp = TerrainTemperature.Arctic;
+                HashSet<FeatureType> features = new HashSet<FeatureType>();
+                float interval = bottom/6;
+                if((r >= bottom - interval & r <= bottom) | (r >= top & r <= top + interval))
                 {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                    terrainTemp = TerrainTemperature.Arctic;
+                }
+                if((r >= bottom - 2 * interval & r <= bottom - interval) | (r >= top + interval & r <= top + 2 * interval))
+                {
+                    terrainTemp = TerrainTemperature.Tundra;
+                }
+                if((r >= bottom - 3 * interval & r <= bottom - 2 * interval) | (r >= top + 2 * interval & r <= top + 3 * interval))
+                {
+                    terrainTemp = TerrainTemperature.Grassland;
+                }
+                if((r >= bottom - 4 * interval & r <= bottom - 3 * interval) | (r >= top + 3 * interval & r <= top + 4 * interval))
+                {
+                    terrainTemp = TerrainTemperature.Plains;
+                }
+                if((r >= bottom - 5 * interval & r <= bottom - 4 * interval) | (r >= top + 3 * interval & r <= top + 4 * interval))
+                {
+                    terrainTemp = TerrainTemperature.Desert;
+                }
+
+                if(r == bottom - 2 | r == 2 & (r != 0 | r != bottom | q != right | q != 0))
+                {
+                    features.Add(FeatureType.Road);
+                }
+                if(r < bottom - 2 & q > 2 & r > bottom/2 & q < right - 2 & (r != 0 | r != bottom | q != right | q != 0))
+                {
+                    features.Add(FeatureType.Forest);
+                }
+                if(q == right/2 & (r != 0 | r != bottom | q != right | q != 0))
+                {
+                    features.Add(FeatureType.River);
+                }
+
+                TerrainType terrainType = TerrainType.Ocean;
+                if(r == bottom/2 && q > left + 2 && q < right - 2 & (r != 0 | r != bottom | q != right | q != 0))
+                {
+                    terrainType = TerrainType.Mountain;
+                }
+                else if(r%2 == 0 | q%2 == 0 & (r != 0 | r != bottom | q != right | q != 0))
+                {
+                    terrainType = TerrainType.Flat;
+                }
+                else if(r != 0 | r != bottom | q != right | q != 0)
+                {
+                    terrainType = TerrainType.Rough;
                 }
                 else
                 {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                    terrainType = TerrainType.Coast;
                 }
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemp, features));
             }
         }
         mainBoard.gameHexDict = gameHexDict;
@@ -81,15 +129,15 @@ struct GameTests
         game.AddPlayer(50.0f, 1);
         game.AddPlayer(50.0f, 2);
         TestPlayerRelations(game);
-        City player1City = new City(1, 1, "MyCity", game.mainGameBoard.gameHexDict[new Hex(1, 1, -2)]);
+        City player1City = new City(1, 1, "MyCity", game.mainGameBoard.gameHexDict[new Hex(2, 2, -4)]);
         City player2City = new City(2, 2, "Team2City", game.mainGameBoard.gameHexDict[new Hex(15, 7, -22)]);
 
         //Yields
-        TestCityYields(player1City);
-        TestCityYields(player2City);
+        TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
+        TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
 
         //City Locations from player
-        Tests.EqualHex("player1CityLocation", new Hex(1, 1, -2), game.playerDictionary[1].cityList[0].ourGameHex.hex);
+        Tests.EqualHex("player1CityLocation", new Hex(2, 2, -4), game.playerDictionary[1].cityList[0].ourGameHex.hex);
         Tests.EqualHex("player2CityLocation", new Hex(15, 7, -22), game.playerDictionary[2].cityList[0].ourGameHex.hex);
 
         //Gamehex with city has District with 'City Center'
@@ -112,8 +160,8 @@ struct GameTests
         }
 
         //Yields
-        TestCityYields(player1City);
-        TestCityYields(player2City);
+        TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
+        TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
 
 
 
@@ -140,8 +188,8 @@ struct GameTests
 
 
         //Yields
-        TestCityYields(player1City);
-        TestCityYields(player2City);
+        TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
+        TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
 
         if(!player1City.productionQueue.Any())
         {
@@ -174,11 +222,19 @@ struct GameTests
         game.turnManager.StartNewTurn(); //rework this somehow smart so when all turns ended we proc
 
         //both scouts should now be spawned at city center TODO location check
-        game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 5, -10)], game.teamManager, false);
+        game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 4, -9)], game.teamManager, false);
 
-        game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 5, -10)], game.teamManager, false);
+        game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 4, -9)], game.teamManager, false);
+
+        // Console.Write(game.playerDictionary[1].unitList[0].currentGameHex.hex.q+" ");
+        // Console.WriteLine(game.playerDictionary[1].unitList[0].currentGameHex.hex.r);
+
+        // Console.Write(game.playerDictionary[2].unitList[0].currentGameHex.hex.q+" ");
+        // Console.WriteLine(game.playerDictionary[2].unitList[0].currentGameHex.hex.r);
 
         //NEW LOCATION CHECK TODO
+        Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
+        Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));
 
     }
 
@@ -238,14 +294,14 @@ struct GameTests
         Happiness
     }
 
-    static public void TestCityYields(City city)
+    static public void TestCityYields(City city, int foodExpected, int productionExpected, int goldExpected, int scienceExpected, int cultureExpected, int happinessExpected)
     {
-        TestCityYield(city.name+"CityFoodYield", city, YieldType.Food, 2);
-        TestCityYield(city.name+"CityProductionYield", city, YieldType.Production, 2);
-        TestCityYield(city.name+"CityGoldYield", city, YieldType.Gold, 8);
-        TestCityYield(city.name+"CityScienceYield", city, YieldType.Science, 4);
-        TestCityYield(city.name+"CityCultureYield", city, YieldType.Culture, 5);
-        TestCityYield(city.name+"CityHappinessYield", city, YieldType.Happiness, 6);
+        TestCityYield(city.name+"CityFoodYield", city, YieldType.Food, foodExpected);
+        TestCityYield(city.name+"CityProductionYield", city, YieldType.Production, productionExpected);
+        TestCityYield(city.name+"CityGoldYield", city, YieldType.Gold, goldExpected);
+        TestCityYield(city.name+"CityScienceYield", city, YieldType.Science, scienceExpected);
+        TestCityYield(city.name+"CityCultureYield", city, YieldType.Culture, cultureExpected);
+        TestCityYield(city.name+"CityHappinessYield", city, YieldType.Happiness, happinessExpected);
     }
 
     static public void TestCityYield(String testName, City testCity, YieldType yieldType, float expectedYield)

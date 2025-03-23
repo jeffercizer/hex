@@ -41,6 +41,23 @@ public class Unit
             { TerrainMoveType.Disembark, 0 },
         };
         this.movementCosts = scoutMovementCosts;
+
+        this.baseMovementCosts = movementCosts;
+        Dictionary<TerrainMoveType,float> scoutSightCosts = new Dictionary<TerrainMoveType, float>{
+            { TerrainMoveType.Flat, 1 },
+            { TerrainMoveType.Rough, 2 },
+            { TerrainMoveType.Mountain, 9999 },
+            { TerrainMoveType.Coast, 1 },
+            { TerrainMoveType.Ocean, 1 },
+            { TerrainMoveType.Forest, 1 },
+            { TerrainMoveType.River, 0 },
+            { TerrainMoveType.Road, 0.5f },
+            { TerrainMoveType.Embark, 0 },
+            { TerrainMoveType.Disembark, 0 },
+        };
+        this.sightCosts = scoutSightCosts;
+        this.baseSightCosts = sightCosts;
+
         currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
     }
 
@@ -198,7 +215,7 @@ public class Unit
         ourVisibleHexes = CalculateVision().Keys.ToList();
         foreach (Hex hex in ourVisibleHexes)
         {
-            currentGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.Add(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+            currentGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
             int count;
             if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
             {
@@ -206,7 +223,7 @@ public class Unit
             }
             else
             {
-                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.Add(hex, 1);
+                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
             }
         }
     }

@@ -77,7 +77,7 @@ public class City
             int counter = 0;
             foreach(Hex hex in temp.hex.WrappingNeighbors(temp.ourGameBoard.left, temp.ourGameBoard.right))
             {
-                if(temp.ourGameBoard.gameHexDict[hex].terrainType == TerrainType.Flat)
+                if(temp.ourGameBoard.gameHexDict[hex].terrainType == TerrainType.Mountain)
                 {
                     counter++;
                 }
