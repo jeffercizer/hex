@@ -43,7 +43,7 @@ public class City
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].cityList.Add(this);
         districts = new();
         AddCityCenter();
-        productionList = new();
+        productionQueue = new();
         partialProductionDictionary = new();
         
         citySize = 0;
@@ -64,7 +64,7 @@ public class City
     public float scienceYield;
     public float cultureYield;
     public float happinessYield;
-    public List<ProductionQueueType> productionList;
+    public List<ProductionQueueType> productionQueue;
     public Dictionary<string, ProductionQueueType> partialProductionDictionary;
 
     private District AddCityCenter()
@@ -99,26 +99,26 @@ public class City
         //so when we remove check the whole queue for a item that matches our name and replace it if our prodLeft is < than theirs
     public bool RemoveFromQueue(int index)
     {
-        if(productionList.Count > index)
+        if(productionQueue.Count > index)
         {
-            if(productionList[index].productionLeft < productionList[index].productionCost)
+            if(productionQueue[index].productionLeft < productionQueue[index].productionCost)
             {
                 bool foundNewHome = false;
-                for(int i = 0; i < productionList.Count; i++)
+                for(int i = 0; i < productionQueue.Count; i++)
                 {
-                    if (productionList[i].name == productionList[index].name & productionList[i].productionLeft > productionList[index].productionLeft)
+                    if (productionQueue[i].name == productionQueue[index].name & productionQueue[i].productionLeft > productionQueue[index].productionLeft)
                     {
                         foundNewHome = true;
-                        productionList[i] = productionList[index];
+                        productionQueue[i] = productionQueue[index];
                         break;
                     }
                 }
                 if(!foundNewHome)
                 {
-                    partialProductionDictionary.Add(productionList[index].name, productionList[index]);
+                    partialProductionDictionary.Add(productionQueue[index].name, productionQueue[index]);
                 }
             }
-            productionList.RemoveAt(index);
+            productionQueue.RemoveAt(index);
             return true;
         }
         return false;
@@ -126,7 +126,7 @@ public class City
 
     public bool AddToQueue(String name, ProductionType prodType, GameHex targetGameHex, float productionCost, bool isUnique)
     {
-        foreach(ProductionQueueType queueItem in productionList)
+        foreach(ProductionQueueType queueItem in productionQueue)
         {
             if(queueItem.name == name & (isUnique | queueItem.isUnique))
             {
@@ -137,11 +137,11 @@ public class City
         if(partialProductionDictionary.TryGetValue(name, out queueItem1))
         {
             partialProductionDictionary.Remove(name);
-            productionList.Add(new ProductionQueueType(name, prodType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost, isUnique));
+            productionQueue.Add(new ProductionQueueType(name, prodType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost, isUnique));
             return true;
         }
 
-        productionList.Add(new ProductionQueueType(name, prodType, targetGameHex, productionCost, productionCost, isUnique));
+        productionQueue.Add(new ProductionQueueType(name, prodType, targetGameHex, productionCost, productionCost, isUnique));
         return true;
     }
 
@@ -163,20 +163,20 @@ public class City
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddScience(scienceYield);
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddCulture(cultureYield);
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddHappiness(cultureYield);
-        if(productionList.Any())
+        if(productionQueue.Any())
         {
-            productionList[0].productionLeft -= productionYield;
-            if(productionList[0].productionLeft <= 0)
+            productionQueue[0].productionLeft -= productionYield;
+            if(productionQueue[0].productionLeft <= 0)
             {
-                if(productionList[0].prodType == ProductionType.Building)
+                if(productionQueue[0].prodType == ProductionType.Building)
                 {
-                    BuildOnHex(productionList[0].targetGameHex.hex, new Building(productionList[0].name));
+                    BuildOnHex(productionQueue[0].targetGameHex.hex, new Building(productionQueue[0].name));
                 }
-                else if(productionList[0].prodType == ProductionType.Unit)
+                else if(productionQueue[0].prodType == ProductionType.Unit)
                 {
-                    productionList[0].targetGameHex.SpawnUnit(new Unit(productionList[0].name, productionList[0].targetGameHex, teamNum), false, true);
+                    productionQueue[0].targetGameHex.SpawnUnit(new Unit(productionQueue[0].name, productionQueue[0].targetGameHex, teamNum), false, true);
                 }
-                productionList.RemoveAt(0);
+                productionQueue.RemoveAt(0);
             }
         }
 
@@ -195,6 +195,12 @@ public class City
 
     public void RecalculateYields()
     {
+        foodYield = 0.0f;
+        productionYield = 0.0f;
+        goldYield = 0.0f;
+        scienceYield = 0.0f;
+        cultureYield = 0.0f;
+        happinessYield = 0.0f;
         foreach(District district in districts)
         {
             district.RecalculateYields();

@@ -57,19 +57,8 @@ struct GameTests
         City player2City = new City(2, 2, "Team2City", mainBoard.gameHexDict[new Hex(15, 7, -22)]);
 
         //Yields
-        TestCityYield("player1CityFoodYield", player1City, YieldType.Food, 2);
-        TestCityYield("player1CityProductionYield", player1City, YieldType.Production, 2);
-        TestCityYield("player1CityGoldYield", player1City, YieldType.Gold, 8);
-        TestCityYield("player1CityScienceYield", player1City, YieldType.Science, 4);
-        TestCityYield("player1CityCultureYield", player1City, YieldType.Culture, 5);
-        TestCityYield("player1CityHappinessYield", player1City, YieldType.Happiness, 6);
-
-        TestCityYield("player2CityFoodYield", player2City, YieldType.Food, 2);
-        TestCityYield("player2CityProductionYield", player2City, YieldType.Production, 2);
-        TestCityYield("player2CityGoldYield", player2City, YieldType.Gold, 8);
-        TestCityYield("player2CityScienceYield", player2City, YieldType.Science, 4);
-        TestCityYield("player2CityCultureYield", player2City, YieldType.Culture, 5);
-        TestCityYield("player2CityHappinessYield", player2City, YieldType.Happiness, 6);
+        TestCityYields(player1City);
+        TestCityYields(player2City);
 
         //City Locations from player
         Tests.EqualHex("player1CityLocation", new Hex(1, 1, -2), game.playerDictionary[1].cityList[0].ourGameHex.hex);
@@ -94,24 +83,61 @@ struct GameTests
             }
         }
 
+        //Yields
+        TestCityYields(player1City);
+        TestCityYields(player2City);
+
 
 
         player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
         player2City.AddToQueue("Scout", ProductionType.Unit, player2City.ourGameHex, 4, false);
 
-        //MAKE ASSERTION ABOUT QUEUE STATUS IN THE CITIES TODO
+        if(player1City.productionQueue.Any())
+        {
+            if(player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 4)
+            {
+                Complain("player1CityFirstQueueNotScoutOrProductionWrong");
+            }
+        }
+        if(player2City.productionQueue.Any() & (player2City.productionQueue[0].name != "Scout" | player2City.productionQueue[0].productionLeft != 4))
+        {
+            Complain("player2CityFirstQueueNotScoutOrProductionWrong");
+        }
 
         
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(2);
-
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn(); //rework this somehow smart so when all turns ended we proc
+
+
+        //Yields
+        TestCityYields(player1City);
+        TestCityYields(player2City);
+
+        if(!player1City.productionQueue.Any())
+        {
+            Complain("player1CityQueueEmpty");
+        }
+        if(!player2City.productionQueue.Any())
+        {
+            Complain("player2CityQueueEmpty");
+        }
 
         player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
         player1City.RemoveFromQueue(0); 
 
-        //check that the one scout in queue still only has 2 prod left TODO
+        if(player1City.productionQueue.Any())
+        {
+            if((player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 2))
+            {
+                Complain("player1CityAddNewRemovePartial");
+            }
+        }
+        else
+        {
+            Complain("player1CityQueueIsEmpty");
+        }
 
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(2);
@@ -119,7 +145,7 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn(); //rework this somehow smart so when all turns ended we proc
 
-        //both scouts should now be spawned TODO location check
+        //both scouts should now be spawned at city center TODO location check
         game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 5, -10)], game.teamManager, false);
 
         game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 5, -10)], game.teamManager, false);
@@ -182,6 +208,16 @@ struct GameTests
         Science,
         Culture,
         Happiness
+    }
+
+    static public void TestCityYields(City city)
+    {
+        TestCityYield(city.name+"CityFoodYield", city, YieldType.Food, 2);
+        TestCityYield(city.name+"CityProductionYield", city, YieldType.Production, 2);
+        TestCityYield(city.name+"CityGoldYield", city, YieldType.Gold, 8);
+        TestCityYield(city.name+"CityScienceYield", city, YieldType.Science, 4);
+        TestCityYield(city.name+"CityCultureYield", city, YieldType.Culture, 5);
+        TestCityYield(city.name+"CityHappinessYield", city, YieldType.Happiness, 6);
     }
 
     static public void TestCityYield(String testName, City testCity, YieldType yieldType, float expectedYield)
