@@ -59,6 +59,10 @@ public class Game
                 {
                     features.Add(FeatureType.River);
                 }
+                if(r == bottom/2 |q == right/2)
+                {
+
+                }
 
                 TerrainType terrainType = TerrainType.Ocean;
                 if(r == bottom/2 && q > left + 2 && q < right - 2 & (r != 0 | r != bottom | q != right | q != 0))
@@ -121,7 +125,7 @@ public class Game
 
 struct GameTests
 {
-    static public void SampleTest()
+    static public Game SampleTest()
     {
         Game game = new(10, 30);
         // GameBoard mainBoard;
@@ -147,6 +151,14 @@ struct GameTests
             if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1 | !tempDistrict.buildings.Contains(new Building("City Center")))
             {
                 Complain("player1CityDistrictInvalid");
+            }
+        }
+        foreach (Hex hex in game.mainGameBoard.gameHexDict.Keys)
+        {
+            if (game.mainGameBoard.gameHexDict[hex].district != null)
+            {
+                Console.Write(game.mainGameBoard.gameHexDict[hex].district.ourGameHex.hex.q +" ");
+                Console.WriteLine(game.mainGameBoard.gameHexDict[hex].district.ourGameHex.hex.r);
             }
         }
 
@@ -221,7 +233,10 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn(); //rework this somehow smart so when all turns ended we proc
 
-        //both scouts should now be spawned at city center TODO location check
+
+
+        Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
+        Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));
         game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 4, -9)], game.teamManager, false);
 
         game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 4, -9)], game.teamManager, false);
@@ -232,10 +247,11 @@ struct GameTests
         // Console.Write(game.playerDictionary[2].unitList[0].currentGameHex.hex.q+" ");
         // Console.WriteLine(game.playerDictionary[2].unitList[0].currentGameHex.hex.r);
 
-        //NEW LOCATION CHECK TODO
         Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
         Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));
 
+
+        return game;
     }
 
 
@@ -254,35 +270,6 @@ struct GameTests
         {
             Complain("PlayerRelations21 " + game.teamManager.GetRelationship(2, 1));
         }
-    }
-
-    static private void StartGameTestHelper(out Game game, out GameBoard mainBoard)
-    {
-        int top = 0;
-        int bottom = 10;
-        int left = 0;
-        int right = 30;
-        Dictionary<int, Player> playerDictionary = new();
-        TurnManager turnManager = new TurnManager();
-        TeamManager teamManager = new TeamManager();
-        game = new Game(playerDictionary, turnManager, teamManager);
-        turnManager.game = game;
-        mainBoard = new GameBoard(game, bottom, right);
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        for (int r = top; r <= bottom; r++){
-            for (int q = left; q <= right; q++){
-                if(r == bottom/2 && q > left + 2 && q < right - 2)
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, TerrainType.Mountain, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-                else
-                {
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, TerrainType.Flat, TerrainTemperature.Grassland, new HashSet<FeatureType>()));
-                }
-            }
-        }
-        mainBoard.gameHexDict = gameHexDict;
-        game.mainGameBoard = mainBoard;
     }
 
     public enum YieldType{

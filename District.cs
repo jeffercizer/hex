@@ -15,6 +15,7 @@ public class District
         
         this.ourGameHex = ourGameHex;
         ourGameHex.ClaimHex(ourCity.teamNum);
+        ourGameHex.district = this;
         foreach(Hex hex in ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
         {
             ourGameHex.ourGameBoard.gameHexDict[hex].TryClaimHex(ourCity.teamNum);
@@ -30,6 +31,7 @@ public class District
         buildings = new();        
         this.ourGameHex = ourGameHex;
         ourGameHex.ClaimHex(ourCity.teamNum);
+        ourGameHex.district = this;
         foreach(Hex hex in ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
         {
             ourGameHex.ourGameBoard.gameHexDict[hex].TryClaimHex(ourCity.teamNum);
