@@ -7,26 +7,27 @@ using System.Data;
 [Serializable]
 public class Building
 {
-    public District ourDistrict;
+    public String name;
+    public District? ourDistrict;
     public List<BuildingEffect> buildingEffects;
-    public int baseBuildCost;
-    public int buildCost;
-    public int baseGoldCost;
-    public int goldCost;
-    public int baseMaintenanceCost;
-    public int maintenanceCost;
-    public int baseFoodYield;
-    public int foodYield;
-    public int baseProductionYield;
-    public int production;
-    public int baseGoldYield;
-    public int goldYield;
-    public int baseScienceYield;
-    public int scienceYield;
-    public int baseCultureYield;
-    public int cultureYield;
-    public int baseHappinessYield;
-    public int happinessYield;
+    public float baseBuildCost;
+    public float buildCost;
+    public float baseGoldCost;
+    public float goldCost;
+    public float baseMaintenanceCost;
+    public float maintenanceCost;
+    public float baseFoodYield;
+    public float foodYield;
+    public float baseProductionYield;
+    public float productionYield;
+    public float baseGoldYield;
+    public float goldYield;
+    public float baseScienceYield;
+    public float scienceYield;
+    public float baseCultureYield;
+    public float cultureYield;
+    public float baseHappinessYield;
+    public float happinessYield;
 
     public Building(String name)
     {
@@ -35,10 +36,10 @@ public class Building
         //LOAD INFORMATION FROM XML USING NAME
         //So far we have requested
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
-        baseBuildCost = 100;
+        baseBuildCost = 15;
         baseGoldCost = 50;
         baseMaintenanceCost = 1;
-        baseFoodYield = 1;
+        baseFoodYield = 2;
         baseProductionYield = 2;
         baseGoldYield = 3;
         baseScienceYield = 4;
@@ -51,10 +52,10 @@ public class Building
         this.ourDistrict = ourDistrict;
         buildingEffects = new();
         //LOAD INFORMATION FROM XML USING NAME
-        baseBuildCost = 100;
+        baseBuildCost = 15;
         baseGoldCost = 50;
         baseMaintenanceCost = 1;
-        baseFoodYield = 1;
+        baseFoodYield = 2;
         baseProductionYield = 2;
         baseGoldYield = 3;
         baseScienceYield = 4;
@@ -68,7 +69,7 @@ public class Building
         ourDistrict.ourCity.RecalculateYields();
     }
 
-    public RecalculateYields()
+    public void RecalculateYields()
     {
         //reset all Yields to base
         buildCost = baseBuildCost;

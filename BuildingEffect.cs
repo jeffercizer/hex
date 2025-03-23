@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-enum BuildingEffectType
+public enum BuildingEffectType
 {
     BuildCost,
     GoldCost,
@@ -17,25 +17,17 @@ enum BuildingEffectType
     HappinessYield    
 }
 
-enum EffectOperation
-{
-    Multiply,
-    Divide,
-    Add,
-    Subtract
-}
-
 [Serializable]
 public class BuildingEffect
 {
-    public BuildingEffect(BuildingEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority, Action<object> applyFunction = null)
+    public BuildingEffect(BuildingEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority, Action<object> applyFunction)
     {
         this.effectType = effectType;
         this.effectOperation = effectOperation;
         this.effectMagnitude = effectMagnitude;
         this.priority = priority;
     }
-    public BuildingEffect(Action<object> applyFunction, int priority)
+    public BuildingEffect(Action<Building> applyFunction, int priority)
     {
         //default values
         this.effectType = BuildingEffectType.BuildCost;
@@ -45,11 +37,11 @@ public class BuildingEffect
         this.priority = priority;
         this.applyFunction = applyFunction;
     }
-    public EffectType effectType;
+    public BuildingEffectType effectType;
     public EffectOperation effectOperation;
     public float effectMagnitude;
     public int priority;
-    public Action<object> ApplyFunction;
+    public Action<Building>? applyFunction;
 
     public void ApplyEffect(Building building)
     {

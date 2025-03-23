@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-enum EffectType
+public enum EffectType
 {
     MovementSpeed,
     MovementCosts,
@@ -13,7 +13,7 @@ enum EffectType
     CombatStrength
 }
 
-enum EffectOperation
+public enum EffectOperation
 {
     Multiply,
     Divide,

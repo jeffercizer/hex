@@ -17,8 +17,23 @@ public class GameBoard
         gameHexDict = new();
         Random rnd = new Random();
         for (int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
-            for (int q = left - r_offset; q <= right - r_offset; q++){
+            for (int q = left; q <= right; q++){
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+            }
+        }
+    }
+
+    public GameBoard(Game game, int bottom, int right)
+    {
+        this.game = game;
+        this.top = 0;
+        this.bottom = bottom;
+        this.left = 0;
+        this.right = right;
+        gameHexDict = new();
+        Random rnd = new Random();
+        for (int r = 0; r <= bottom; r++){
+            for (int q = 0; q <= right; q++){
                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
             }
         }

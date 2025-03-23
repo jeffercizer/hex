@@ -7,13 +7,16 @@ using System.Data;
 [Serializable]
 public class TurnManager
 {
+    public TurnManager()
+    {
+    }
     public TurnManager(Game game)
     {
       this.game = game;
     }
-    public Game game;
+    public Game? game;
 
-    public int currentTurn = 0;
+    public int currentTurn = 1;
 
     public void StartNewTurn()
     {
@@ -22,9 +25,9 @@ public class TurnManager
         {
             player.OnTurnStarted(currentTurn);
         }
-        foreach (GameBoard gameBoard in game.mainGameBoard)
+        if(game.mainGameBoard != null)
         {
-            gameBoard.OnTurnStarted(currentTurn);
+            game.mainGameBoard.OnTurnStarted(currentTurn);
         }
     }
     public void EndCurrentTurn(int teamNum)
@@ -33,9 +36,9 @@ public class TurnManager
         {
             player.OnTurnEnded(currentTurn);
         }
-        foreach (GameBoard gameBoard in game.mainGameBoard)
+        if(game.mainGameBoard != null & teamNum == 0)
         {
-            gameBoard.OnTurnStarted(currentTurn);
-        }
+            game.mainGameBoard.OnTurnEnded(currentTurn);
+        }    
     }
 }

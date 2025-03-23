@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
-enum TerrainMoveType
+public enum TerrainMoveType
 {
     Flat,
     Rough,
@@ -21,14 +21,37 @@ enum TerrainMoveType
 [Serializable]
 public class Unit
 {
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
+
+    public Unit(String name, GameHex currentGameHex, int teamNum)
     {
         this.name = name;
-        this.movementCosts = movementCosts;
         this.currentGameHex = currentGameHex;
+        this.teamNum = teamNum;
+        //LOAD FROM XML BASED ON NAME
+        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
+            { TerrainMoveType.Flat, 1 },
+            { TerrainMoveType.Rough, 2 },
+            { TerrainMoveType.Mountain, 9999 },
+            { TerrainMoveType.Coast, 1 },
+            { TerrainMoveType.Ocean, 1 },
+            { TerrainMoveType.Forest, 1 },
+            { TerrainMoveType.River, 0 },
+            { TerrainMoveType.Road, 0.5f },
+            { TerrainMoveType.Embark, 0 },
+            { TerrainMoveType.Disembark, 0 },
+        };
+        this.movementCosts = scoutMovementCosts;
+        currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
     }
 
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, Dictionary<TerrainMoveType, float> sightCosts, GameHex currentGameHex, float sightRange, float movementSpeed, float combatStrength, int teamNum)
+    // public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
+    // {
+    //     this.name = name;
+    //     this.movementCosts = movementCosts;
+    //     this.currentGameHex = currentGameHex;
+    // }
+
+    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, Dictionary<TerrainMoveType, float> sightCosts, GameHex currentGameHex, float sightRange, float movementSpeed, float combatStrength, float maintenanceCost, int teamNum)
     {
         this.name = name;
         this.baseMovementCosts = movementCosts;
@@ -43,6 +66,9 @@ public class Unit
         this.teamNum = teamNum;
         this.baseCombatStrength = combatStrength;
         this.combatStrength = combatStrength;
+        this.baseMaintenanceCost = maintenanceCost;
+        this.maintenanceCost = maintenanceCost;
+        currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
     }
 
     public String name;
@@ -59,25 +85,28 @@ public class Unit
     public float currentHealth = 100.0f;
     public float baseCombatStrength = 10.0f;
     public float combatStrength = 10.0f;
-    public int teamNum = 1;
-    public List<Hex>? currentPath;
-    public List<Hex> ourVisibleHexes;
-    public List<Effect> ourEffects;
+    public float baseMaintenanceCost = 1.0f;
+    public float maintenanceCost = 1.0f;
+    public int teamNum;
+    public List<Hex>? currentPath = new();
+    public List<Hex> ourVisibleHexes = new();
+    public List<Effect> ourEffects = new();
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
     {
         remainingMovement = movementSpeed;
-        Console.WriteLine($"Unit ({name}): Started turn {turnNumber}.");
+        //Console.WriteLine($"Unit ({name}): Started turn {turnNumber}.");
     }
 
     public void OnTurnEnded(int turnNumber)
     {
+        currentGameHex.ourGameBoard.game.playerDictionary[teamNum].AddGold(maintenanceCost);
         if(remainingMovement > 0.0f & currentPath.Any())
         {
             MoveTowards(currentGameHex.ourGameBoard.gameHexDict[currentPath.Last()], currentGameHex.ourGameBoard.game.teamManager ,isTargetEnemy);
         }
-        Console.WriteLine($"Unit ({name}): Ended turn {turnNumber}.");
+        //Console.WriteLine($"Unit ({name}): Ended turn {turnNumber}.");
     }
     
     public void RecalculateEffects()
@@ -88,6 +117,7 @@ public class Unit
         movementSpeed = baseMovementSpeed;
         sightRange = baseSightRange;
         combatStrength = baseCombatStrength;
+        maintenanceCost = baseMaintenanceCost;
         //also order all effects, multiply/divide after add/subtract priority
         //0 means it is applied first 100 means it is applied "last" (highest number last)
         //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room

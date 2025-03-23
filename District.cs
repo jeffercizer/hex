@@ -10,12 +10,27 @@ public class District
     public District(GameHex ourGameHex, Building initialBuilding, bool isCityCenter, bool isUrban, City ourCity)
     {
         buildings = new();
-        buildings.Add(initialBuilding);
+        AddBuilding(initialBuilding);
         initialBuilding.ourDistrict = this;
         
         this.ourGameHex = ourGameHex;
         ourGameHex.ClaimHex(ourCity.teamNum);
-        foreach(Hex hex in ourGameHex.hex.WrappedNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
+        foreach(Hex hex in ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
+        {
+            ourGameHex.ourGameBoard.gameHexDict[hex].TryClaimHex(ourCity.teamNum);
+        }
+        this.isCityCenter = isCityCenter;
+        this.isUrban = isUrban;
+        this.ourCity = ourCity;
+        ourCity.RecalculateYields();
+    }
+
+    public District(GameHex ourGameHex, bool isCityCenter, bool isUrban, City ourCity)
+    {
+        buildings = new();        
+        this.ourGameHex = ourGameHex;
+        ourGameHex.ClaimHex(ourCity.teamNum);
+        foreach(Hex hex in ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
         {
             ourGameHex.ourGameBoard.gameHexDict[hex].TryClaimHex(ourCity.teamNum);
         }
@@ -41,6 +56,7 @@ public class District
     public void AddBuilding(Building building)
     {
         buildings.Add(building);
+        ourCity.citySize += 1;
         ourCity.RecalculateYields();
     }
 }

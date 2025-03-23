@@ -26,10 +26,10 @@ public enum FeatureType
 public enum TerrainTemperature
 {
     Desert,
-    Grassland,
     Plains,
+    Grassland,
     Tundra,
-    Artic
+    Arctic
 }
 
 [Serializable]
@@ -71,7 +71,7 @@ public class GameHex
     public int ownedBy;
     public HashSet<FeatureType> featureSet = new();
     public List<Unit> unitsList = new();
-    public District district;
+    public District? district;
 
     public void OnTurnStarted(int turnNumber)
     {
@@ -113,7 +113,7 @@ public class GameHex
     //if flexible is true look for adjacent spaces to place
     public bool SpawnUnit(Unit newUnit, bool stackable, bool flexible)
     {
-        if(!stackable & unitsList.Any() | newUnit.movementCosts[(TerrainMoveType)terrainType] > 100) //if they cant stack and their are units or the hex is invalid for this unit
+        if((!stackable & unitsList.Any()) | newUnit.movementCosts[(TerrainMoveType)terrainType] > 100) //if they cant stack and their are units or the hex is invalid for this unit
         {
             if (flexible)
             {

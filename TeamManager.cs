@@ -1,32 +1,21 @@
 using System;
 using System.Collections.Generic;
 
-public class Team
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-}
-
 [Serializable]
 public class TeamManager
 {
-    private Dictionary<int, Team> teams = new Dictionary<int, Team>();
     private Dictionary<int, Dictionary<int, int>> relationships = new Dictionary<int, Dictionary<int, int>>();
 
-    public void AddTeam(int id, string name)
+    public void AddTeam(int newTeamNum, int defaultRelationship)
     {
-        teams[id] = new Team { Id = id, Name = name };
-        relationships[id] = new Dictionary<int, int>();
-        foreach (int teamId in relationships.Keys)
+        Dictionary<int, int> newTeam = new();
+        foreach(int oldTeamNum in relationships.Keys)
         {
-            if (teamId != id)
-            {
-                relationships[id][teamId] = 50;
-                relationships[teamId][id] = 50; // Symmetric relationship to start
-            }
+            relationships[oldTeamNum].Add(newTeamNum, defaultRelationship);
+            newTeam.Add(oldTeamNum, defaultRelationship);
         }
+        relationships.Add(newTeamNum, newTeam);
     }
-
     public void SetRelationship(int team1, int team2, int relationship)
     {
         if (!relationships.ContainsKey(team1) || !relationships.ContainsKey(team2))

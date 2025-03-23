@@ -20,3 +20,10 @@ C:\Users\jeffe\Desktop\Stuff\c#\obj\Debug\net8.0\c#.sourcelink.json
 C:\Users\jeffe\Desktop\Stuff\c#\obj\Debug\net8.0\c#.dll
 C:\Users\jeffe\Desktop\Stuff\c#\obj\Debug\net8.0\refint\c#.dll
 C:\Users\jeffe\Desktop\Stuff\c#\obj\Debug\net8.0\c#.pdb
+C:\Users\jeffe\Desktop\Stuff\c#\bin\Debug\net8.0\c#.exe
+C:\Users\jeffe\Desktop\Stuff\c#\bin\Debug\net8.0\c#.deps.json
+C:\Users\jeffe\Desktop\Stuff\c#\bin\Debug\net8.0\c#.runtimeconfig.json
+C:\Users\jeffe\Desktop\Stuff\c#\bin\Debug\net8.0\c#.dll
+C:\Users\jeffe\Desktop\Stuff\c#\bin\Debug\net8.0\c#.pdb
+C:\Users\jeffe\Desktop\Stuff\c#\obj\Debug\net8.0\c#.genruntimeconfig.cache
+C:\Users\jeffe\Desktop\Stuff\c#\obj\Debug\net8.0\ref\c#.dll

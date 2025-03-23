@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using System.Runtime;
 
 struct Point
 {
@@ -77,11 +78,11 @@ public struct Hex
         Hex target = Add(Hex.Direction(direction));
         if(target.q < left)
         {
-            return(new Hex(right, target.r, target.s));
+            return(new Hex(right, target.r, -right-target.r));
         }
         else if(target.q > right)
         {
-            return(new Hex(left, target.r, target.s));
+            return(new Hex(left, target.r, -left-target.r));
         }
         else
         {
@@ -618,10 +619,10 @@ struct Tests
 }
 
 
-struct HexMain
-{
-    static public void Main()
-    {
-        Tests.TestAll();
-    }
-}
+// struct HexMain
+// {
+//     static public void Main()
+//     {
+//         Tests.TestAll();
+//     }
+// }
