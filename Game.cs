@@ -7,6 +7,94 @@ using System.Data;
 [Serializable]
 public class Game
 {
+    public Game(String mapName)
+    {
+        int top = 0;
+        int left = 0;
+        this.playerDictionary = new();
+        this.turnManager = new TurnManager();
+        this.teamManager = new TeamManager();
+        turnManager.game = this;
+        
+        Dictionary<Hex, GameHex> gameHexDict = new();
+        String mapData = File.ReadAllText("path_to_file.txt");
+        List<String> lines = mapData.Split('\n').ToList();
+        //file format is 111 111 (each 3 numbers are a single hex)
+        // first number is terraintype, second number is terraintemp, last number is features 1234 are singles and 6789 are combos 
+        int r = 0;
+        int q = 0;
+        foreach (String line in lines)
+        {
+            q = 0;
+            foreach (String cell in line.Split(' ').ToList())
+            {
+                TerrainType terrainType = (TerrainType)cell[0];
+                TerrainTemperature terrainTemperature = (TerrainTemperature)cell[1];
+                List<FeatureType> features = new();
+                //cell[2] == 0 means no features
+                if(cell[2] == 1)
+                {
+                    features.Add(FeatureType.Forest);
+                }
+                if(cell[2] == 2)
+                {
+                    features.Add(FeatureType.River);
+                }
+                if(cell[2] == 3)
+                {
+                    features.Add(FeatureType.Road);
+                }
+                if(cell[2] == 4)
+                {
+                    features.Add(FeatureType.Coral);
+                }
+                if(cell[2] == 5)
+                {
+                    //openslot //TODO
+                }
+                if(cell[2] == 6)
+                {
+                    features.Add(FeatureType.Forest);
+                    features.Add(FeatureType.River);
+                }
+                if(cell[2] == 7)
+                {
+                    features.Add(FeatureType.River);
+                    features.Add(FeatureType.Road);
+                }
+                if(cell[2] == 8)
+                {
+                    features.Add(FeatureType.Forest);
+                    features.Add(FeatureType.Road);
+                }
+                if(cell[2] == 9)
+                {
+                    features.Add(FeatureType.Forest);
+                    features.Add(FeatureType.River);
+                    features.Add(FeatureType.Road);
+                }
+                if(cell[2] == 9)
+                {
+                    features.Add(FeatureType.Forest);
+                    features.Add(FeatureType.River);
+                    features.Add(FeatureType.Road);
+                }
+                //fourth number is for resources
+                if(cell[3] == 1)
+                {
+                    features.Add(FeatureType.Resource);
+                }
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemp, features));
+                q += 1;
+            }
+            r += 1;
+        }
+        int bottom = r; //CHECK
+        int right = q; //CHECK
+        GameBoard mainBoard = new GameBoard(this, bottom, right);
+        mainBoard.gameHexDict = gameHexDict;
+        this.mainGameBoard = mainBoard;
+    }
     public Game(int boardHeight, int boardWidth)
     {
         int top = 0;
