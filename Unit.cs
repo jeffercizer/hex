@@ -59,6 +59,7 @@ public class Unit
         this.baseSightCosts = sightCosts;
 
         currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
+        AddVision();
     }
 
     // public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
@@ -86,6 +87,7 @@ public class Unit
         this.baseMaintenanceCost = maintenanceCost;
         this.maintenanceCost = maintenanceCost;
         currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
+        AddVision();
     }
 
     public String name;
@@ -212,20 +214,7 @@ public class Unit
     public void UpdateVision()
     {
         RemoveVision();
-        ourVisibleHexes = CalculateVision().Keys.ToList();
-        foreach (Hex hex in ourVisibleHexes)
-        {
-            currentGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
-            int count;
-            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
-            {
-                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
-            }
-            else
-            {
-                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
-            }
-        }
+        AddVision();
     }
 
     public void RemoveVision()
@@ -246,6 +235,24 @@ public class Unit
             }
         }
         ourVisibleHexes.Clear();
+    }
+
+    public void AddVision()
+    {
+        ourVisibleHexes = CalculateVision().Keys.ToList();
+        foreach (Hex hex in ourVisibleHexes)
+        {
+            currentGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+            int count;
+            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            {
+                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
+            }
+            else
+            {
+                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
+            }
+        }
     }
 
     public Dictionary<Hex, float> CalculateVision()
