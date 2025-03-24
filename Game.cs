@@ -17,7 +17,7 @@ public class Game
         turnManager.game = this;
         
         Dictionary<Hex, GameHex> gameHexDict = new();
-        String mapData = File.ReadAllText("path_to_file.txt");
+        String mapData = File.ReadAllText(mapName+".map");
         List<String> lines = mapData.Split('\n').ToList();
         //file format is 111 111 (each 3 numbers are a single hex)
         // first number is terraintype, second number is terraintemp, last number is features 1234 are singles and 6789 are combos 
@@ -26,8 +26,16 @@ public class Game
         foreach (String line in lines)
         {
             q = 0;
-            foreach (String cell in line.Split(' ').ToList())
+            Queue<String> cells = new Queue(line.Split(' ').ToList());
+            int offset = r>>1;
+            offset = (offset % cells.Count + cells.Count) % cells.Count; //negatives and overflow
+            for (int i = 0; i < offset; i++)
             {
+                queue.Enqueue(queue.Dequeue());
+            }
+            foreach (String cell in cells)
+            {
+                
                 TerrainType terrainType = (TerrainType)cell[0];
                 TerrainTemperature terrainTemperature = (TerrainTemperature)cell[1];
                 List<FeatureType> features = new();
