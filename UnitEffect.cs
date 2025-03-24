@@ -24,6 +24,7 @@ public enum EffectOperation
 [Serializable]
 public class UnitEffect
 {
+    //priority is 0-100 (100 most important)
     public UnitEffect(UnitEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
     {
         this.effectType = effectType;
@@ -47,7 +48,7 @@ public class UnitEffect
     public int priority;
     public Action<Building>? applyFunction;
 
-    public void ApplyEffect(Unit unit)
+    public void Apply(Unit unit)
     {
         if (applyFunction != null)
         {
