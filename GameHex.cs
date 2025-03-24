@@ -13,7 +13,14 @@ public enum TerrainType
     Ocean
 }
 
-
+public enum TerrainTemperature
+{
+    Desert,
+    Plains,
+    Grassland,
+    Tundra,
+    Arctic
+}
 
 public enum FeatureType
 {
@@ -24,14 +31,7 @@ public enum FeatureType
     Resource
 }
 
-public enum TerrainTemperature
-{
-    Desert,
-    Plains,
-    Grassland,
-    Tundra,
-    Arctic
-}
+
 
 [Serializable]
 public class GameHex
