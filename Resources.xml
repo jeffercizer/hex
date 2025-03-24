@@ -1,7 +1,7 @@
 <Resources>
-  <Resource Name="Iron" Food="0" Production="3" Gold="1" Happiness="0"/>
-  <Resource Name="Horses" Food="0" Production="3" Gold="0" Happiness="1"/>
-  <Resource Name="Dates" Food="2" Production="0" Gold="0" Happiness="2" />
-  <Resource Name="Sheep" Food="2" Production="2" Gold="0" Happiness="0"/>
-  <Resource Name="Wheat" Food="3" Production="0" Gold="0" Happiness="1"/>
+  <Resource Name="Iron" Food="0" Production="3" Gold="1" Science="0" Culture="0" Happiness="0"/>
+  <Resource Name="Horses" Food="0" Production="3" Gold="0" Science="0" Culture="0" Happiness="1"/>
+  <Resource Name="Dates" Food="2" Production="0" Gold="0" Science="0" Culture="0" Happiness="2" />
+  <Resource Name="Sheep" Food="2" Production="2" Gold="0" Science="0" Culture="0" Happiness="0"/>
+  <Resource Name="Wheat" Food="3" Production="0" Gold="0" Science="0" Culture="0" Happiness="1"/>
 </Resources>
