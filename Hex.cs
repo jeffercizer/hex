@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Data;
 using System.Runtime;
 
-struct Point
+public struct Point
 {
     public Point(double x, double y)
     {
@@ -161,7 +161,7 @@ public struct Hex
 
 }
 
-struct FractionalHex
+public struct FractionalHex
 {
     public FractionalHex(double q, double r, double s)
     {
@@ -221,7 +221,7 @@ struct FractionalHex
 
 }
 
-struct OffsetCoord
+public struct OffsetCoord
 {
     public OffsetCoord(int col, int row)
     {
@@ -284,7 +284,7 @@ struct OffsetCoord
 
 }
 
-struct DoubledCoord
+public struct DoubledCoord
 {
     public DoubledCoord(int col, int row)
     {
@@ -329,7 +329,7 @@ struct DoubledCoord
 
 }
 
-struct Orientation
+public struct Orientation
 {
     public Orientation(double f0, double f1, double f2, double f3, double b0, double b1, double b2, double b3, double start_angle)
     {
@@ -354,7 +354,7 @@ struct Orientation
     public readonly double start_angle;
 }
 
-struct Layout
+public struct Layout
 {
     public Layout(Orientation orientation, Point size, Point origin)
     {
@@ -414,7 +414,7 @@ struct Layout
 // Tests
 
 
-struct Tests
+public struct Tests
 {
 
     static public void EqualHex(String name, Hex a, Hex b)

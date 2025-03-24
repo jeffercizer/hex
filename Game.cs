@@ -17,7 +17,7 @@ public class Game
         turnManager.game = this;
         GameBoard mainBoard = new GameBoard(this, 0, 0);
         Dictionary<Hex, GameHex> gameHexDict = new();
-        String mapData = File.ReadAllText(mapName+".map");
+        String mapData = System.IO.File.ReadAllText(mapName+".map");
         List<String> lines = mapData.Split('\n').ToList();
         //file format is 1110 1110 (each 4 numbers are a single hex)
         // first number is terraintype, second number is terraintemp, last number is features, last is resource type
@@ -36,8 +36,8 @@ public class Game
             }
             foreach (String cell in cells)
             {
-                TerrainType terrainType = (TerrainType)cell[0];
-                TerrainTemperature terrainTemperature = (TerrainTemperature)cell[1];
+                TerrainType terrainType = (TerrainType)int.Parse(cell[0].ToString());
+                TerrainTemperature terrainTemperature = (TerrainTemperature)int.Parse(cell[1].ToString());
                 HashSet<FeatureType> features = new();
                 //cell[2] == 0 means no features
                 if(cell[2] == 1)
@@ -88,7 +88,9 @@ public class Game
                     features.Add(FeatureType.Road);
                 }
                 //fourth number is for resources
-                ResourceType resource = (ResourceType)cell[3];
+                ResourceType resource = (ResourceType)int.Parse(cell[3].ToString());
+
+                //Console.WriteLine(terrainTemperature);
                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, (ResourceType)0, features, new List<Unit>(), null));
                 q += 1;
             }
@@ -363,10 +365,18 @@ struct GameTests
         return game;
     }
 
+    static public Game MapLoad()
+    {
+        Game game = new Game("sample");
+        game.mainGameBoard.PrintGameBoard();
+        return new Game("sample");
+    }
+
 
     static public void TestAll()
     {
-        GameTests.SampleTest();
+        //GameTests.SampleTest();
+        GameTests.MapLoad();
     }
 
     static private void TestPlayerRelations(Game game)
