@@ -40,6 +40,11 @@ public class Unit
             { TerrainMoveType.Embark, 0 },
             { TerrainMoveType.Disembark, 0 },
         };
+        Action<Unit> scoutAbility = (unit) =>
+        {
+            
+        };
+        AddEffect(new UnitEffect(scoutAbility, 100));
         this.movementCosts = scoutMovementCosts;
 
         this.baseMovementCosts = movementCosts;
@@ -109,8 +114,20 @@ public class Unit
     public int teamNum;
     public List<Hex>? currentPath = new();
     public List<Hex> ourVisibleHexes = new();
-    public List<Effect> ourEffects = new();
+    public List<UnitEffect> ourEffects = new();
+    public List<UnitEffect> ourAbilities = new();
     public bool isTargetEnemy;
+
+    public void AddEffect(UnitEffect effect)
+    {
+        ourEffects.Add(effect);
+        RecalculateVision();
+    }
+
+    public void AddAbility(UnitEffect ability)
+    {
+        ourAbilities.Add(ability);
+    }
 
     public void OnTurnStarted(int turnNumber)
     {
@@ -149,7 +166,7 @@ public class Unit
         int priority;
         while(orderedEffects.TryDequeue(out effect, out priority))
         {
-            effect.ApplyEffect(this);
+            effect.Apply(this);
         }
     }
 
