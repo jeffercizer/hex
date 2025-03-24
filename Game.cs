@@ -30,7 +30,7 @@ public class Game
             Queue<String> cells = new Queue(line.Split(' ').ToList());
             int offset = r>>1;
             offset = (offset % cells.Count + cells.Count) % cells.Count; //negatives and overflow
-            for (int i = 0; i < offset; i++)
+            for (int i = 1; i < offset; i++)
             {
                 cells.Enqueue(cells.Dequeue());
             }
