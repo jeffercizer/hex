@@ -20,7 +20,8 @@ public enum FeatureType
     Forest,
     River,
     Road,
-    Coral
+    Coral,
+    Resource
 }
 
 public enum TerrainTemperature
