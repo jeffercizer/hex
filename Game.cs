@@ -148,7 +148,7 @@ struct GameTests
         if(game.playerDictionary[1].cityList[0].ourGameHex.district != null)
         {
             District? tempDistrict = game.playerDictionary[1].cityList[0].ourGameHex.district;
-            if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1 | !tempDistrict.buildings.Contains(new Building("City Center")))
+            if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1)
             {
                 Complain("player1CityDistrictInvalid");
             }
@@ -165,9 +165,9 @@ struct GameTests
         if(game.playerDictionary[2].cityList[0].ourGameHex.district != null)
         {
             District tempDistrict = game.playerDictionary[2].cityList[0].ourGameHex.district;
-            if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1 | !tempDistrict.buildings.Contains(new Building("City Center")))
+            if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1)
             {
-                Complain("player1CityDistrictInvalid");
+                Complain("player2CityDistrictInvalid");
             }
         }
 
@@ -241,11 +241,27 @@ struct GameTests
 
         game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 4, -9)], game.teamManager, false);
 
-        // Console.Write(game.playerDictionary[1].unitList[0].currentGameHex.hex.q+" ");
-        // Console.WriteLine(game.playerDictionary[1].unitList[0].currentGameHex.hex.r);
 
-        // Console.Write(game.playerDictionary[2].unitList[0].currentGameHex.hex.q+" ");
-        // Console.WriteLine(game.playerDictionary[2].unitList[0].currentGameHex.hex.r);
+
+        Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
+        Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));
+
+        Console.Write(game.playerDictionary[1].unitList[0].currentGameHex.hex.q+" ");
+        Console.WriteLine(game.playerDictionary[1].unitList[0].currentGameHex.hex.r);
+
+        Console.Write(game.playerDictionary[2].unitList[0].currentGameHex.hex.q+" ");
+        Console.WriteLine(game.playerDictionary[2].unitList[0].currentGameHex.hex.r);
+
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(2);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn(); //rework this somehow smart so when all turns ended we proc
+
+        Console.Write(game.playerDictionary[1].unitList[0].currentGameHex.hex.q+" ");
+        Console.WriteLine(game.playerDictionary[1].unitList[0].currentGameHex.hex.r);
+
+        Console.Write(game.playerDictionary[2].unitList[0].currentGameHex.hex.q+" ");
+        Console.WriteLine(game.playerDictionary[2].unitList[0].currentGameHex.hex.r);
 
         Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
         Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));

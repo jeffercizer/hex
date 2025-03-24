@@ -69,7 +69,6 @@ public class City
 
     private District AddCityCenter()
     {
-        District district = new District(ourGameHex, true, true, this);
         Building building = new Building("City Center");
         Action<Building> adjacentDistrictsGoldFunction = (building) =>
         {
@@ -85,10 +84,9 @@ public class City
             building.goldYield += counter;
         };
         BuildingEffect effect = new BuildingEffect(adjacentDistrictsGoldFunction, 5);
+        District district = new District(ourGameHex, building, true, true, this);
         building.ourDistrict = district;
         building.AddEffect(effect);
-
-        district.AddBuilding(building);
         districts.Add(district);
         return district;
     }
