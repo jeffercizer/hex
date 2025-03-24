@@ -211,6 +211,7 @@ public class Game
     public Dictionary<int, Player> playerDictionary;
     public TeamManager? teamManager;
     public TurnManager turnManager;
+    public ResourceList resourceList = new();
 }
 
 // Tests
