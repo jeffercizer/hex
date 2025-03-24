@@ -28,7 +28,7 @@ public class District
             ourGameHex.AddTerrainFeature(FeatureType.Road);
         }
         ourCity.RecalculateYields();
-        UpdateVision();
+        AddVision();
     }
 
     public List<Building> buildings;
@@ -56,20 +56,7 @@ public class District
     public void UpdateVision()
     {
         RemoveVision();
-        ourVisibleHexes = ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right);
-        foreach (Hex hex in ourVisibleHexes)
-        {
-            ourGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
-            int count;
-            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
-            {
-                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
-            }
-            else
-            {
-                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
-            }
-        }
+        AddVision();
     }
 
     public void RemoveVision()
@@ -90,5 +77,22 @@ public class District
             }
         }
         ourVisibleHexes.Clear();
+    }
+    public void AddVision()
+    {
+        ourVisibleHexes = ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right);
+        foreach (Hex hex in ourVisibleHexes)
+        {
+            ourGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+            int count;
+            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            {
+                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
+            }
+            else
+            {
+                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
+            }
+        }
     }
 }
