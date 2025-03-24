@@ -42,7 +42,7 @@ public class Unit
         };
         Action<Unit> scoutAbility = (unit) =>
         {
-            
+            Console.WriteLine("We Used Scout Ability");
         };
         AddEffect(new UnitEffect(scoutAbility, 100));
         this.movementCosts = scoutMovementCosts;
@@ -118,17 +118,6 @@ public class Unit
     public List<UnitEffect> ourAbilities = new();
     public bool isTargetEnemy;
 
-    public void AddEffect(UnitEffect effect)
-    {
-        ourEffects.Add(effect);
-        RecalculateVision();
-    }
-
-    public void AddAbility(UnitEffect ability)
-    {
-        ourAbilities.Add(ability);
-    }
-
     public void OnTurnStarted(int turnNumber)
     {
         remainingMovement = movementSpeed;
@@ -168,6 +157,7 @@ public class Unit
         {
             effect.Apply(this);
         }
+        UpdateVision();
     }
 
     public void AddEffect(Effect effect)
@@ -180,6 +170,11 @@ public class Unit
     {
         ourEffects.Remove(effect);
         RecalculateEffects();
+    }
+
+    public void AddAbility(UnitEffect ability)
+    {
+        ourAbilities.Add(ability);
     }
 
     public bool AttackTarget(GameHex targetGameHex, TeamManager teamManager)
