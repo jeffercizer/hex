@@ -250,6 +250,7 @@ public class City
     public Building GetRuralBuilding(Hex hex)
     {
         Building ruralBuilding;
+        //TODO
         switch (ourGameHex.ourGameBoard.gameHexDict[hex].terrainType)
         {
             case TerrainType.Flat:
