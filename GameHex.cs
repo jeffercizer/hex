@@ -31,6 +31,20 @@ public enum FeatureType
     Resource
 }
 
+public enum ResourceType
+{
+    Luxury,
+    Bonus,
+    City,
+    Iron,
+    Horses,
+    Coal,
+    Oil,
+    Uranium,
+    Lithium,
+    SciFi
+}
+
 
 
 [Serializable]
