@@ -37,7 +37,7 @@ public struct ResourceInfo
     public int Gold { get; set; }
 }
 
-public class ResourceList()
+public class ResourceLoader
 {
     Dictionary<ResourceType, ResourceInfo> resources;
     public ResourceList()
