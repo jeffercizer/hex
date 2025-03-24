@@ -76,6 +76,8 @@ public class ResourceLoader
                     Food = int.Parse(r.Attribute("Food").Value),
                     Production = int.Parse(r.Attribute("Production").Value),
                     Gold = int.Parse(r.Attribute("Gold").Value),
+                    Science = int.Parse(r.Attribute("Science").Value),
+                    Culture = int.Parse(r.Attribute("Culture").Value),
                     Happiness = int.Parse(r.Attribute("Happiness").Value)
                 }
             );
