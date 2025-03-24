@@ -83,10 +83,9 @@ public class City
             }
             building.goldYield += counter;
         };
-        BuildingEffect effect = new BuildingEffect(adjacentDistrictsGoldFunction, 5);
+        building.AddEffect(new BuildingEffect(adjacentDistrictsGoldFunction, 5));
         District district = new District(ourGameHex, building, true, true, this);
         building.ourDistrict = district;
-        building.AddEffect(effect);
         districts.Add(district);
         return district;
     }
