@@ -14,6 +14,7 @@ public enum ResourceType
     Uranium = 'U',
     Lithium = 'L',
     SciFi = 'S',
+    Jade = 'j',
     Wheat = 'w',
     Sheep = 's',
     Marble = 'm',
@@ -26,7 +27,7 @@ public enum ResourceType
     Silver = 'k',
     Camels = 'c',
     Coffee = 'e',
-    Cotton = 'j',
+    Cotton = 'q',
     Tobacco = 't',
 }
 
@@ -35,19 +36,31 @@ public struct ResourceInfo
     public int Food { get; set; }
     public int Production { get; set; }
     public int Gold { get; set; }
+    public int Science { get; set; }
+    public int Culture { get; set; }
     public int Happiness { get; set; }
 }
 
 public class ResourceLoader
 {
     Dictionary<ResourceType, ResourceInfo> resources;
+    Dictionary<ResourceType, ResourceEffect> resourceEffects;
+    public delegate void ResourceEffect(ResourceInfo resourceInfo);
+    
     public ResourceList()
     {
+        resourceEffects = new Dictionary<ResourceType, ResourceEffect>
+        {
+            { ResourceType.Silk, ApplySilkEffect },
+            { ResourceType.Jade, ApplyJadeEffect },
+            { ResourceType.Iron, ApplyIronEffect },
+            { ResourceType.Horses, ApplyHorsesEffect },
+            { ResourceType.Oil, ApplyOilEffect },
+        };
         string xmlPath = "Resources.xml";
         resources = LoadResourceData(xmlPath);
-        //example usage
-        //TileResource resource = TileResource.Wheat;
         //if (resources.TryGetValue(resource, out ResourceInfo info))
+        //ExecuteResourceEffect(resource);
     }
     public static Dictionary<TileResource, ResourceInfo> LoadResourceData(string xmlPath)
     {
@@ -68,5 +81,13 @@ public class ResourceLoader
             );
 
         return resourceData;
+    }
+    public void ExecuteResourceEffect(ResourceType resourceType)
+    {
+        if (resources.TryGetValue(resourceType, out ResourceInfo info) &&
+            resourceEffects.TryGetValue(resourceType, out ResourceEffect effect))
+        {
+            effect.Invoke(info);
+        }
     }
 }
