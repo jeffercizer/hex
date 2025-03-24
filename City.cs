@@ -145,7 +145,6 @@ public class City
 
     public bool ChangeTeam(int newTeamNum)
     {
-        
         foreach (District district in districts)
         {
             district.RemoveVision();
