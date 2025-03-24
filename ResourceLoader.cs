@@ -35,6 +35,7 @@ public struct ResourceInfo
     public int Food { get; set; }
     public int Production { get; set; }
     public int Gold { get; set; }
+    public int Happiness { get; set; }
 }
 
 public class ResourceLoader
@@ -61,7 +62,8 @@ public class ResourceLoader
                 {
                     Food = int.Parse(r.Attribute("Food").Value),
                     Production = int.Parse(r.Attribute("Production").Value),
-                    Gold = int.Parse(r.Attribute("Gold").Value)
+                    Gold = int.Parse(r.Attribute("Gold").Value),
+                    Happiness = int.Parse(r.Attribute("Happiness").Value)
                 }
             );
 
