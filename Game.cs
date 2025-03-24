@@ -19,8 +19,9 @@ public class Game
         Dictionary<Hex, GameHex> gameHexDict = new();
         String mapData = File.ReadAllText(mapName+".map");
         List<String> lines = mapData.Split('\n').ToList();
-        //file format is 111 111 (each 3 numbers are a single hex)
-        // first number is terraintype, second number is terraintemp, last number is features 1234 are singles and 6789 are combos 
+        //file format is 1110 1110 (each 4 numbers are a single hex)
+        // first number is terraintype, second number is terraintemp, last number is features, last is resource type
+        // 0, luxury, bonus, city, iron, horses, coal, oil, uranium, (lithium?), futurething
         int r = 0;
         int q = 0;
         foreach (String line in lines)
@@ -87,10 +88,7 @@ public class Game
                     features.Add(FeatureType.Road);
                 }
                 //fourth number is for resources
-                if(cell[3] == 1)
-                {
-                    features.Add(FeatureType.Resource);
-                }
+                ResourceType resource = (ResourceType)cell[3];
                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemp, features));
                 q += 1;
             }
