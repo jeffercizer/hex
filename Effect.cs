@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 
-public enum EffectType
+public enum UnitEffectType
 {
     MovementSpeed,
     MovementCosts,
@@ -24,10 +24,10 @@ public enum EffectOperation
 [Serializable]
 public class Effect
 {
-    public Effect(EffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
+    public Effect(UnitEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
     {
         this.effectType = effectType;
-        if(effectType == EffectType.MovementCosts | effectType == EffectType.SightCosts)
+        if(effectType == UnitEffectType.MovementCosts | effectType == UnitEffectType.SightCosts)
         {
             throw new InvalidOperationException("Must provide a TerrainMoveType if adjusting the movecost table");
         }
@@ -35,68 +35,77 @@ public class Effect
         this.effectMagnitude = effectMagnitude;
         this.priority = priority;
     }
-    public Effect(EffectType effectType, TerrainMoveType terrainMoveType, EffectOperation effectOperation, float effectMagnitude, int priority)
+    public Effect(Action<Unit> applyFunction, int priority)
     {
         this.effectType = effectType;
         this.effectOperation = effectOperation;
         this.effectMagnitude = effectMagnitude;
         this.terrainMoveType = terrainMoveType;
         this.priority = priority;
+        this.applyFunction = applyFunction;
     }
-    public EffectType effectType;
+    public UnitEffectType effectType;
     public EffectOperation effectOperation;
     public TerrainMoveType terrainMoveType;
     public float effectMagnitude;
     public int priority;
+    public Action<Building>? applyFunction;
 
     public void ApplyEffect(Unit unit)
     {
-        if(effectType == EffectType.MovementSpeed)
+        if (applyFunction != null)
         {
-            ApplyOperation(ref unit.movementSpeed);
+            applyFunction(unit);
         }
-        else if(effectType == EffectType.SightRange)
+        else
         {
-            ApplyOperation(ref unit.sightRange);
-        }
-        else if(effectType == EffectType.SightRange)
-        {
-            ApplyOperation(ref unit.combatStrength);
-        }
-        else if(effectType == EffectType.MovementCosts)
-        {
-            switch (effectOperation)
+            if(effectType == UnitEffectType.MovementSpeed)
             {
-                case EffectOperation.Multiply:
-                    unit.movementCosts[terrainMoveType] *= effectMagnitude;
-                    break;
-                case EffectOperation.Divide:
-                    unit.movementCosts[terrainMoveType] /= effectMagnitude;
-                    break;
-                case EffectOperation.Add:
-                    unit.movementCosts[terrainMoveType] += effectMagnitude;
-                    break;
-                case EffectOperation.Subtract:
-                    unit.movementCosts[terrainMoveType] -= effectMagnitude;
-                    break;
+                ApplyOperation(ref unit.movementSpeed);
             }
-        }
-        else if(effectType == EffectType.SightCosts)
-        {
-            switch (effectOperation)
+            else if(effectType == UnitEffectType.SightRange)
             {
-                case EffectOperation.Multiply:
-                    unit.sightCosts[terrainMoveType] *= effectMagnitude;
-                    break;
-                case EffectOperation.Divide:
-                    unit.sightCosts[terrainMoveType] /= effectMagnitude;
-                    break;
-                case EffectOperation.Add:
-                    unit.sightCosts[terrainMoveType] += effectMagnitude;
-                    break;
-                case EffectOperation.Subtract:
-                    unit.sightCosts[terrainMoveType] -= effectMagnitude;
-                    break;
+                ApplyOperation(ref unit.sightRange);
+            }
+            else if(effectType == UnitEffectType.SightRange)
+            {
+                ApplyOperation(ref unit.combatStrength);
+            }
+            else if(effectType == UnitEffectType.MovementCosts)
+            {
+                switch (effectOperation)
+                {
+                    case EffectOperation.Multiply:
+                        unit.movementCosts[terrainMoveType] *= effectMagnitude;
+                        break;
+                    case EffectOperation.Divide:
+                        unit.movementCosts[terrainMoveType] /= effectMagnitude;
+                        break;
+                    case EffectOperation.Add:
+                        unit.movementCosts[terrainMoveType] += effectMagnitude;
+                        break;
+                    case EffectOperation.Subtract:
+                        unit.movementCosts[terrainMoveType] -= effectMagnitude;
+                        break;
+                }
+            }
+            else if(effectType == UnitEffectType.SightCosts)
+            {
+                switch (effectOperation)
+                {
+                    case EffectOperation.Multiply:
+                        unit.sightCosts[terrainMoveType] *= effectMagnitude;
+                        break;
+                    case EffectOperation.Divide:
+                        unit.sightCosts[terrainMoveType] /= effectMagnitude;
+                        break;
+                    case EffectOperation.Add:
+                        unit.sightCosts[terrainMoveType] += effectMagnitude;
+                        break;
+                    case EffectOperation.Subtract:
+                        unit.sightCosts[terrainMoveType] -= effectMagnitude;
+                        break;
+                }
             }
         }
     }
