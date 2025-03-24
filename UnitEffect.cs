@@ -22,9 +22,9 @@ public enum EffectOperation
 }
 
 [Serializable]
-public class Effect
+public class UnitEffect
 {
-    public Effect(UnitEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
+    public UnitEffect(UnitEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority)
     {
         this.effectType = effectType;
         if(effectType == UnitEffectType.MovementCosts | effectType == UnitEffectType.SightCosts)
@@ -35,12 +35,8 @@ public class Effect
         this.effectMagnitude = effectMagnitude;
         this.priority = priority;
     }
-    public Effect(Action<Unit> applyFunction, int priority)
+    public UnitEffect(Action<Unit> applyFunction, int priority)
     {
-        this.effectType = effectType;
-        this.effectOperation = effectOperation;
-        this.effectMagnitude = effectMagnitude;
-        this.terrainMoveType = terrainMoveType;
         this.priority = priority;
         this.applyFunction = applyFunction;
     }
