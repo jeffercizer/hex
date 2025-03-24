@@ -46,7 +46,7 @@ public class UnitEffect
     public TerrainMoveType terrainMoveType;
     public float effectMagnitude;
     public int priority;
-    public Action<Building>? applyFunction;
+    public Action<Unit>? applyFunction;
 
     public void Apply(Unit unit)
     {

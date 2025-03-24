@@ -18,7 +18,7 @@ public class GameBoard
         Random rnd = new Random();
         for (int r = top; r <= bottom; r++){
             for (int q = left; q <= right; q++){
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, (ResourceType)0, new HashSet<FeatureType>(), new List<Unit>(), null));
             }
         }
     }
@@ -34,7 +34,7 @@ public class GameBoard
         Random rnd = new Random();
         for (int r = 0; r <= bottom; r++){
             for (int q = 0; q <= right; q++){
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, new HashSet<FeatureType>()));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, (ResourceType)0, new HashSet<FeatureType>(), new List<Unit>(), null));
             }
         }
     }

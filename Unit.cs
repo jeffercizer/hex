@@ -44,7 +44,7 @@ public class Unit
         {
             Console.WriteLine("We Used Scout Ability");
         };
-        AddEffect(new UnitEffect(scoutAbility, 100));
+        AddAbility(new UnitEffect(scoutAbility, 100));
         this.movementCosts = scoutMovementCosts;
 
         this.baseMovementCosts = movementCosts;
@@ -146,12 +146,12 @@ public class Unit
         //also order all effects, multiply/divide after add/subtract priority
         //0 means it is applied first 100 means it is applied "last" (highest number last)
         //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
-        PriorityQueue<Effect, int> orderedEffects = new();
-        foreach(Effect effect1 in ourEffects)
+        PriorityQueue<UnitEffect, int> orderedEffects = new();
+        foreach(UnitEffect effect1 in ourEffects)
         {
             orderedEffects.Enqueue(effect1, effect1.priority);
         }
-        Effect effect;
+        UnitEffect effect;
         int priority;
         while(orderedEffects.TryDequeue(out effect, out priority))
         {
@@ -160,13 +160,13 @@ public class Unit
         UpdateVision();
     }
 
-    public void AddEffect(Effect effect)
+    public void AddEffect(UnitEffect effect)
     {
         ourEffects.Add(effect);
         RecalculateEffects();
     }
 
-    public void RemoveEffect(Effect effect)
+    public void RemoveEffect(UnitEffect effect)
     {
         ourEffects.Remove(effect);
         RecalculateEffects();

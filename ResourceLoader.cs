@@ -47,22 +47,22 @@ public class ResourceLoader
     Dictionary<ResourceType, ResourceEffect> resourceEffects;
     public delegate void ResourceEffect(ResourceInfo resourceInfo);
     
-    public ResourceList()
+    public ResourceLoader()
     {
         resourceEffects = new Dictionary<ResourceType, ResourceEffect>
         {
-            { ResourceType.Silk, ApplySilkEffect },
-            { ResourceType.Jade, ApplyJadeEffect },
-            { ResourceType.Iron, ApplyIronEffect },
-            { ResourceType.Horses, ApplyHorsesEffect },
-            { ResourceType.Oil, ApplyOilEffect },
+            // { ResourceType.Silk, ApplySilkEffect },
+            // { ResourceType.Jade, ApplyJadeEffect },
+            // { ResourceType.Iron, ApplyIronEffect },
+            // { ResourceType.Horses, ApplyHorsesEffect },
+            // { ResourceType.Oil, ApplyOilEffect },
         };
         string xmlPath = "Resources.xml";
         resources = LoadResourceData(xmlPath);
         //if (resources.TryGetValue(resource, out ResourceInfo info))
         //ExecuteResourceEffect(resource);
     }
-    public static Dictionary<TileResource, ResourceInfo> LoadResourceData(string xmlPath)
+    public static Dictionary<ResourceType, ResourceInfo> LoadResourceData(string xmlPath)
     {
         // Load the XML file
         XDocument xmlDoc = XDocument.Load(xmlPath);

@@ -15,7 +15,7 @@ public class Game
         this.turnManager = new TurnManager();
         this.teamManager = new TeamManager();
         turnManager.game = this;
-        
+        GameBoard mainBoard = new GameBoard(this, 0, 0);
         Dictionary<Hex, GameHex> gameHexDict = new();
         String mapData = File.ReadAllText(mapName+".map");
         List<String> lines = mapData.Split('\n').ToList();
@@ -27,7 +27,7 @@ public class Game
         foreach (String line in lines)
         {
             q = 0;
-            Queue<String> cells = new Queue(line.Split(' ').ToList());
+            Queue<String> cells = new Queue<String>(line.Split(' ').ToList());
             int offset = r>>1;
             offset = (offset % cells.Count + cells.Count) % cells.Count; //negatives and overflow
             for (int i = 1; i < offset; i++)
@@ -38,7 +38,7 @@ public class Game
             {
                 TerrainType terrainType = (TerrainType)cell[0];
                 TerrainTemperature terrainTemperature = (TerrainTemperature)cell[1];
-                List<FeatureType> features = new();
+                HashSet<FeatureType> features = new();
                 //cell[2] == 0 means no features
                 if(cell[2] == 1)
                 {
@@ -89,14 +89,13 @@ public class Game
                 }
                 //fourth number is for resources
                 ResourceType resource = (ResourceType)cell[3];
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemp, features));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, (ResourceType)0, features, new List<Unit>(), null));
                 q += 1;
             }
             r += 1;
         }
-        int bottom = r; //CHECK
-        int right = q; //CHECK
-        GameBoard mainBoard = new GameBoard(this, bottom, right);
+        mainBoard.bottom = r;
+        mainBoard.right = q;
         mainBoard.gameHexDict = gameHexDict;
         this.mainGameBoard = mainBoard;
     }
@@ -174,7 +173,7 @@ public class Game
                 {
                     terrainType = TerrainType.Coast;
                 }
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemp, features));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemp, (ResourceType)0, features, new List<Unit>(), null));
             }
         }
         mainBoard.gameHexDict = gameHexDict;

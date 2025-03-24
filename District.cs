@@ -80,18 +80,18 @@ public class District
     }
     public void AddVision()
     {
-        ourVisibleHexes = ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right);
+        ourVisibleHexes = ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right).ToList();
         foreach (Hex hex in ourVisibleHexes)
         {
-            ourGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+            ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
             int count;
-            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            if(ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
             {
-                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
+                ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].visibleGameHexDict[hex] = count + 1;
             }
             else
             {
-                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].visibleGameHexDict.TryAdd(hex, 1);
             }
         }
     }
