@@ -28,6 +28,7 @@ public class District
             ourGameHex.AddTerrainFeature(FeatureType.Road);
         }
         ourCity.RecalculateYields();
+        UpdateVision();
     }
 
     public List<Building> buildings;
@@ -35,6 +36,7 @@ public class District
     public bool isCityCenter;
     public bool isUrban;
     public City ourCity;
+    public List<Hex> ourVisibleHexes = new();
     
     public void RecalculateYields()
     {
@@ -49,5 +51,44 @@ public class District
         buildings.Add(building);
         ourCity.citySize += 1;
         ourCity.RecalculateYields();
+    }
+
+    public void UpdateVision()
+    {
+        RemoveVision();
+        ourVisibleHexes = ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right);
+        foreach (Hex hex in ourVisibleHexes)
+        {
+            ourGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+            int count;
+            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            {
+                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
+            }
+            else
+            {
+                ourGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
+            }
+        }
+    }
+
+    public void RemoveVision()
+    {
+        foreach (Hex hex in ourVisibleHexes)
+        {            
+            int count;
+            if(ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            {
+                if(count <= 1)
+                {
+                    ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].visibleGameHexDict.Remove(hex);
+                }
+                else
+                {
+                    ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].visibleGameHexDict[hex] = count - 1;
+                }
+            }
+        }
+        ourVisibleHexes.Clear();
     }
 }
