@@ -31,11 +31,10 @@ public class Game
             offset = (offset % cells.Count + cells.Count) % cells.Count; //negatives and overflow
             for (int i = 0; i < offset; i++)
             {
-                queue.Enqueue(queue.Dequeue());
+                cells.Enqueue(cells.Dequeue());
             }
             foreach (String cell in cells)
             {
-                
                 TerrainType terrainType = (TerrainType)cell[0];
                 TerrainTemperature terrainTemperature = (TerrainTemperature)cell[1];
                 List<FeatureType> features = new();
