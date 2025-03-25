@@ -179,7 +179,13 @@ public class City
                 }
                 else if(productionQueue[0].prodType == ProductionType.Unit)
                 {
-                    productionQueue[0].targetGameHex.SpawnUnit(new Unit(productionQueue[0].name, productionQueue[0].targetGameHex, teamNum), false, true);
+                    Unit tempUnit = new Unit(productionQueue[0].name, productionQueue[0].targetGameHex, teamNum);
+                    if(!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
+                    {
+                        tempUnit.name = "Ghost Man";
+                        tempUnit.decreaseCurrentHealth(99999.9f);
+                        Console.WriteLine("NO VALID HEX TO SPAWN UNIT SO WE KILLED HIM ( ˶°ㅁ°)");
+                    }
                 }
                 productionQueue.RemoveAt(0);
             }
@@ -278,7 +284,7 @@ public class City
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in ourGameHex.hex.Range(3))
+        foreach(Hex hex in ourGameHex.hex.WrappingRange(3, ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right, ourGameHex.ourGameBoard.top, ourGameHex.ourGameBoard.bottom))
         {
             if(validTerrain.Contains(ourGameHex.ourGameBoard.gameHexDict[hex].terrainType))
             {
@@ -312,7 +318,7 @@ public class City
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in ourGameHex.hex.Range(3))
+        foreach(Hex hex in ourGameHex.hex.WrappingRange(3, ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right, ourGameHex.ourGameBoard.top, ourGameHex.ourGameBoard.bottom))
         {
             if(validTerrain.Contains(ourGameHex.ourGameBoard.gameHexDict[hex].terrainType))
             {

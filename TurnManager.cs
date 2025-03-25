@@ -32,10 +32,7 @@ public class TurnManager
     }
     public void EndCurrentTurn(int teamNum)
     {
-        foreach (Player player in game.playerDictionary.Values)
-        {
-            player.OnTurnEnded(currentTurn);
-        }
+        game.playerDictionary[teamNum].OnTurnEnded(currentTurn);
         if(game.mainGameBoard != null & teamNum == 0)
         {
             game.mainGameBoard.OnTurnEnded(currentTurn);

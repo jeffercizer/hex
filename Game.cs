@@ -89,8 +89,6 @@ public class Game
                 }
                 //fourth number is for resources
                 ResourceType resource = (ResourceType)int.Parse(cell[3].ToString());
-
-                //Console.WriteLine(terrainTemperature);
                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, (ResourceType)0, features, new List<Unit>(), null));
                 q += 1;
             }
@@ -220,24 +218,25 @@ public class Game
 
 struct GameTests
 {
-    static public Game SampleTest()
+    static public Game MapLoadTest()
     {
-        Game game = new(10, 30);
-        // GameBoard mainBoard;
-        // StartGameTestHelper(out game, out mainBoard);
+        Game game = new Game("sample");
+        game.AddPlayer(0.0f, 0);
         game.AddPlayer(50.0f, 1);
         game.AddPlayer(50.0f, 2);
         TestPlayerRelations(game);
-        City player1City = new City(1, 1, "MyCity", game.mainGameBoard.gameHexDict[new Hex(2, 2, -4)]);
-        City player2City = new City(2, 2, "Team2City", game.mainGameBoard.gameHexDict[new Hex(15, 7, -22)]);
+        Hex player1CityLocation = new Hex(4, 3, -7);
+        Hex player2CityLocation = new Hex(14, 13, -27);
+        City player1City = new City(1, 1, "MyCity", game.mainGameBoard.gameHexDict[player1CityLocation]);
+        City player2City = new City(2, 2, "Team2City", game.mainGameBoard.gameHexDict[player2CityLocation]);
 
         //Yields
         TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
         TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
 
         //City Locations from player
-        Tests.EqualHex("player1CityLocation", new Hex(2, 2, -4), game.playerDictionary[1].cityList[0].ourGameHex.hex);
-        Tests.EqualHex("player2CityLocation", new Hex(15, 7, -22), game.playerDictionary[2].cityList[0].ourGameHex.hex);
+        Tests.EqualHex("player1CityLocation", player1CityLocation, game.playerDictionary[1].cityList[0].ourGameHex.hex);
+        Tests.EqualHex("player2CityLocation", player2CityLocation, game.playerDictionary[2].cityList[0].ourGameHex.hex);
 
         //Gamehex with city has District with 'City Center'
         if(game.playerDictionary[1].cityList[0].ourGameHex.district != null)
@@ -252,8 +251,10 @@ struct GameTests
         {
             if (game.mainGameBoard.gameHexDict[hex].district != null)
             {
-                Console.Write(game.mainGameBoard.gameHexDict[hex].district.ourGameHex.hex.q +" ");
-                Console.WriteLine(game.mainGameBoard.gameHexDict[hex].district.ourGameHex.hex.r);
+                if (!hex.Equals(player1CityLocation) & !hex.Equals(player2CityLocation))
+                {
+                    Complain("playerCityMissingFromGameHex");
+                }
             }
         }
 
@@ -270,8 +271,14 @@ struct GameTests
         TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
         TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
 
+        return game;
+    }
 
-
+    static public Game TestScoutMovementCombat()
+    {
+        Game game = MapLoadTest();
+        City player1City = game.playerDictionary[1].cityList[0];
+        City player2City = game.playerDictionary[2].cityList[0];
         player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
         player2City.AddToQueue("Scout", ProductionType.Unit, player2City.ourGameHex, 4, false);
 
@@ -287,7 +294,6 @@ struct GameTests
             Complain("player2CityFirstQueueNotScoutOrProductionWrong");
         }
 
-        
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(2);
         game.turnManager.EndCurrentTurn(0);
@@ -295,88 +301,273 @@ struct GameTests
 
 
         //Yields
-        TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
-        TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
+            TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
+            TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
 
-        if(!player1City.productionQueue.Any())
-        {
-            Complain("player1CityQueueEmpty");
-        }
-        if(!player2City.productionQueue.Any())
-        {
-            Complain("player2CityQueueEmpty");
-        }
-
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
-        player1City.RemoveFromQueue(0); 
-
-        if(player1City.productionQueue.Any())
-        {
-            if((player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 2))
+            if(!player1City.productionQueue.Any())
             {
-                Complain("player1CityAddNewRemovePartial");
+                Complain("player1CityQueueEmpty");
             }
-        }
-        else
-        {
-            Complain("player1CityQueueIsEmpty");
-        }
+            if(!player2City.productionQueue.Any())
+            {
+                Complain("player2CityQueueEmpty");
+            }
 
-        game.turnManager.EndCurrentTurn(1);
-        game.turnManager.EndCurrentTurn(2);
+            player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
+            player1City.RemoveFromQueue(0); 
 
-        game.turnManager.EndCurrentTurn(0);
+            if(player1City.productionQueue.Any())
+            {
+                if((player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 2))
+                {
+                    Complain("player1CityAddNewRemovePartial");
+                }
+            }
+            else
+            {
+                Complain("player1CityQueueIsEmpty");
+            }
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+
+            game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn(); //rework this somehow smart so when all turns ended we proc
 
 
 
-        Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
-        Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));
-        game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 4, -9)], game.teamManager, false);
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(14, 13, -27));
+            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)], game.teamManager, false);
 
-        game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 4, -9)], game.teamManager, false);
+            game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, false);
 
 
 
-        Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
-        Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(5,4,-9));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(13, 12, -25));
 
-        Console.Write(game.playerDictionary[1].unitList[0].currentGameHex.hex.q+" ");
-        Console.WriteLine(game.playerDictionary[1].unitList[0].currentGameHex.hex.r);
 
-        Console.Write(game.playerDictionary[2].unitList[0].currentGameHex.hex.q+" ");
-        Console.WriteLine(game.playerDictionary[2].unitList[0].currentGameHex.hex.r);
-
-        game.turnManager.EndCurrentTurn(1);
-        game.turnManager.EndCurrentTurn(2);
-        game.turnManager.EndCurrentTurn(0);
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn(); //rework this somehow smart so when all turns ended we proc
 
-        Console.Write(game.playerDictionary[1].unitList[0].currentGameHex.hex.q+" ");
-        Console.WriteLine(game.playerDictionary[1].unitList[0].currentGameHex.hex.r);
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
 
-        Console.Write(game.playerDictionary[2].unitList[0].currentGameHex.hex.q+" ");
-        Console.WriteLine(game.playerDictionary[2].unitList[0].currentGameHex.hex.r);
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,5,-11));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(12, 11, -23));
 
-        Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
-        Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11,8,-19));
+        game.turnManager.StartNewTurn();
 
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,7,-13));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
+        game.turnManager.StartNewTurn();
+        
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(7,8,-15));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
+        game.turnManager.StartNewTurn();
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(8,9,-17));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
+        game.turnManager.StartNewTurn();
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 9, -19));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
+        game.turnManager.StartNewTurn();
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
+        game.turnManager.StartNewTurn();
+
+            //Scout1 Attack Scout2
+            game.teamManager.DecreaseRelationship(1, 2, 100);
+            game.teamManager.DecreaseRelationship(2, 1, 100);
+            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
+
+            if(game.playerDictionary[1].unitList[0].currentHealth != 80.0f & game.playerDictionary[2].unitList[0].currentHealth != 75.0f)
+            {
+                Complain("IncorrectHealthAfterCombatPlayerDict");
+            }
+            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].currentHealth != 80.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].currentHealth != 75.0f)
+            {
+                Complain("IncorrectHealthAfterCombatGameHex");
+            }
+            Tests.EqualHex("Scout 1 Location PostCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
+            //try attacking again
+            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
+            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
+            if(game.playerDictionary[1].unitList[0].currentHealth != 80.0f & game.playerDictionary[2].unitList[0].currentHealth != 75.0f)
+            {
+                Complain("IncorrectHealthAfterFailCombatPlayerDict");
+            }
+            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].currentHealth != 80.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].currentHealth != 75.0f)
+            {
+                Complain("IncorrectHealthAfterFailCombatGameHex");
+            }
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+        
+        game.turnManager.StartNewTurn();
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
+            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            
+            if(game.playerDictionary[1].unitList[0].currentHealth != 60.0f & game.playerDictionary[2].unitList[0].currentHealth != 50.0f)
+            {
+                Complain("IncorrectHealthAfterCombatPlayerDict");
+            }
+            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].currentHealth != 60.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].currentHealth != 50.0f)
+            {
+                Complain("IncorrectHealthAfterCombatGameHex");
+            }
+
+        game.turnManager.StartNewTurn();
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
+            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            
+            if(game.playerDictionary[1].unitList[0].currentHealth != 40.0f & game.playerDictionary[2].unitList[0].currentHealth != 25.0f)
+            {
+                Complain("IncorrectHealthAfterCombatPlayerDict");
+            }
+
+        game.turnManager.StartNewTurn();
+        
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
+            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            //Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            if(game.playerDictionary[2].unitList.Any())
+            {
+                Complain("UnitInPlayerDictionary");
+            }
+            if(game.playerDictionary[1].unitList[0].currentHealth != 20.0f)
+            {
+                Complain("IncorrectHealthAfterCombatPlayerDict");
+            }
+            if(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList.Count > 1)
+            {
+                Complain("TooManyUnitsOnHex");
+            }
+
+        game.turnManager.StartNewTurn();
 
         return game;
     }
 
-    static public Game MapLoad()
+    static public Game TestMassScoutBuild()
     {
-        Game game = new Game("sample");
-        game.mainGameBoard.PrintGameBoard();
-        return new Game("sample");
+        Game game = MapLoadTest();
+        City player1City = game.playerDictionary[1].cityList[0];
+        City player2City = game.playerDictionary[2].cityList[0];
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        int targetTurn = 25;
+        for(int i = 0; i < targetTurn; i++)
+        {
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(0);
+            game.turnManager.StartNewTurn();
+        }
+        if(player1City.productionQueue.Any())
+        {
+            Complain("MassScout-CityHasQueueLeft");
+        }
+        if(game.playerDictionary[1].unitList.Count != 23)
+        {
+            Complain("MassScout-PlayerUnitCountWrong");
+        }
+        return game;
+    }
+
+    static public Game TestOverflowProduction()
+    {
+        Game game = MapLoadTest();
+        City player1City = game.playerDictionary[1].cityList[0];
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 1, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 1, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 1, false);
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
+        return game;
     }
 
 
     static public void TestAll()
     {
         //GameTests.SampleTest();
-        GameTests.MapLoad();
+        //GameTests.MapLoadTest();
+        TestScoutMovementCombat();
+        TestMassScoutBuild();
     }
 
     static private void TestPlayerRelations(Game game)

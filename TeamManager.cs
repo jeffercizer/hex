@@ -27,25 +27,25 @@ public class TeamManager
         //relationships[team2][team1] = relationship; //for symmetric relationships
     }
 
-    public void IncreaseRelationship(int team1, int team2, int relationship)
+    public void IncreaseRelationship(int team1, int team2, int relationshipChange)
     {
         if (!relationships.ContainsKey(team1) || !relationships.ContainsKey(team2))
         {
             throw new Exception("One or both teams do not exist.");
         }
 
-        relationships[team1][team2] += relationship;
+        relationships[team1][team2] += relationshipChange;
         //relationships[team2][team1] = relationship; //for symmetric relationships
     }
 
-    public void DecreaseRelationship(int team1, int team2, int relationship)
+    public void DecreaseRelationship(int team1, int team2, int relationshipChange)
     {
         if (!relationships.ContainsKey(team1) || !relationships.ContainsKey(team2))
         {
             throw new Exception("One or both teams do not exist.");
         }
 
-        relationships[team1][team2] -= relationship;
+        relationships[team1][team2] -= relationshipChange;
         //relationships[team2][team1] = relationship; //for symmetric relationships
     }
 
@@ -68,7 +68,7 @@ public class TeamManager
             Dictionary<int, int> relationshipDict = relationships[teamId];
             foreach (int relationshipID in relationshipDict.Keys)
             {
-                if (relationshipDict[relationshipID] > 80)
+                if (relationshipDict[relationshipID] >= 80)
                 {
                     allies.Add(relationshipID);
                 }
@@ -87,7 +87,7 @@ public class TeamManager
             Dictionary<int, int> relationshipDict = relationships[teamId];
             foreach (int relationshipID in relationshipDict.Keys)
             {
-                if (relationshipDict[relationshipID] == 0)
+                if (relationshipDict[relationshipID] <= 0)
                 {
                     enemies.Add(relationshipID);
                 }

@@ -62,7 +62,6 @@ public class GameBoard
         {
             hex.OnTurnStarted(turnNumber);
         }
-        Console.WriteLine($"GameBoard: Started turn {turnNumber}.");
     }
 
     public void OnTurnEnded(int turnNumber)
@@ -71,7 +70,6 @@ public class GameBoard
         {
             hex.OnTurnEnded(turnNumber);
         }
-        Console.WriteLine($"GameBoard: Ended turn {turnNumber}.");
     }
 
     public void PrintGameBoard()
@@ -79,13 +77,12 @@ public class GameBoard
         //terraintype
         GameHex test;
         for(int r = top; r <= bottom; r++){
-            int r_offset = r>>1; //same as (int)Math.Floor(r/2.0f)
             String mapRow = ""; 
             if (r%2 == 1)
             {
                 mapRow += " ";
             }
-            for (int q = left - r_offset; q <= right - r_offset; q++){
+            for (int q = left; q <= right; q++){
                 if(gameHexDict.TryGetValue(new Hex(q, r, -q-r), out test)){
                     if(test.terrainType == TerrainType.Flat)
                     {

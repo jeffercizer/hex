@@ -25,6 +25,12 @@ public struct Hex
         this.s = s;
         if (q + r + s != 0) throw new ArgumentException("q + r + s must be 0");
     }
+
+    public override string ToString()
+    {
+        return "("+q+", "+r+")";
+    }
+
     public readonly int q;
     public readonly int r;
     public readonly int s;
@@ -138,6 +144,27 @@ public struct Hex
         }
         return results;
     }
+
+public List<Hex> WrappingRange(int range, int left, int right, int top, int bottom)
+{
+    List<Hex> results = new();
+    int width = right - left;
+
+    for (int q = -range; q <= range; q++)
+    {
+        for (int r = Math.Max(-range, -q - range); r <= Math.Min(range, -q + range); r++)
+        {
+            // Adjust the q coordinate using modular arithmetic for wrapping.
+            int wrappedQ = ((q - left) % width + width) % width + left;
+            int wrappedS = -wrappedQ - r;
+            if (r >= top & r < bottom)
+            {
+                results.Add(new Hex(wrappedQ, r, wrappedS));
+            }
+        }
+    }
+    return results;
+}
 
 
     public int Length()

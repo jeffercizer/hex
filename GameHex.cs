@@ -57,12 +57,12 @@ public class GameHex
 
     public void OnTurnStarted(int turnNumber)
     {
-        //Console.WriteLine($"GameHex ({hex.q},{hex.r}): Started turn {turnNumber}.");
+
     }
 
     public void OnTurnEnded(int turnNumber)
     {
-        //Console.WriteLine($"GameHex ({hex.q},{hex.r}): Ended turn {turnNumber}.");
+
     }
     public bool SetTerrainType(TerrainType newTerrainType)
     {
@@ -99,9 +99,9 @@ public class GameHex
         {
             if (flexible)
             {
-                for (int i = 0; i < 6; i++) //ask all our neighbors if they have space
+                foreach(Hex rangeHex in hex.WrappingRange(3, ourGameBoard.left, ourGameBoard.right, ourGameBoard.top, ourGameBoard.bottom))
                 {
-                    if(ourGameBoard.gameHexDict[hex.WrappingNeighbor(i, ourGameBoard.left, ourGameBoard.left)].SpawnUnit(newUnit, stackable, flexible))
+                    if(ourGameBoard.gameHexDict[rangeHex].SpawnUnit(newUnit, stackable, false))
                     {
                         return true;
                     }
