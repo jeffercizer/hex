@@ -136,8 +136,8 @@ public class District
         }
     }
 
-    public void RemoveResource()
+    public void RemoveLostResource()
     {
-        ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].RemoveResource(ourGameHex.hex);
+        ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].RemoveLostResource(ourGameHex.hex);
     }
 }
