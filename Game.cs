@@ -555,9 +555,44 @@ struct GameTests
         Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 1, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 1, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 1, false);
+
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn();
+
+        if(player1City.productionQueue.Any())
+        {
+            Complain("OverflowProduction-CityHasQueueLeft");
+        }
+
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn();
+
+        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 3, false);
+
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn();
+
+        if(player1City.productionQueue.Any())
+        {
+            Complain("OverflowProduction-CityHasQueueLeft");
+        }
+
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn();
+
         player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn();
+        if(player1City.productionQueue.Any())
+        {
+            Complain("OverflowProduction-CityHasQueueLeft");
+        }
+
         return game;
     }
 
@@ -568,6 +603,7 @@ struct GameTests
         //GameTests.MapLoadTest();
         TestScoutMovementCombat();
         TestMassScoutBuild();
+        TestOverflowProduction();
     }
 
     static private void TestPlayerRelations(Game game)

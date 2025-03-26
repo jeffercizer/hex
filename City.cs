@@ -60,6 +60,7 @@ public class City
     public float foodStockpile;
     public float foodYield;
     public float productionYield;
+    public float productionOverflow;
     public float goldYield;
     public float scienceYield;
     public float cultureYield;
@@ -164,13 +165,15 @@ public class City
     public void OnTurnStarted(int turnNumber)
     {
         RecalculateYields();
+        productionOverflow += productionYield;
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddGold(goldYield);
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddScience(scienceYield);
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddCulture(cultureYield);
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddHappiness(cultureYield);
         if(productionQueue.Any())
         {
-            productionQueue[0].productionLeft -= productionYield;
+            productionQueue[0].productionLeft -= productionOverflow;
+            Math.Max(productionOverflow - productionQueue[0].productionLeft, 0);
             if(productionQueue[0].productionLeft <= 0)
             {
                 if(productionQueue[0].prodType == ProductionType.Building)
