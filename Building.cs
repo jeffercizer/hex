@@ -63,6 +63,16 @@ public class Building
         baseHappinessYield = 6;
     }
 
+    public void SwitchTeams()
+    {
+        RecalculateYields();
+    }
+
+    public void DestroyBuilding()
+    {
+        ourDistrict = null;
+    }
+
     public void AddEffect(BuildingEffect effect)
     {
         buildingEffects.Add(effect);
