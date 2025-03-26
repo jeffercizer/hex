@@ -96,7 +96,7 @@ public class Game
                 }
                 //fourth number is for resources
                 ResourceType resource = Enum.Parse<ResourceType>(cell[3]);
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, (ResourceType)0, features, new List<Unit>(), null));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
                 q += 1;
             }
             r += 1;
