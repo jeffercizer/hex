@@ -7,6 +7,12 @@ using System.Data;
 [Serializable]
 public class Game
 {
+    public GameBoard? mainGameBoard;
+    public Dictionary<int, Player> playerDictionary;
+    public TeamManager? teamManager;
+    public TurnManager turnManager;
+    public ResourceLoader resourceLoader = new();
+    
     public Game(String mapName)
     {
         int top = 0;
@@ -206,11 +212,11 @@ public class Game
         Player newPlayer = new Player(this, startGold, teamNum);
         playerDictionary.Add(teamNum, newPlayer);
     }
-    public GameBoard? mainGameBoard;
-    public Dictionary<int, Player> playerDictionary;
-    public TeamManager? teamManager;
-    public TurnManager turnManager;
-    public ResourceLoader resourceLoader = new();
+
+    public int GetUniqueID()
+    {
+        return currentID++;
+    }
 }
 
 // Tests
