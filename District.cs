@@ -37,6 +37,34 @@ public class District
     public bool isUrban;
     public City ourCity;
     public List<Hex> ourVisibleHexes = new();
+
+    public void BeforeSwitchTeam()
+    {
+        RemoveVision();
+        RemoveResource();        
+    }
+    
+    public void AfterSwitchTeam()
+    {      
+        foreach(Building building in buildings)
+        {
+            SwitchTeams();
+        }
+        AddVision();
+        AddResource();
+    }
+
+    public void DestroyDistrict()
+    {
+        RemoveVision();
+        RemoveResource();
+        ourCity.districts.Remove(this);
+        ourGameHex.district = null;
+        foreach(Building building in buildings)
+        {
+            building.DestroyBuilding();
+        }
+    }
     
     public void RecalculateYields()
     {
@@ -94,5 +122,18 @@ public class District
                 ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].visibleGameHexDict.TryAdd(hex, 1);
             }
         }
+    }
+
+    public void AddResource()
+    {
+        if(ourGameHex.resourceType != ResourceType.None)
+        {
+            ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].AddUnassignedResource(new Resource(ourGameHex.hex, ourGameHex.resourceType))
+        }
+    }
+
+    public void RemoveResource()
+    {
+        ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].RemoveResourceFromHex(ourGameHex.hex);
     }
 }
