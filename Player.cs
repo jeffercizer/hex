@@ -39,6 +39,7 @@ public class Player
     public Dictionary<Hex, bool> seenGameHexDict;
     public List<Unit> unitList;
     public List<City> cityList;
+    public Dictionary<Hex, ResourceType> unassignedResources();
     public float scienceTotal;
     public float cultureTotal;
     public float goldTotal;
@@ -70,19 +71,30 @@ public class Player
         turnFinished = true;
     }
 
+    public bool RemoveResource(Hex hex)
+    {
+        foreach(City city in cityList)
+        {
+            if(city.heldResources.Remove(hex))
+            {
+                return true;
+            }
+        }
+    }
+
     public void AddGold(float gold)
     {
         goldTotal += gold;
     }
-        public void AddScience(float science)
+    public void AddScience(float science)
     {
         scienceTotal += science;
     }
-        public void AddCulture(float culture)
+    public void AddCulture(float culture)
     {
         cultureTotal += culture;
     }
-        public void AddHappiness(float happiness)
+    public void AddHappiness(float happiness)
     {
         happinessTotal += happiness;
     }
