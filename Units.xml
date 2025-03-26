@@ -1,12 +1,12 @@
 <Units>
   <Unit Name="Scout" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="15">
-    <Effects>
-      <Effect>ScoutVisionAbility</Effect>
-    </Effects>
+    <Abilities>
+      <Ability>ScoutVisionAbility</Ability>
+    </Abilities>
   </Unit>
   <Unit Name="Settler" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="15">
-    <Effects>
-      <Effect>SettleCity</Effect>
-    </Effects>
+    <Abilities>
+      <Ability>SettleCityAbility</Ability>
+    </Abilities>
   </Unit>
 </Units>
