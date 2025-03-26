@@ -23,7 +23,7 @@ public struct UnitInfo
 
 public class UnitLoader
 {
-    Dictionary<UnitType, UnitInfo> Units;
+    Dictionary<UnitType, UnitInfo> UnitsLoader;
     public delegate void UnitEffect(UnitInfo UnitInfo);
     
     public UnitLoader()
