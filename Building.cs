@@ -36,15 +36,22 @@ public class Building
         //LOAD INFORMATION FROM XML USING NAME
         //So far we have requested
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
-        baseBuildCost = 15;
-        baseGoldCost = 50;
-        baseMaintenanceCost = 1;
-        baseFoodYield = 2;
-        baseProductionYield = 2;
-        baseGoldYield = 3;
-        baseScienceYield = 4;
-        baseCultureYield = 5;
-        baseHappinessYield = 6;
+        if (Enum.TryParse(name, out UnitType unitType) && unitData.TryGetValue(unitType, out UnitInfo unitInfo))
+                {
+            BuildingType buildingType = Enum.Parse(name);
+            current
+                    this.movementCosts = unitInfo.MovementCosts;
+                    this.baseMovementCosts = unitInfo.MovementCosts;
+                    this.sightCosts = unitInfo.SightCosts;
+                    this.baseSightCosts = unitInfo.SightCosts;
+            
+                    this.movementSpeed = unitInfo.MovementSpeed;
+                    this.sightRange = unitInfo.SightRange;
+                    this.healingFactor = unitInfo.HealingFactor;
+                    this.combatStrength = unitInfo.CombatPower;
+                    this.maintenanceCost = unitInfo.MaintenanceCost;
+            
+
     }
     public Building(String name, District ourDistrict)
     {
@@ -76,6 +83,12 @@ public class Building
     public void AddEffect(BuildingEffect effect)
     {
         buildingEffects.Add(effect);
+        ourDistrict.ourCity.RecalculateYields();
+    }
+
+    public void RemoveEffect(BuildingEffect effect)
+    {
+        buildingEffects.Remove(effect);
         ourDistrict.ourCity.RecalculateYields();
     }
 
