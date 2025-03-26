@@ -118,7 +118,7 @@ public class Unit
     public List<Hex>? currentPath = new();
     public List<Hex> ourVisibleHexes = new();
     public List<UnitEffect> ourEffects = new();
-    public List<UnitEffect> ourAbilities = new();
+    public List<(int,UnitEffect)> ourAbilities = new();
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
@@ -178,9 +178,21 @@ public class Unit
         RecalculateEffects();
     }
 
-    public void AddAbility(UnitEffect ability)
+    public void AddAbility(UnitEffect ability, int usageCount)
     {
-        ourAbilities.Add(ability);
+        ourAbilities.Add((ability, usageCount));
+    }
+
+    public void UseAbilities()
+    {
+        foreach((UnitEffect, int) ability in ourAbilities)
+        {
+            if(ability.Item2 >= 1)
+            {
+                ability.Item1.Apply(this);
+                ability.Item2 -= 1;
+            }
+        }
     }
 
     public bool AttackTarget(GameHex targetGameHex, TeamManager teamManager)
