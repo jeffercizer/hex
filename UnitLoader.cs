@@ -18,7 +18,7 @@ public struct UnitInfo
     public float CombatPower { get; set; }
     public int HealingFactor { get; set; }
     public List<String> Effects { get; set; }
-    public List<String> Abilities { get; set; }
+    public Dictionary<String, int> Abilities { get; set; }
 }
 
 public class UnitLoader
@@ -48,7 +48,10 @@ public class UnitLoader
                     CombatPower = float.Parse(r.Attribute("CombatPower").Value),
                     HealingFactor = int.Parse(r.Attribute("HealingFactor").Value),
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
-                    Abilities = r.Element("Abilities").Elements("Ability").Select(e => e.Value).ToList()
+                    Abilities = r.Element("Abilities").Elements("Ability").ToDictionary(
+                        a => a.Attribute("Name").Value,
+                        a => int.Parse(a.Attribute("UsageCount").Value)
+                    )
                 }
             );
         return UnitData;
