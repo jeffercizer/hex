@@ -89,6 +89,22 @@ public class Player
     {
         foreach(City city in cityList)
         {
+            if(city.heldResources.Contains(hex))
+            {
+                ResourceType temp = city.heldResources[hex];
+                city.heldResources.Remove(hex)
+                unassignedResources.Add(temp);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    public bool RemoveLostResource(Hex hex)
+    {
+        foreach(City city in cityList)
+        {
             if(city.heldResources.Remove(hex))
             {
                 return true;
