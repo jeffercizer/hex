@@ -124,4 +124,10 @@ public class UnitEffect
                 break;
         }
     }
+    
+//Abilities\\
+    public void SettleCity(Unit unit, String cityName)
+    {
+        new City(game.GetUniqueID(), unit.teamNum, cityName, game.mainGameBoard.gameHexDict[unit.currentGameHex.hex]);
+    }
 }
