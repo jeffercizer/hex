@@ -128,12 +128,12 @@ public class District
     {
         if(ourGameHex.resourceType != ResourceType.None)
         {
-            ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].AddUnassignedResource(new Resource(ourGameHex.hex, ourGameHex.resourceType))
+            ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].unassignedResources.Add(ourGameHex.hex, ourGameHex.resourceType)
         }
     }
 
     public void RemoveResource()
     {
-        ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].RemoveResourceFromHex(ourGameHex.hex);
+        ourGameHex.ourGameBoard.game.playerDictionary[ourCity.teamNum].RemoveResource(ourGameHex.hex);
     }
 }
