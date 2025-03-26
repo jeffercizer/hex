@@ -41,12 +41,18 @@ public class UnitEffect
         this.priority = priority;
         this.applyFunction = applyFunction;
     }
+
+    public UnitEffect(String functionName, int priority)
+    {
+        this.functionName = functionName;
+    }
     public UnitEffectType effectType;
     public EffectOperation effectOperation;
     public TerrainMoveType terrainMoveType;
     public float effectMagnitude;
     public int priority;
     public Action<Unit>? applyFunction;
+    public String functionName;
 
     public void Apply(Unit unit)
     {
@@ -123,17 +129,5 @@ public class UnitEffect
                 property -= effectMagnitude;
                 break;
         }
-    }
-    
-//Abilities\\
-    public void SettleCity(Unit unit, GameHex gamehex, String cityName)
-    {
-        new City(game.GetUniqueID(), unit.teamNum, cityName, gameHex]);
-    }
-
-    public void ScoutVision(Unit unit)
-    {
-        unit.sightRange += 1;
-        Console.WriteLine("Scout Vision Activated");
     }
 }
