@@ -42,9 +42,8 @@ public class UnitEffect
         this.applyFunction = applyFunction;
     }
 
-    public UnitEffect(String functionName, int priority)
+    public UnitEffect(String functionName)
     {
-        this.priority = priority;
         this.functionName = functionName;
     }
 
@@ -145,10 +144,12 @@ public class UnitEffect
         else if(functionString == "ScoutVisionAbility")
         {
             unit.sightRange += 1;
+            unit.UpdateVision();
         }
     }
     public bool SettleCity(Unit unit, String cityName)
     {
         new City(unit.ourGameBoard.game.GetUniqueID(), 1, cityName, game.mainGameBoard.gameHexDict[player1CityLocation]);
+        unit.decreaseCurrentHealth(99999.0f);
     }
 }
