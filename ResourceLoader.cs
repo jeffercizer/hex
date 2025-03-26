@@ -29,6 +29,7 @@ public enum ResourceType
     Coffee = 'e',
     Cotton = 'q',
     Tobacco = 't',
+    Stone = 'z',
 }
 
 public struct ResourceInfo
