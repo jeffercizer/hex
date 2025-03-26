@@ -16,6 +16,10 @@ public class District
         
         this.ourGameHex = ourGameHex;
         ourGameHex.ClaimHex(ourCity.teamNum);
+        if(ourGameHex.resourceType != ResourceType.None)
+        {
+            AddResource();
+        }
         ourGameHex.district = this;
         foreach(Hex hex in ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
         {
