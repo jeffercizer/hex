@@ -42,18 +42,13 @@ public class UnitEffect
         this.applyFunction = applyFunction;
     }
 
-    public UnitEffect(String functionName, int priority)
-    {
-        this.functionName = functionName;
-    }
     public UnitEffectType effectType;
     public EffectOperation effectOperation;
     public TerrainMoveType terrainMoveType;
     public float effectMagnitude;
     public int priority;
     public Action<Unit>? applyFunction;
-    public String functionName;
-
+    
     public void Apply(Unit unit)
     {
         if (applyFunction != null)
