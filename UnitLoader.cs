@@ -17,7 +17,8 @@ public struct UnitInfo
     public float SightRange { get; set; }
     public float CombatPower { get; set; }
     public int HealingFactor { get; set; }
-    public List<string> Effects { get; set; }
+    public List<String> Effects { get; set; }
+    public List<String> Abilities { get; set; }
 }
 
 public class UnitLoader
@@ -46,7 +47,8 @@ public class UnitLoader
                     SightRange = float.Parse(r.Attribute("SightRange").Value),
                     CombatPower = float.Parse(r.Attribute("CombatPower").Value),
                     HealingFactor = int.Parse(r.Attribute("HealingFactor").Value),
-                    Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList()
+                    Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
+                    Abilities = r.Element("Abilities").Elements("Ability").Select(e => e.Value).ToList()
                 }
             );
         return UnitData;
@@ -54,5 +56,9 @@ public class UnitLoader
     public void ExecuteUnitEffect(UnitType UnitType)
     {
         //pick a thing idk
+    }
+    public void SettlerAbility()
+    {
+        
     }
 }
