@@ -53,12 +53,4 @@ public class UnitLoader
             );
         return UnitData;
     }
-    public void ExecuteUnitEffect(UnitType UnitType)
-    {
-        //pick a thing idk
-    }
-    public void SettlerAbility()
-    {
-        
-    }
 }
