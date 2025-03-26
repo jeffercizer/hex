@@ -1,5 +1,5 @@
 <Units>
-  <Unit Name="Scout" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="15">
+  <Unit Name="Scout" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="15" MaintenanceCost="1">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
