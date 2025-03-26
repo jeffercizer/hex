@@ -17,25 +17,16 @@ public struct UnitInfo
     public float SightRange { get; set; }
     public float CombatPower { get; set; }
     public int HealingFactor { get; set; }
-    public List<string> Effects { get; set; 
+    public List<string> Effects { get; set; }
 }
 
 public class UnitLoader
 {
     Dictionary<UnitType, UnitInfo> Units;
-    Dictionary<UnitType, UnitEffect> UnitEffects;
     public delegate void UnitEffect(UnitInfo UnitInfo);
     
     public UnitLoader()
     {
-        UnitEffects = new Dictionary<UnitType, UnitEffect>
-        {
-            // { UnitType.Silk, ApplySilkEffect },
-            // { UnitType.Jade, ApplyJadeEffect },
-            // { UnitType.Iron, ApplyIronEffect },
-            // { UnitType.Horses, ApplyHorsesEffect },
-            // { UnitType.Oil, ApplyOilEffect },
-        };
         string xmlPath = "Units.xml";
         Units = LoadUnitData(xmlPath);
         //if (Units.TryGetValue(Unit, out UnitInfo info))
@@ -43,10 +34,7 @@ public class UnitLoader
     }
     public static Dictionary<UnitType, UnitInfo> LoadUnitData(string xmlPath)
     {
-        // Load the XML file
         XDocument xmlDoc = XDocument.Load(xmlPath);
-
-        // Parse the Unit information into a dictionary
         var UnitData = xmlDoc.Descendants("Unit")
             .ToDictionary(
                 r => (UnitType)Enum.Parse(typeof(UnitType), r.Attribute("Name").Value),
@@ -61,16 +49,10 @@ public class UnitLoader
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList()
                 }
             );
-}
-
         return UnitData;
     }
     public void ExecuteUnitEffect(UnitType UnitType)
     {
-        if (Units.TryGetValue(UnitType, out UnitInfo info) &&
-            UnitEffects.TryGetValue(UnitType, out UnitEffect effect))
-        {
-            effect.Invoke(info);
-        }
+        //pick a thing idk
     }
 }
