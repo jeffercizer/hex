@@ -16,6 +16,7 @@ public class Player
         this.seenGameHexDict = new();
         this.unitList = new();
         this.cityList = new();
+        this.unassignedResources = new();
         game.teamManager.AddTeam(teamNum, 50);
     }
     public Player(Game game, int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
@@ -39,7 +40,7 @@ public class Player
     public Dictionary<Hex, bool> seenGameHexDict;
     public List<Unit> unitList;
     public List<City> cityList;
-    public Dictionary<Hex, ResourceType> unassignedResources();
+    public Dictionary<Hex, ResourceType> unassignedResources;
     public float scienceTotal;
     public float cultureTotal;
     public float goldTotal;
@@ -77,9 +78,11 @@ public class Player
         {
             if(targetCity.heldResources.Add(hex, resourceType))
             {
+                unassignedResources.Remove(hex);
                 return true;
             }
         }
+        return false;
     }
 
     public bool RemoveResource(Hex hex)
@@ -91,6 +94,7 @@ public class Player
                 return true;
             }
         }
+        return false;
     }
 
     public void AddGold(float gold)
