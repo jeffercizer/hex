@@ -45,6 +45,7 @@ public class City
         AddCityCenter();
         productionQueue = new();
         partialProductionDictionary = new();
+        heldResources = new();
         
         citySize = 0;
         foodToGrow = 10.0f;
@@ -67,6 +68,9 @@ public class City
     public float happinessYield;
     public List<ProductionQueueType> productionQueue;
     public Dictionary<string, ProductionQueueType> partialProductionDictionary;
+    public Dictionary<Hex, ResourceType> heldResources;
+    public int baseMaxResourcesHeld;
+    public int maxResourcesHeld;
 
     private District AddCityCenter()
     {
@@ -147,13 +151,15 @@ public class City
     {
         foreach (District district in districts)
         {
-            district.RemoveVision();
+            district.BeforeSwitchTeam();
         }
+        heldResource.Clear();
         teamNum = newTeamNum;
         foreach (District district in districts)
         {
-            district.AddVision();
+            district.AfterSwitchTeam();
         }
+        RecalculateYields();
         return true;
     }
 
@@ -164,6 +170,10 @@ public class City
 
     public void OnTurnStarted(int turnNumber)
     {
+        foreach(District district in districts)
+        {
+            district.Heal(15.0f);
+        }
         RecalculateYields();
         productionOverflow += productionYield;
         ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddGold(goldYield);
@@ -198,7 +208,7 @@ public class City
         if (foodToGrow <= foodStockpile)
         {
             citySize += 1;
-            foodStockpile = 0.0f;
+            foodStockpile = Math.Max(0.0f, foodStockpile - foodToGrow);
         }
     }
 
@@ -227,6 +237,17 @@ public class City
                 scienceYield += building.scienceYield;
                 cultureYield += building.cultureYield;
                 happinessYield += building.happinessYield;
+            }
+        }
+        foreach(ResourceType resource in heldResources)
+        {
+            ResourceInfo resourceInfo = ourGameHex.ourGameBoard.game.resourceLoader.resources[resource];
+        }
+        foreach(ResourceType resource in heldResources)
+        {
+            if(ourGameHex.ourGameBoard.game.resourceLoader.resourceEffects[resource])
+            {
+                ourGameHex.ourGameBoard.game.resourceLoader.ExecuteResourceEffect(ourGameHex.ourGameBoard.game.resourceLoader.resourceEffects[resource]);
             }
         }
     }
