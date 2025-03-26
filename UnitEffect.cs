@@ -126,8 +126,8 @@ public class UnitEffect
     }
     
 //Abilities\\
-    public void SettleCity(Unit unit, String cityName)
+    public void SettleCity(Unit unit, GameHex gamehex, String cityName)
     {
-        new City(game.GetUniqueID(), unit.teamNum, cityName, game.mainGameBoard.gameHexDict[unit.currentGameHex.hex]);
+        new City(game.GetUniqueID(), unit.teamNum, cityName, gameHex]);
     }
 }
