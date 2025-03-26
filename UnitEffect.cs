@@ -130,4 +130,10 @@ public class UnitEffect
     {
         new City(game.GetUniqueID(), unit.teamNum, cityName, gameHex]);
     }
+
+    public void ScoutVision(Unit unit)
+    {
+        unit.sightRange += 1;
+        Console.WriteLine("Scout Vision Activated");
+    }
 }
