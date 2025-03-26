@@ -6,7 +6,7 @@
   </Unit>
   <Unit Name="Settler" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="15">
     <Effects>
-      <Effect>SettlerAbility</Effect>
+      <Effect>SettleCity</Effect>
     </Effects>
   </Unit>
 </Units>
