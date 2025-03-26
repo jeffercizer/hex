@@ -45,7 +45,7 @@ public class District
     public void BeforeSwitchTeam()
     {
         RemoveVision();
-        RemoveResource();        
+        RemoveLostResource();        
     }
     
     public void AfterSwitchTeam()
@@ -61,7 +61,7 @@ public class District
     public void DestroyDistrict()
     {
         RemoveVision();
-        RemoveResource();
+        RemoveLostResource();
         ourCity.districts.Remove(this);
         ourGameHex.district = null;
         foreach(Building building in buildings)
