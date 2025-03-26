@@ -71,6 +71,17 @@ public class Player
         turnFinished = true;
     }
 
+    public bool AddResource(Hex hex, ResourceType resourceType, City targetCity)
+    {
+        if(targetCity.heldResources.Count < targetCity.maxResourcesHeld)
+        {
+            if(targetCity.heldResources.Add(hex, resourceType))
+            {
+                return true;
+            }
+        }
+    }
+
     public bool RemoveResource(Hex hex)
     {
         foreach(City city in cityList)
