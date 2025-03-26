@@ -42,18 +42,29 @@ public class UnitEffect
         this.applyFunction = applyFunction;
     }
 
+    public UnitEffect(String functionName, int priority)
+    {
+        this.priority = priority;
+        this.functionName = functionName;
+    }
+
     public UnitEffectType effectType;
     public EffectOperation effectOperation;
     public TerrainMoveType terrainMoveType;
     public float effectMagnitude;
     public int priority;
     public Action<Unit>? applyFunction;
+    public String functionName = "";
     
     public void Apply(Unit unit)
     {
         if (applyFunction != null)
         {
             applyFunction(unit);
+        }
+        else if (functionName != "")
+        {
+            ProcessFunctionString(functionName, unit);
         }
         else
         {
@@ -124,5 +135,20 @@ public class UnitEffect
                 property -= effectMagnitude;
                 break;
         }
+    }
+    void ProcessFunctionString(String functionString, Unit unit)
+    {
+        if(functionString == "SettleCityAbility")
+        {
+            SettleCity(unit, "SettledCityName");
+        }
+        else if(functionString == "ScoutVisionAbility")
+        {
+            unit.sightRange += 1;
+        }
+    }
+    public bool SettleCity(Unit unit, String cityName)
+    {
+        new City(unit.ourGameBoard.game.GetUniqueID(), 1, cityName, game.mainGameBoard.gameHexDict[player1CityLocation]);
     }
 }
