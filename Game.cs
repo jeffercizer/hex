@@ -12,6 +12,7 @@ public class Game
     public TeamManager? teamManager;
     public TurnManager turnManager;
     public ResourceLoader resourceLoader = new();
+    public UnitsLoader unitsLoader = new();
     
     public Game(String mapName)
     {
