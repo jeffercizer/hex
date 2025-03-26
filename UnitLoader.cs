@@ -17,6 +17,8 @@ public struct UnitInfo
     public float SightRange { get; set; }
     public float CombatPower { get; set; }
     public int HealingFactor { get; set; }
+    public Dictionary<TerrainMoveType, float> MovementCosts { get; set; }
+    public Dictionary<TerrainMoveType, float> SightCosts { get; set; }
     public List<String> Effects { get; set; }
     public Dictionary<String, int> Abilities { get; set; }
 }
@@ -47,6 +49,14 @@ public class UnitLoader
                     SightRange = float.Parse(r.Attribute("SightRange").Value),
                     CombatPower = float.Parse(r.Attribute("CombatPower").Value),
                     HealingFactor = int.Parse(r.Attribute("HealingFactor").Value),
+                    MovementCosts = r.Element("MovementCosts").Elements("TerrainMoveType").ToDictionary(
+                            m => (TerrainMoveType)Enum.Parse(typeof(TerrainMoveType), m.Attribute("Name").Value),
+                            m => float.Parse(m.Attribute("Value").Value)
+                        ),
+                    SightCosts = r.Element("SightCosts").Elements("TerrainMoveType").ToDictionary(
+                            s => (TerrainMoveType)Enum.Parse(typeof(TerrainMoveType), s.Attribute("Name").Value),
+                            s => float.Parse(s.Attribute("Value").Value)
+                        )
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
                     Abilities = r.Element("Abilities").Elements("Ability").ToDictionary(
                         a => a.Attribute("Name").Value,
