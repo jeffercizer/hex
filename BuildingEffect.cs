@@ -37,17 +37,28 @@ public class BuildingEffect
         this.priority = priority;
         this.applyFunction = applyFunction;
     }
+
+    public BuildingEffect(String functionName)
+    {
+        this.functionName = functionName;
+    }
+    
     public BuildingEffectType effectType;
     public EffectOperation effectOperation;
     public float effectMagnitude;
     public int priority;
     public Action<Building>? applyFunction;
+    public String functionName = "";
 
     public void ApplyEffect(Building building)
     {
         if (applyFunction != null)
         {
             applyFunction(building);
+        }
+        else if (functionName != "")
+        {
+            ProcessFunctionString(functionName, unit);
         }
         else
         {
@@ -105,6 +116,17 @@ public class BuildingEffect
             case EffectOperation.Subtract:
                 property -= effectMagnitude;
                 break;
+        }
+    }
+    void ProcessFunctionString(String functionString, Building building)
+    {
+        if(functionString == "")
+        {
+            
+        }
+        else if(functionString == "")
+        {
+
         }
     }
 }
