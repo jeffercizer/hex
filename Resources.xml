@@ -19,7 +19,7 @@
   <Resource Name="Gold" Food="0" Production="0" Gold="0" Science="0" Culture="0" Happiness="0"/>
   <Resource Name="Silver" Food="0" Production="0" Gold="0" Science="0" Culture="0" Happiness="0"/>
   <Resource Name="Camels" Food="0" Production="0" Gold="0" Science="0" Culture="0" Happiness="0"/>
-  <Resource Name="Coffee" Food="2" Production="0" Gold="1" Science="1" Culture="0" Happiness="0"/>
+  <Resource Name="Coffee" Food="0" Production="0" Gold="0" Science="0" Culture="0" Happiness="0"/>
   <Resource Name="Cotton" Food="0" Production="2" Gold="2" Science="0" Culture="0" Happiness="0"/>
   <Resource Name="Tobacco" Food="0" Production="0" Gold="2" Science="1" Culture="1" Happiness="0"/>
   <Resource Name="Stone" Food="0" Production="4" Gold="0" Science="0" Culture="0" Happiness="0"/>
