@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
+public struct Resource
+{
+    Hex hex,
+    ResourceType resourceType
+}
+
 public enum ResourceType
 {
     None,
