@@ -40,14 +40,15 @@ public class Unit
             { TerrainMoveType.Embark, 0 },
             { TerrainMoveType.Disembark, 0 },
         };
+        this.movementCosts = scoutMovementCosts;
+        this.baseMovementCosts = movementCosts;
+        
         Action<Unit> scoutAbility = (unit) =>
         {
             Console.WriteLine("We Used Scout Ability");
         };
         AddAbility(new UnitEffect(scoutAbility, 100));
-        this.movementCosts = scoutMovementCosts;
-
-        this.baseMovementCosts = movementCosts;
+        
         Dictionary<TerrainMoveType,float> scoutSightCosts = new Dictionary<TerrainMoveType, float>{
             { TerrainMoveType.Flat, 1 },
             { TerrainMoveType.Rough, 2 },
@@ -63,16 +64,15 @@ public class Unit
         this.sightCosts = scoutSightCosts;
         this.baseSightCosts = sightCosts;
 
+        this.movementSpeed = 2.0f;
+        this.sightRange = 3.0f;
+        this.healingFactor = 15;
+        this.combatStrength = 15.0f;
+        this.maintenanceCost = 1.0f;
+
         currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
         AddVision();
     }
-
-    // public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, GameHex currentGameHex)
-    // {
-    //     this.name = name;
-    //     this.movementCosts = movementCosts;
-    //     this.currentGameHex = currentGameHex;
-    // }
 
     public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, Dictionary<TerrainMoveType, float> sightCosts, GameHex currentGameHex, float sightRange, float movementSpeed, float combatStrength, float maintenanceCost, int teamNum)
     {
@@ -111,8 +111,9 @@ public class Unit
     public float combatStrength = 10.0f;
     public float baseMaintenanceCost = 1.0f;
     public float maintenanceCost = 1.0f;
-    public int baseAttackCount = 1;
+    public int maxAttackCount = 1;
     public int attacksLeft = 1;
+    public int healingFactor = 15;
     public int teamNum;
     public List<Hex>? currentPath = new();
     public List<Hex> ourVisibleHexes = new();
@@ -123,7 +124,7 @@ public class Unit
     public void OnTurnStarted(int turnNumber)
     {
         remainingMovement = movementSpeed;
-        attacksLeft = baseAttackCount;
+        attacksLeft = maxAttackCount;
     }
 
     public void OnTurnEnded(int turnNumber)
@@ -132,6 +133,10 @@ public class Unit
         if(remainingMovement > 0.0f & currentPath.Any())
         {
             MoveTowards(currentGameHex.ourGameBoard.gameHexDict[currentPath.Last()], currentGameHex.ourGameBoard.game.teamManager ,isTargetEnemy);
+        }
+        if(remaningMovement >= movementSpeed & attacksLeft == maxAttackCount)
+        {
+            increaseCurrentHealth(healingFactor);
         }
     }
     
@@ -180,17 +185,16 @@ public class Unit
 
     public bool AttackTarget(GameHex targetGameHex, TeamManager teamManager)
     {
+        remainingMovement -= moveCost;
         if (targetGameHex.unitsList.Any())
         {
-            foreach (Unit unit in targetGameHex.unitsList)
+            Unit unit = targetGameHex.unitsList[0];
+            if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
             {
-                if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
-                {
-                    //combat math TODO
-                    //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
-                    attacksLeft -= 1;
-                    return !decreaseCurrentHealth(20.0f) & unit.decreaseCurrentHealth(25.0f);
-                }
+                //combat math TODO
+                //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
+                attacksLeft -= 1;
+                return !decreaseCurrentHealth(20.0f) & unit.decreaseCurrentHealth(25.0f);
             }
             return false;
         }
@@ -360,7 +364,6 @@ public class Unit
             {
                 if(AttackTarget(targetGameHex, teamManager))
                 {
-                    remainingMovement -= moveCost;
                     UpdateVision();
                     currentGameHex.unitsList.Remove(this);
                     currentGameHex = targetGameHex;
