@@ -22,54 +22,40 @@ public enum TerrainMoveType
 public class Unit
 {
 
-    public Unit(String name, GameHex currentGameHex, int teamNum)
+    public Unit(string name, GameHex currentGameHex, int teamNum, Dictionary<UnitType, UnitInfo> unitData)
     {
         this.name = name;
         this.currentGameHex = currentGameHex;
         this.teamNum = teamNum;
-        //LOAD FROM XML BASED ON NAME
-        Dictionary<TerrainMoveType,float> scoutMovementCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        this.movementCosts = scoutMovementCosts;
-        this.baseMovementCosts = movementCosts;
-        
-        Action<Unit> scoutAbility = (unit) =>
+    
+        if (Enum.TryParse(name, out UnitType unitType) && unitData.TryGetValue(unitType, out UnitInfo unitInfo))
         {
-            Console.WriteLine("We Used Scout Ability");
-        };
-        AddAbility(new UnitEffect(scoutAbility, 100));
-        
-        Dictionary<TerrainMoveType,float> scoutSightCosts = new Dictionary<TerrainMoveType, float>{
-            { TerrainMoveType.Flat, 1 },
-            { TerrainMoveType.Rough, 2 },
-            { TerrainMoveType.Mountain, 9999 },
-            { TerrainMoveType.Coast, 1 },
-            { TerrainMoveType.Ocean, 1 },
-            { TerrainMoveType.Forest, 1 },
-            { TerrainMoveType.River, 0 },
-            { TerrainMoveType.Road, 0.5f },
-            { TerrainMoveType.Embark, 0 },
-            { TerrainMoveType.Disembark, 0 },
-        };
-        this.sightCosts = scoutSightCosts;
-        this.baseSightCosts = sightCosts;
+            this.movementCosts = unitInfo.MovementCosts;
+            this.baseMovementCosts = unitInfo.MovementCosts;
+            this.sightCosts = unitInfo.SightCosts;
+            this.baseSightCosts = unitInfo.SightCosts;
+    
+            this.movementSpeed = unitInfo.MovementSpeed;
+            this.sightRange = unitInfo.SightRange;
+            this.healingFactor = unitInfo.HealingFactor;
+            this.combatStrength = unitInfo.CombatPower;
+            this.maintenanceCost = unitInfo.MaintenanceCost;
 
-        this.movementSpeed = 2.0f;
-        this.sightRange = 3.0f;
-        this.healingFactor = 15;
-        this.combatStrength = 15.0f;
-        this.maintenanceCost = 1.0f;
-
+            foreach (String effectName in unitInfo.Effect.Keys)
+            {
+                AddEffect(new UnitEffect(effectName));
+            }
+    
+            foreach (String abilityName in unitInfo.Abilities.Keys)
+            {
+                AddAbility(new UnitEffect(abilityName));
+            }
+        }
+        else
+        {
+            throw new ArgumentException($"Unit type '{name}' not found in unit data.");
+        }
+    
         currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
         AddVision();
     }
