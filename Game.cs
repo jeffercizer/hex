@@ -13,6 +13,7 @@ public class Game
     public TurnManager turnManager;
     public ResourceLoader resourceLoader = new();
     public UnitsLoader unitsLoader = new();
+    public BuildingLoader buildingLoader = new();
     
     public Game(String mapName)
     {
