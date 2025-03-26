@@ -49,14 +49,22 @@ public class ResourceLoader
     public delegate void ResourceEffect(ResourceInfo resourceInfo);
     
     public ResourceLoader()
-    {
+    { //Iron, Horses, Niter, Coal, Oil, Uranium, Lithium, Jade, Silk, Tobacco, Silver, Gold, Camels
         resourceEffects = new Dictionary<ResourceType, ResourceEffect>
         {
-            // { ResourceType.Silk, ApplySilkEffect },
-            // { ResourceType.Jade, ApplyJadeEffect },
-            // { ResourceType.Iron, ApplyIronEffect },
-            // { ResourceType.Horses, ApplyHorsesEffect },
-            // { ResourceType.Oil, ApplyOilEffect },
+            { ResourceType.Iron, ApplyIronEffect },
+            { ResourceType.Horses, ApplyHorsesEffect },
+            { ResourceType.Niter, ApplyNiterEffect },
+            { ResourceType.Coal, ApplyCoalEffect },
+            { ResourceType.Oil, ApplyOilEffect },
+            { ResourceType.Uranium, ApplyUraniumEffect },
+            { ResourceType.Lithium, ApplyLithiumEffect },
+            { ResourceType.Jade, ApplyJadeEffect },
+            { ResourceType.Silk, ApplySilkEffect },
+            { ResourceType.Coffee, ApplyCoffeeEffect },
+            { ResourceType.Silver, ApplySilverEffect },
+            { ResourceType.Gold, ApplyGoldEffect },
+            { ResourceType.Camels, ApplyCamelsEffect }
         };
         string xmlPath = "Resources.xml";
         resources = LoadResourceData(xmlPath);
@@ -92,5 +100,70 @@ public class ResourceLoader
         {
             effect.Invoke(info);
         }
+    }
+    
+    //all infantry (non-horse, non-siege land) +1 cs
+    void ApplyIronEffect()
+    {
+    }
+    
+    //all mounted units (horse, siege) +1 cs
+    void ApplyHorsesEffect()    
+    {
+    }
+    
+    //idk
+    void ApplyNiterEffect()
+    {
+    }
+    
+    //idk
+    void ApplyCoalEffect()
+    {
+    }
+    
+    //idk
+    void ApplyOilEffect()
+    {
+    }
+    
+    //idk
+    void ApplyUraniumEffect()
+    {
+    }
+    
+    //idk
+    void ApplyLithiumEffect()
+    {
+    }
+    
+    //15% more gold in city
+    void ApplyJadeEffect()
+    {
+    }
+    
+    //10% more culture in city
+    void ApplySilkEffect()
+    {
+    }
+
+    //10% more science in city
+    void ApplyCoffeeEffect()
+    {
+    }
+
+    //15% off units purchased with gold
+    void ApplySilverEffect()
+    {
+    }
+
+    //15% off buildings purchased with gold
+    void ApplyGoldEffect()
+    {
+    }
+
+    //allow 3 more resources to be assigned to this city
+    void ApplyCamelsEffect()
+    {
     }
 }
