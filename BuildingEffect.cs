@@ -124,21 +124,18 @@ public class BuildingEffect
         {
             FreshWaterEffect(building);
         }
-        else if(functionString == "FarmHarvestEffect")
-        {
 
-        }
-        else if(functionString == "GraneryWarehouseEffect")
+        else if(functionString == "GranaryWarehouseEffect")
         {
-            
+            GranaryWarehouseEffect(building);
         }
     }
     void FreshWaterEffect(Building building)
     {
         building.happinessYield += 10.0f;
     }
-    void GraneryWarehouseEffect(Building building)
+    void GranaryWarehouseEffect(Building building)
     {
-        
+        building.ourDistrict.ourCity.flatYields.foodYield += 1;
     }
 }
