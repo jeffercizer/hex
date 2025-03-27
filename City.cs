@@ -314,6 +314,7 @@ public class City
         return ruralBuilding;
     }
 
+    //valid hexes for a rural district
     public List<Hex> ValidExpandHexes(List<TerrainType> validTerrain)
     {
         List<Hex> validHexes = new();
@@ -347,7 +348,8 @@ public class City
         }
         return validHexes;
     }
-
+    
+    //valid hexes to build a district or build a new building on one
     public List<Hex> ValidUrbanBuildHexes(List<TerrainType> validTerrain)
     {
         List<Hex> validHexes = new();
@@ -360,7 +362,41 @@ public class City
                 if(ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == -1 | ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex does not have a district or it is not urban or has less than the max buildings TODO
-                    if (ourGameHex.ourGameBoard.gameHexDict[hex].district == null | !ourGameHex.ourGameBoard.gameHexDict[hex].district.isUrban)
+                    if (ourGameHex.ourGameBoard.gameHexDict[hex].district == null | !ourGameHex.ourGameBoard.gameHexDict[hex].district.isUrban | ourGameHex.ourGameBoard.gameHexDict[hex].district.buildings.Count() < ourGameHex.ourGameBoard.gameHexDict[hex].maxBuildings)
+                    {
+                        //hex doesnt have a non-friendly unit
+                        bool valid = true;
+                        foreach(Unit unit in ourGameHex.ourGameBoard.gameHexDict[hex].unitsList)
+                        {
+                            if(!ourGameHex.ourGameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
+                            {
+                                valid = false;
+                            }
+                        }
+                        if(valid)
+                        {
+                            validHexes.Add(hex);
+                        }
+                    }
+                }
+            }
+        }
+        return validHexes;
+    }
+
+    public List<Hex> ValidDefensiveBuildHexes(List<TerrainType> validTerrain)
+    {
+        List<Hex> validHexes = new();
+        //gather valid targets
+        foreach(Hex hex in ourGameHex.hex.WrappingRange(3, ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right, ourGameHex.ourGameBoard.top, ourGameHex.ourGameBoard.bottom))
+        {
+            if(validTerrain.Contains(ourGameHex.ourGameBoard.gameHexDict[hex].terrainType))
+            {
+                //hex is owned by us so continue
+                if(ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == teamNum)
+                {
+                    //hex has a district with less than the max defenses TODO
+                    if (ourGameHex.ourGameBoard.gameHexDict[hex].district != null & ourGameHex.ourGameBoard.gameHexDict[hex].district.defenses.Count() < ourGameHex.ourGameBoard.gameHexDict[hex].district.maxDefenses)
                     {
                         //hex doesnt have a non-friendly unit
                         bool valid = true;
