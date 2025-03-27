@@ -46,6 +46,7 @@ public class City
         productionQueue = new();
         partialProductionDictionary = new();
         heldResources = new();
+        heldHexes = new();
         
         citySize = 0;
         foodToGrow = 10.0f;
@@ -75,6 +76,7 @@ public class City
     public List<ProductionQueueType> productionQueue;
     public Dictionary<string, ProductionQueueType> partialProductionDictionary;
     public Dictionary<Hex, ResourceType> heldResources;
+    public Hashset<Hex> heldHexes;
     public int baseMaxResourcesHeld;
     public int maxResourcesHeld;
 
