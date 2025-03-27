@@ -241,7 +241,7 @@ public class City
         }
         foreach(ResourceType resource in heldResources)
         {
-            ResourceInfo resourceInfo = ourGameHex.ourGameBoard.game.resourceLoader.resources[resource];
+            ResourceInfo resourceInfo = ResourceLoader.resources[resource];
         }
         foreach(ResourceType resource in heldResources)
         {
