@@ -28,6 +28,7 @@ public enum FeatureType
     River,
     Road,
     Coral,
+    Wetland,
     Fortification
 }
 
