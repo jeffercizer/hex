@@ -6,7 +6,7 @@ using System.Data;
 
 public enum BuildingEffectType
 {
-    BuildCost,
+    ProductionCost,
     GoldCost,
     MaintenanceCost,
     FoodYield,
@@ -30,7 +30,7 @@ public class BuildingEffect
     public BuildingEffect(Action<Building> applyFunction, int priority)
     {
         //default values
-        this.effectType = BuildingEffectType.BuildCost;
+        this.effectType = BuildingEffectType.ProductionCost;
         this.effectOperation = EffectOperation.Add;
         this.effectMagnitude = 0.0f;
         //real values
@@ -62,9 +62,9 @@ public class BuildingEffect
         }
         else
         {
-            if (effectType == BuildingEffectType.BuildCost)
+            if (effectType == BuildingEffectType.ProductionCost)
             {
-                ApplyOperation(ref building.buildCost);
+                ApplyOperation(ref building.productionCost);
             }
             else if (effectType == BuildingEffectType.GoldCost)
             {
