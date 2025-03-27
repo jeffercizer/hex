@@ -340,6 +340,37 @@ public class Unit
     public void MovementRange()
     {
         //breadth first using movement speed and move costs
+        Queue<Hex> frontier = new();
+        frontier.Enqueue(currentGameHex.hex);
+        Dictionary<Hex, float> reached = new();
+        reached.Add(currentGameHex.hex, 0.0f);
+
+        while (frontier.Count > 0)
+        {
+            Hex current = frontier.Dequeue();
+
+            foreach (Hex next in currentGameHex.hex.WrappingNeighbors(currentGameHex.ourGameBoard.left, currentGameHex.ourGameBoard.right))
+            {
+                float movementLeft = movementSpeed - reached[current];
+                float moveCost = TravelCost(current, next, teamManager, true, movementCosts, unitMovementSpeed, reached[current]); 
+                if (moveCost <= movementLeft)
+                {
+                    if (!reached.Keys.Contains(next))
+                    {
+                        if(reached[current]+moveCost < movementSpeed)
+                        {
+                            frontier.Enqueue(next);
+                        }
+                        reached.Add(next, reached[current]+moveCost);
+                    }
+                    else if(reached[next] > reached[current]+moveCost)
+                    {
+                        reached[next] = reached[current]+moveCost;
+                    }
+                }
+            }
+        }
+        return reached;
     }
     
 
