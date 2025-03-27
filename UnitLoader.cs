@@ -32,8 +32,6 @@ public static class UnitLoader
     {
         string xmlPath = "Units.xml";
         unitsDict = LoadUnitData(xmlPath);
-        //if (Units.TryGetValue(Unit, out UnitInfo info))
-        //ExecuteUnitEffect(Unit);
     }
     public static Dictionary<UnitType, UnitInfo> LoadUnitData(string xmlPath)
     {
