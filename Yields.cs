@@ -6,26 +6,25 @@ using System.Data;
 
 public struct Yields
 {
-    public float foodYield;
-    public float productionYield;
-    public float productionOverflow;
-    public float goldYield;
-    public float scienceYield;
-    public float cultureYield;
-    public float happinessYield;
+    public float food;
+    public float production;
+    public float gold;
+    public float science;
+    public float culture;
+    public float happiness;
     
     // Overload the + operator
     public static Yields operator +(Yields a, Yields b)
     {
         return new Yields
         {
-            foodYield = a.foodYield + b.foodYield,
-            productionYield = a.productionYield + b.productionYield,
+            food = a.food + b.food,
+            production = a.production + b.production,
             productionOverflow = a.productionOverflow + b.productionOverflow,
-            goldYield = a.goldYield + b.goldYield,
-            scienceYield = a.scienceYield + b.scienceYield,
-            cultureYield = a.cultureYield + b.cultureYield,
-            happinessYield = a.happinessYield + b.happinessYield
+            gold = a.gold + b.gold,
+            science = a.science + b.science,
+            culture = a.culture + b.culture,
+            happiness = a.happiness + b.happiness
         };
     }
 }
