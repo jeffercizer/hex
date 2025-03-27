@@ -120,13 +120,25 @@ public class BuildingEffect
     }
     void ProcessFunctionString(String functionString, Building building)
     {
-        if(functionString == "")
+        if(functionString == "FreshWaterEffect")
         {
-            
+            FreshWaterEffect(building);
         }
-        else if(functionString == "")
+        else if(functionString == "FarmHarvestEffect")
         {
 
         }
+        else if(functionString == "GraneryWarehouseEffect")
+        {
+            
+        }
+    }
+    void FreshWaterEffect(Building building)
+    {
+        building.happinessYield += 10.0f;
+    }
+    void GraneryWarehouseEffect(Building building)
+    {
+        
     }
 }
