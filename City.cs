@@ -265,15 +265,14 @@ public class City
         {
             ourGameHex.ourGameBoard.gameHexDict[hex].district.AddBuilding(building);
             building.ourDistrict = ourGameHex.ourGameBoard.gameHexDict[hex].district;
+            ourGameHex.ourGameBoard.gameHexDict[hex].district.isUrban = True;
         }
 
     }
 
     public void ExpandToHex(Hex hex)
     {
-        Building ruralBuilding = GetRuralBuilding(hex);
-        District district = new District(ourGameHex, ruralBuilding, false, false, this);
-        ruralBuilding.ourDistrict = district;
+        District district = new District(ourGameHex, false, false, this);
         districts.Add(district);
     }
 
