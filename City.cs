@@ -214,31 +214,12 @@ public class City
         foreach(District district in districts)
         {
             district.RecalculateYields();
-            if(district.isUrban)
-            {
-                foreach(Building building in district.buildings)
-                {
-                    foodYield += building.foodYield;
-                    productionYield += building.productionYield;
-                    goldYield -= building.maintenanceCost;
-                    goldYield += building.goldYield;
-                    scienceYield += building.scienceYield;
-                    cultureYield += building.cultureYield;
-                    happinessYield += building.happinessYield;
-                    happinessYield -= 1; //reduce 1 per population
-                }
-            }
-            else
-            {
-                foodYield += district.ourGameHex.foodYield;
-                productionYield += district.ourGameHex.productionYield;
-                goldYield += district.ourGameHex.goldYield;
-                scienceYield += district.ourGameHex.scienceYield;
-                cultureYield += district.ourGameHex.cultureYield;
-                happinessYield += district.ourGameHex.happinessYield;
-                happinessYield -= 1; //reduce 1 per population
-            }
-
+            foodYield += district.ourGameHex.foodYield;
+            productionYield += district.ourGameHex.productionYield;
+            goldYield += district.ourGameHex.goldYield;
+            scienceYield += district.ourGameHex.scienceYield;
+            cultureYield += district.ourGameHex.cultureYield;
+            happinessYield += district.ourGameHex.happinessYield;
         }
         foreach(ResourceType resource in heldResources)
         {
