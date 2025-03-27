@@ -66,6 +66,16 @@ public class City
     public float scienceYield;
     public float cultureYield;
     public float happinessYield;
+    public Yields flatYields = new();
+    public Yields roughYields = new();
+    public Yields mountainYields = new();
+    public Yields coastalYields = new();
+    public Yields oceanYields = new();
+    public Yields desertYields = new();
+    public Yields plainsYields = new();
+    public Yields grasslandYields = new();
+    public Yields tundraYields = new();
+    public Yields arcticYields = new();
     public List<ProductionQueueType> productionQueue;
     public Dictionary<string, ProductionQueueType> partialProductionDictionary;
     public Dictionary<Hex, ResourceType> heldResources;
@@ -355,53 +365,53 @@ public class City
     // For terrain types
     public void AddFlatYields(GameHex gameHex)
     {
-        gameHex.foodYield += 1;
+        gameHex.yields += flatYields;
     }
     
     public void AddRoughYields(GameHex gameHex)
     {
-        gameHex.productionYield += 1;
+        gameHex.yields += roughYields;
     }
     
     public void AddMountainYields(GameHex gameHex)
     {
-        //nothing for now
+        gameHex.yields += mountainYields;
     }
     
     public void AddCoastYields(GameHex gameHex)
     {
-        gameHex.foodYield += 1;
+        gameHex.yields += coastYields;
     }
     
     public void AddOceanYields(GameHex gameHex)
     {
-        gameHex.goldYield += 1;
+        gameHex.yields += oceanYields;
     }
     
     // For terrain temperatures
     public void AddDesertYields(GameHex gameHex)
     {
-        gameHex.goldYield += 1;
+        gameHex.yields += desertYields;
     }
     
     public void AddPlainsYields(GameHex gameHex)
     {
-        gameHex.productionYield += 1;
+        gameHex.yields += plainsYields;
     }
     
     public void AddGrasslandYields(GameHex gameHex)
     {
-        gameHex.foodYield += 1;
+        gameHex.yields += grasslandYields;
     }
     
     public void AddTundraYields(GameHex gameHex)
     {
-        gameHex.happinessYield += 1;
+        gameHex.yields += tundraYields;
     }
     
     public void AddArcticYields(GameHex gameHex)
     {
-        //nothing for now
+        gameHex.yields += articYields;
     }
 
 }
