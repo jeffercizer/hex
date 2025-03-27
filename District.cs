@@ -23,6 +23,7 @@ public class District
     {
         this.ourCity = ourCity;
         buildings = new();
+        defenses = new();
         this.ourGameHex = ourGameHex;
         
         ourGameHex.ClaimHex(ourCity);
@@ -38,6 +39,11 @@ public class District
         }
 
         this.isCityCenter = isCityCenter;
+        if(isCityCenter)
+        {
+            maxHealth = 50.0f;
+            currentHealth = 50.0f;
+        }
         this.isUrban = isUrban;
         if(isUrban)
         {
@@ -48,11 +54,17 @@ public class District
     }
 
     public List<Building> buildings;
+    public List<Building> defenses;
     public GameHex ourGameHex;
     public bool isCityCenter;
     public bool isUrban;
+    public bool hasWalls;
     public City ourCity;
     public List<Hex> ourVisibleHexes = new();
+    public float currentHealth = 0.0f;
+    public float maxHealth = 0.0f;
+    public int maxBuildings = 2;
+    public int maxDefenses = 1;
 
     public void BeforeSwitchTeam()
     {
@@ -64,7 +76,11 @@ public class District
     {      
         foreach(Building building in buildings)
         {
-            SwitchTeams();
+            building.SwitchTeams();
+        }
+        foreach(Building building in defenses)
+        {
+            building.SwitchTeams();
         }
         AddVision();
         AddResource();
@@ -79,6 +95,26 @@ public class District
         foreach(Building building in buildings)
         {
             building.DestroyBuilding();
+        }
+        foreach(Building building in defenses)
+        {
+            building.DestroyBuilding();
+        }
+    }
+
+    public void Heal(float healAmount)
+    {
+        currentHealth += healAmount;
+        currentHealth = Math.Min(currentHealth, maxHealth);
+    }
+
+    public void AddWalls(float wallStrength)
+    {
+        if(currentHealth >= maxHealth)
+        {
+            maxHealth += wallStrength;
+            currentHealth += wallStrength;
+            hasWalls = true;
         }
     }
     
@@ -104,9 +140,21 @@ public class District
 
     public void AddBuilding(Building building)
     {
-        buildings.Add(building);
-        ourCity.citySize += 1;
-        ourCity.RecalculateYields();
+        if(buildings.Count() < maxBuildings)
+        {
+            buildings.Add(building);
+            ourCity.citySize += 1;
+            ourCity.RecalculateYields();
+        }
+    }
+
+    public void AddDefense(Building building)
+    {
+        if(defenses.Count() < maxDefenses)
+        {
+            defenses.Add(building);
+            ourCity.RecalculateYields();
+        }
     }
 
     public void UpdateVision()
