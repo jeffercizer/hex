@@ -42,11 +42,10 @@ public struct ResourceInfo
     public int Happiness { get; set; }
 }
 
-public class ResourceLoader
+public static class ResourceLoader
 {
-    Dictionary<ResourceType, ResourceInfo> resources;
-    Dictionary<ResourceType, ResourceEffect> resourceEffects;
-    public delegate void ResourceEffect(ResourceInfo resourceInfo);
+    public Dictionary<ResourceType, ResourceInfo> resources;
+    public Dictionary<ResourceType, ResourceEffect> resourceEffects;
     
     public ResourceLoader()
     { //Iron, Horses, Niter, Coal, Oil, Uranium, Lithium, Jade, Silk, Tobacco, Silver, Gold, Camels
