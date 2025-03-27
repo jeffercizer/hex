@@ -52,9 +52,122 @@ public class GameHex
     public TerrainTemperature terrainTemp;
     public ResourceType resourceType;
     public int ownedBy;
+    public City owningCity;
     public HashSet<FeatureType> featureSet = new();
     public List<Unit> unitsList = new();
     public District? district;
+
+    public float foodYield;
+    public float productionYield;
+    public float goldYield;
+    public float scienceYield;
+    public float cultureYield;
+    public float happinessYield;
+
+    public void RecalculateYields()
+    {
+        foodYield = 0.0f;
+        productionYield = 0.0f;
+        goldYield = 0.0f;
+        scienceYield = 0.0f;
+        cultureYield = 0.0f;
+        happinessYield = 0.0f;
+        //if the distrit is urban the buildings will set our yields
+        if (district != null & !district.isUrban)
+        {
+            //calculate the rural value
+            if(terrainType == TerrainType.Flat)
+            {
+                ourCity.AddFlatYields(this);
+            }
+            else if (terrainType == TerrainType.Rough)
+            {
+                ourCity.AddRoughYields(this);
+            }
+            else if (terrainType == TerrainType.Mountain)
+            {
+                ourCity.AddMountainYields(this);
+            }
+            else if (terrainType == TerrainType.Coast)
+            {
+                ourCity.AddCoastYields(this);
+            }
+            else if (terrainType == TerrainType.Ocean)
+            {
+                ourCity.AddOceanYields(this);
+            }
+            
+            if(terrainTemp == TerrainTemperature.Desert)
+            {
+                ourCity.AddDesertYields(this);
+            }
+            else if (terrainTemp == TerrainTemperature.Plains)
+            {
+                ourCity.AddPlainsYields(this);
+            }
+            else if (terrainTemp == TerrainTemperature.Grassland)
+            {
+                ourCity.AddGrasslandYields(this);
+            }
+            else if (terrainTemp == TerrainTemperature.Tundra)
+            {
+                ourCity.AddTundraYields(this);
+            }
+            else
+            {
+                ourCity.AddArcticYields(this);
+            }
+        }
+        else
+        {
+            SetUnownedHexYields();
+        }
+    }
+
+    public void SetUnownedHexYields()
+    {
+            if(terrainType == TerrainType.Flat)
+            {
+                foodYield += 1;
+            }
+            else if (terrainType == TerrainType.Rough)
+            {
+                productionYield += 1;
+            }
+            else if (terrainType == TerrainType.Mountain)
+            {
+                //nothing
+            }
+            else if (terrainType == TerrainType.Coast)
+            {
+                foodYield += 1;
+            }
+            else if (terrainType == TerrainType.Ocean)
+            {
+                goldYield += 1;
+            }
+            
+            if(terrainTemp == TerrainTemperature.Desert)
+            {
+                goldYield += 1;
+            }
+            else if (terrainTemp == TerrainTemperature.Plains)
+            {
+                productionYield += 1;
+            }
+            else if (terrainTemp == TerrainTemperature.Grassland)
+            {
+                foodYield += 1;
+            }
+            else if (terrainTemp == TerrainTemperature.Tundra)
+            {
+                happiness += 1;
+            }
+            else
+            {
+                //nothing
+            }
+    }
 
     public void OnTurnStarted(int turnNumber)
     {
@@ -77,16 +190,18 @@ public class GameHex
         return true;
     }
 
-    public void ClaimHex(int teamNum)
+    public void ClaimHex(int teamNum, City city)
     {
         ownedBy = teamNum;
+        owningCity = city;
     }
 
-    public bool TryClaimHex(int teamNum)
+    public bool TryClaimHex(int teamNum, City city)
     {
         if(ownedBy == -1)
         {
             ownedBy = teamNum;
+            owningCity = city;
             return true;
         }
         return false;
