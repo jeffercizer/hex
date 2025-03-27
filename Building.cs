@@ -61,8 +61,11 @@ public class Building
             
             this.happinessYield = buildingInfo.HappinessYield;
             this.baseHappinessYield = buildingInfo.HappinessYield;
-            
-            this.buildingEffects = buildingInfo.Effects;
+            this.buildingEffects = new();
+            foreach (String effectName in buildingInfo.Effects)
+            {
+                buildingEffects.Add(new BuildingEffect(effectName))
+            }
         }
     }
 
