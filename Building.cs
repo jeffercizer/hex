@@ -10,8 +10,8 @@ public class Building
     public String name;
     public District? ourDistrict;
     public List<BuildingEffect> buildingEffects;
-    public float baseBuildCost;
-    public float buildCost;
+    public float baseProductionCost;
+    public float productionCost;
     public float baseGoldCost;
     public float goldCost;
     public float baseMaintenanceCost;
@@ -32,42 +32,38 @@ public class Building
     public Building(String name)
     {
         this.name = name;
-        buildingEffects = new();
-        //LOAD INFORMATION FROM XML USING NAME
-        //So far we have requested
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
-        if (Enum.TryParse(name, out UnitType unitType) && BuildingLoader.buildingsDict.TryGetValue(unitType, out UnitInfo unitInfo))
-                {
-            BuildingType buildingType = Enum.Parse(name);
-            current
-                    this.movementCosts = unitInfo.MovementCosts;
-                    this.baseMovementCosts = unitInfo.MovementCosts;
-                    this.sightCosts = unitInfo.SightCosts;
-                    this.baseSightCosts = unitInfo.SightCosts;
+        if (Enum.TryParse(name, out BuildingType buildingType) && BuildingLoader.buildingsDict.TryGetValue(buildingType, out BuildingInfo buildingInfo))
+        {
+            this.productionCost = buildingInfo.BuildCost;
+            this.baseProductionCost = buildingInfo.BuildCost;
             
-                    this.movementSpeed = unitInfo.MovementSpeed;
-                    this.sightRange = unitInfo.SightRange;
-                    this.healingFactor = unitInfo.HealingFactor;
-                    this.combatStrength = unitInfo.CombatPower;
-                    this.maintenanceCost = unitInfo.MaintenanceCost;
+            this.goldCost = buildingInfo.GoldCost;
+            this.baseGoldCost = buildingInfo.GoldCost;
             
-
-    }
-    public Building(String name, District ourDistrict)
-    {
-        this.name = name;
-        this.ourDistrict = ourDistrict;
-        buildingEffects = new();
-        //LOAD INFORMATION FROM XML USING NAME
-        baseBuildCost = 15;
-        baseGoldCost = 50;
-        baseMaintenanceCost = 1;
-        baseFoodYield = 2;
-        baseProductionYield = 2;
-        baseGoldYield = 3;
-        baseScienceYield = 4;
-        baseCultureYield = 5;
-        baseHappinessYield = 6;
+            this.maintenanceCost = buildingInfo.MaintenanceCost;
+            this.baseMaintenanceCost = buildingInfo.MaintenanceCost;
+            
+            this.foodYield = buildingInfo.FoodYield;
+            this.baseFoodYield = buildingInfo.FoodYield;
+            
+            this.productionYield = buildingInfo.ProductionYield;
+            this.baseProductionYield = buildingInfo.ProductionYield;
+            
+            this.goldYield = buildingInfo.GoldYield;
+            this.baseGoldYield = buildingInfo.GoldYield;
+            
+            this.scienceYield = buildingInfo.ScienceYield;
+            this.baseScienceYield = buildingInfo.ScienceYield;
+            
+            this.cultureYield = buildingInfo.CultureYield;
+            this.baseCultureYield = buildingInfo.CultureYield;
+            
+            this.happinessYield = buildingInfo.HappinessYield;
+            this.baseHappinessYield = buildingInfo.HappinessYield;
+            
+            this.buildingEffects = buildingInfo.Effects;
+        }
     }
 
     public void SwitchTeams()
@@ -95,7 +91,7 @@ public class Building
     public void RecalculateYields()
     {
         //reset all Yields to base
-        buildCost = baseBuildCost;
+        productionCost = baseProductionCost;
         goldCost = baseGoldCost;
         maintenanceCost = baseMaintenanceCost;
         foodYield = baseFoodYield;
