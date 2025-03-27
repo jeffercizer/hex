@@ -277,7 +277,15 @@ public class City
             building.ourDistrict = ourGameHex.ourGameBoard.gameHexDict[hex].district;
             ourGameHex.ourGameBoard.gameHexDict[hex].district.isUrban = True;
         }
+    }
 
+    public void BuildDefenseOnHex(Hex hex, Building building)
+    {
+        if(ourGameHex.ourGameBoard.gameHexDict[hex].district != null)
+        {
+            ourGameHex.ourGameBoard.gameHexDict[hex].district.AddDefense(building);
+            building.ourDistrict = ourGameHex.ourGameBoard.gameHexDict[hex].district;
+        }
     }
 
     public void ExpandToHex(Hex hex)
