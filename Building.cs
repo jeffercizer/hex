@@ -29,11 +29,11 @@ public class Building
     public float baseHappinessYield;
     public float happinessYield;
 
-    public Building(String name)
+    public Building(BuildingType buildingType)
     {
-        this.name = name;
+        this.name = buildingType.ToString();
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
-        if (Enum.TryParse(name, out BuildingType buildingType) && BuildingLoader.buildingsDict.TryGetValue(buildingType, out BuildingInfo buildingInfo))
+        if (BuildingLoader.buildingsDict.TryGetValue(buildingType, out BuildingInfo buildingInfo))
         {
             this.productionCost = buildingInfo.BuildCost;
             this.baseProductionCost = buildingInfo.BuildCost;
