@@ -64,7 +64,7 @@ public class BuildingEffect
         {
             if (effectType == BuildingEffectType.ProductionCost)
             {
-                ApplyOperation(ref building.productionCost);
+                ApplyOperation(ref building.yields.production);
             }
             else if (effectType == BuildingEffectType.GoldCost)
             {
@@ -76,27 +76,27 @@ public class BuildingEffect
             }
             else if (effectType == BuildingEffectType.FoodYield)
             {
-                ApplyOperation(ref building.foodYield);
+                ApplyOperation(ref building.yields.food);
             }
             else if (effectType == BuildingEffectType.ProductionYield)
             {
-                ApplyOperation(ref building.productionYield);
+                ApplyOperation(ref building.yields.production);
             }
             else if (effectType == BuildingEffectType.GoldYield)
             {
-                ApplyOperation(ref building.goldYield);
+                ApplyOperation(ref building.yields.gold);
             }
             else if (effectType == BuildingEffectType.ScienceYield)
             {
-                ApplyOperation(ref building.scienceYield);
+                ApplyOperation(ref building.yields.science);
             }
             else if (effectType == BuildingEffectType.CultureYield)
             {
-                ApplyOperation(ref building.cultureYield);
+                ApplyOperation(ref building.yields.culture);
             }
             else if (effectType == BuildingEffectType.HappinessYield)
             {
-                ApplyOperation(ref building.happinessYield);
+                ApplyOperation(ref building.yields.happiness);
             }
         }
     }
@@ -132,11 +132,32 @@ public class BuildingEffect
     }
     void WaterSupplyEffect(Building building)
     {
-        foreach(Hexh hex on building.ourDistrict.ourGameHex.WrappingNeighbors(building.ourDistrict.ourGameHex.gameBoard.left, building.ourDistrict.ourGameHex.gameBoard.right))
-        building.happinessYield += 10.0f;
+        float waterHappinessYield = 0.0f;
+        if(building.ourDistrict.ourGameHex.terrainType == TerrainType.Coastal ||building.ourDistrict.ourGameHex.featureSet.Contains(FeatureType.River) 
+                || building.ourDistrict.ourGameHex.featureSet.Contains(FeatureType.Wetland))
+        {
+            waterHappinessYield = 10.0f;
+        }
+        else
+        {
+            foreach(Hex hex on building.ourDistrict.ourGameHex.WrappingNeighbors(building.ourDistrict.ourGameHex.gameBoard.left, building.ourDistrict.ourGameHex.gameBoard.right))
+            {
+                if (building.ourDistrict.ourGameHex.gameBoard.gameHexDict[hex].terrainType == TerrainType.Coastal || building.ourDistrict.ourGameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.River) 
+                    || building.ourDistrict.ourGameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Wetland))
+                {
+                    waterHappinessYield = 10.0f;
+                    break;
+                }
+            }
+        }
+        building.yields.happiness += waterhappinessYield;
     }
     void GranaryWarehouseEffect(Building building)
     {
-        building.ourDistrict.ourCity.flatYields.foodYield += 1;
+        building.ourDistrict.ourCity.flatYields.food += 1;
+    }
+    void StoneCutterWarehouseEffect(Building building)
+    {
+        building.ourDistrict.ourCity.roughYields.production += 1;
     }
 }
