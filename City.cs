@@ -50,32 +50,28 @@ public class City
         citySize = 0;
         foodToGrow = 10.0f;
         RecalculateYields();
+        SetBaseHexYields();
     }
     public int id;
     public int teamNum;
     public String name;
     public List<District> districts;
     public GameHex ourGameHex;
+    public Yields yields;
     public int citySize;
     public float foodToGrow;
     public float foodStockpile;
-    public float foodYield;
-    public float productionYield;
     public float productionOverflow;
-    public float goldYield;
-    public float scienceYield;
-    public float cultureYield;
-    public float happinessYield;
-    public Yields flatYields = new();
-    public Yields roughYields = new();
-    public Yields mountainYields = new();
-    public Yields coastalYields = new();
-    public Yields oceanYields = new();
-    public Yields desertYields = new();
-    public Yields plainsYields = new();
-    public Yields grasslandYields = new();
-    public Yields tundraYields = new();
-    public Yields arcticYields = new();
+    public Yields flatYields;
+    public Yields roughYields;
+    public Yields mountainYields;
+    public Yields coastalYields;
+    public Yields oceanYields;
+    public Yields desertYields;
+    public Yields plainsYields;
+    public Yields grasslandYields;
+    public Yields tundraYields;
+    public Yields arcticYields;
     public List<ProductionQueueType> productionQueue;
     public Dictionary<string, ProductionQueueType> partialProductionDictionary;
     public Dictionary<Hex, ResourceType> heldResources;
@@ -89,6 +85,32 @@ public class City
         building.ourDistrict = district;
         districts.Add(district);
         return district;
+    }
+
+    private void SetBaseHexYields()
+    {
+        flatYields = new();
+        roughYields = new();
+        mountainYields = new();
+        coastalYields = new();
+        oceanYields = new();
+        desertYields = new();
+        plainsYields = new();
+        grasslandYields = new();
+        tundraYields = new();
+        arcticYields = new();
+        
+        flatYields.food += 1;
+        roughYields.production += 1;
+        //mountainYields.production += 0;
+        coastalYields.food += 1;
+        oceanYields.gold += 1;
+        
+        desertYields.gold += 1;
+        plainsYields.production += 1;
+        grasslandYields.food += 1;
+        tundraYields.happiness += 1;
+        //arcticYields
     }
 
 
@@ -171,11 +193,11 @@ public class City
             district.Heal(15.0f);
         }
         RecalculateYields();
-        productionOverflow += productionYield;
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddGold(goldYield);
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddScience(scienceYield);
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddCulture(cultureYield);
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddHappiness(cultureYield);
+        productionOverflow += yields.production;
+        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddGold(yields.gold);
+        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddScience(yields.science);
+        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddCulture(yields.culture);
+        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddHappiness(yields.happiness);
         if(productionQueue.Any())
         {
             productionQueue[0].productionLeft -= productionOverflow;
@@ -200,7 +222,7 @@ public class City
             }
         }
 
-        foodStockpile += foodYield;
+        foodStockpile += yields.food;
         if (foodToGrow <= foodStockpile)
         {
             citySize += 1;
@@ -215,21 +237,11 @@ public class City
 
     public void RecalculateYields()
     {
-        foodYield = 0.0f;
-        productionYield = 0.0f;
-        goldYield = 0.0f;
-        scienceYield = 0.0f;
-        cultureYield = 0.0f;
-        happinessYield = 0.0f;
+        yields = new();
         foreach(District district in districts)
         {
             district.RecalculateYields();
-            foodYield += district.ourGameHex.foodYield;
-            productionYield += district.ourGameHex.productionYield;
-            goldYield += district.ourGameHex.goldYield;
-            scienceYield += district.ourGameHex.scienceYield;
-            cultureYield += district.ourGameHex.cultureYield;
-            happinessYield += district.ourGameHex.happinessYield;
+            yields += district.ourGameHex.yields;
         }
         foreach(ResourceType resource in heldResources)
         {
