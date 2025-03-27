@@ -352,4 +352,56 @@ public class City
         }
         return validHexes;
     }
+    // For terrain types
+    public void AddFlatYields(GameHex gameHex)
+    {
+        gameHex.foodYield += 1;
+    }
+    
+    public void AddRoughYields(GameHex gameHex)
+    {
+        gameHex.productionYield += 1;
+    }
+    
+    public void AddMountainYields(GameHex gameHex)
+    {
+        //nothing for now
+    }
+    
+    public void AddCoastYields(GameHex gameHex)
+    {
+        gameHex.foodYield += 1;
+    }
+    
+    public void AddOceanYields(GameHex gameHex)
+    {
+        gameHex.goldYield += 1;
+    }
+    
+    // For terrain temperatures
+    public void AddDesertYields(GameHex gameHex)
+    {
+        gameHex.goldYield += 1;
+    }
+    
+    public void AddPlainsYields(GameHex gameHex)
+    {
+        gameHex.productionYield += 1;
+    }
+    
+    public void AddGrasslandYields(GameHex gameHex)
+    {
+        gameHex.foodYield += 1;
+    }
+    
+    public void AddTundraYields(GameHex gameHex)
+    {
+        gameHex.happinessYield += 1;
+    }
+    
+    public void AddArcticYields(GameHex gameHex)
+    {
+        //nothing for now
+    }
+
 }
