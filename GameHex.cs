@@ -107,6 +107,10 @@ public class GameHex
             {
                 ourCity.AddArcticYields(this);
             }
+            if(featureSet.Contains(FeatureType.Forest))
+            {
+                yields.production += 1;
+            }
         }
         else
         {
