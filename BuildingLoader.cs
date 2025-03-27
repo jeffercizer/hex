@@ -30,15 +30,14 @@ public struct BuildingInfo
     public List<String> Effects { get; set; }
 }
 
-public class BuildingLoader
+public static class BuildingLoader
 {
-    Dictionary<BuildingType, BuildingInfo> BuildingsLoader;
-    public delegate void BuildingEffect(BuildingInfo BuildingInfo);
+    public Dictionary<BuildingType, BuildingInfo> buildingsDict;
     
     public BuildingLoader()
     {
         string xmlPath = "Buildings.xml";
-        Buildings = LoadBuildingData(xmlPath);
+        buildingsDict = LoadBuildingData(xmlPath);
     }
     
     public static Dictionary<BuildingType, BuildingInfo> LoadBuildingData(string xmlPath)
