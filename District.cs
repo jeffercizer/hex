@@ -9,11 +9,20 @@ public class District
 {
     public District(GameHex ourGameHex, Building initialBuilding, bool isCityCenter, bool isUrban, City ourCity)
     {
-        this.ourCity = ourCity;
-        buildings = new();
+        SetupDistrict(ourGameHex, isCityCenter, isUrban, ourCity);
         AddBuilding(initialBuilding);
         initialBuilding.ourDistrict = this;
-        
+    }
+
+    public District(GameHex ourGameHex, bool isCityCenter, bool isUrban, City ourCity)
+    {
+        SetupDistrict(ourGameHex, isCityCenter, isUrban, ourCity);
+    }
+
+    private void SetupDistrict(GameHex ourGameHex, bool isCityCenter, bool isUrban, City ourCity)
+    {
+        this.ourCity = ourCity;
+        buildings = new();
         this.ourGameHex = ourGameHex;
         ourGameHex.ClaimHex(ourCity.teamNum);
         if(ourGameHex.resourceType != ResourceType.None)
@@ -72,9 +81,13 @@ public class District
     
     public void RecalculateYields()
     {
-        foreach(Building building in buildings)
+        ourGameHex.RecalculateYields();
+        if(builings.Any())
         {
-            building.RecalculateYields();
+            foreach(Building building in buildings)
+            {
+                building.RecalculateYields();
+            }
         }
     }
 
