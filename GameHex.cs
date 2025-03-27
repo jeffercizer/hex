@@ -112,7 +112,7 @@ public class GameHex
                 yields.production += 1;
             }
         }
-        else
+        else if(district == null)
         {
             SetUnownedHexYields();
         }
