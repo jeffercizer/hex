@@ -82,11 +82,19 @@ public class District
     public void RecalculateYields()
     {
         ourGameHex.RecalculateYields();
+        foreach(Building building in buildings)
+        {
+            building.RecalculateYields();
+        }
+    }
+
+    public void PrepareYieldRecalculate()
+    {
         if(builings.Any())
         {
             foreach(Building building in buildings)
             {
-                building.RecalculateYields();
+                building.PrepareYieldRecalculate();
             }
         }
     }
