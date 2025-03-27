@@ -18,16 +18,11 @@ public enum BuildingType
 
 public struct BuildingInfo
 {
-    public int ProductionCost { get; set; }
-    public int GoldCost { get; set; }
-    public float FoodYield { get; set; }
-    public float ProductionYield { get; set; }
-    public float GoldYield { get; set; }
-    public float ScienceYield { get; set; }
-    public float CultureYield { get; set; }
-    public float HappinessYield { get; set; }
-    public float MaintenanceCost { get; set; }
-    public List<String> Effects { get; set; }
+    public int ProductionCost;
+    public int GoldCost;
+    public Yields yields;
+    public float MaintenanceCost;
+    public List<String> Effects;
 }
 
 public static class BuildingLoader
@@ -50,12 +45,12 @@ public static class BuildingLoader
                 {
                     ProductionCost = int.Parse(r.Attribute("ProductionCost").Value),
                     GoldCost = int.Parse(r.Attribute("GoldCost").Value),
-                    FoodYield = int.Parse(r.Attribute("FoodYield").Value),
-                    ProductionYield = int.Parse(r.Attribute("ProductionYield").Value),
-                    GoldYield = float.Parse(r.Attribute("GoldYield").Value),
-                    ScienceYield = float.Parse(r.Attribute("ScienceYield").Value),
-                    CultureYield = float.Parse(r.Attribute("CultureYield").Value),
-                    HappinessYield = int.Parse(r.Attribute("HappinessYield").Value),
+                    yields.food = int.Parse(r.Attribute("FoodYield").Value),
+                    yields.production = int.Parse(r.Attribute("ProductionYield").Value),
+                    yields.gold = float.Parse(r.Attribute("GoldYield").Value),
+                    yields.science = float.Parse(r.Attribute("ScienceYield").Value),
+                    yields.culture = float.Parse(r.Attribute("CultureYield").Value),
+                    yields.happiness = int.Parse(r.Attribute("HappinessYield").Value),
                     MaintenanceCost = float.Parse(r.Attribute("MaintenanceCost").Value),
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
                 }
