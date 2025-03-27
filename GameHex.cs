@@ -57,21 +57,11 @@ public class GameHex
     public List<Unit> unitsList = new();
     public District? district;
 
-    public float foodYield;
-    public float productionYield;
-    public float goldYield;
-    public float scienceYield;
-    public float cultureYield;
-    public float happinessYield;
+    public Yields yields;
 
     public void RecalculateYields()
     {
-        foodYield = 0.0f;
-        productionYield = 0.0f;
-        goldYield = 0.0f;
-        scienceYield = 0.0f;
-        cultureYield = 0.0f;
-        happinessYield = 0.0f;
+        yields = new();
         //if the distrit is urban the buildings will set our yields
         if (district != null & !district.isUrban)
         {
@@ -128,11 +118,11 @@ public class GameHex
     {
             if(terrainType == TerrainType.Flat)
             {
-                foodYield += 1;
+                yields.food += 1;
             }
             else if (terrainType == TerrainType.Rough)
             {
-                productionYield += 1;
+                yields.production += 1;
             }
             else if (terrainType == TerrainType.Mountain)
             {
@@ -140,28 +130,28 @@ public class GameHex
             }
             else if (terrainType == TerrainType.Coast)
             {
-                foodYield += 1;
+                yields.food += 1;
             }
             else if (terrainType == TerrainType.Ocean)
             {
-                goldYield += 1;
+                yields.gold += 1;
             }
             
             if(terrainTemp == TerrainTemperature.Desert)
             {
-                goldYield += 1;
+                yields.gold += 1;
             }
             else if (terrainTemp == TerrainTemperature.Plains)
             {
-                productionYield += 1;
+                yields.production += 1;
             }
             else if (terrainTemp == TerrainTemperature.Grassland)
             {
-                foodYield += 1;
+                yields.food += 1;
             }
             else if (terrainTemp == TerrainTemperature.Tundra)
             {
-                happiness += 1;
+                yields.happiness += 1;
             }
             else
             {
