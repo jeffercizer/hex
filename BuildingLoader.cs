@@ -11,7 +11,7 @@ public enum BuildingType
   HuntingCamp = "Hunting Camp",
   FishingBoat = "Fishing Boat",
   WhalingShip = "Whaling Ship",
-  Granery = "Granery",
+  Granary = "Granary",
   StoneCutter = "Stone Cutter",
   Market = "Market",
 }
