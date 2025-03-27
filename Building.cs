@@ -16,18 +16,8 @@ public class Building
     public float goldCost;
     public float baseMaintenanceCost;
     public float maintenanceCost;
-    public float baseFoodYield;
-    public float foodYield;
-    public float baseProductionYield;
-    public float productionYield;
-    public float baseGoldYield;
-    public float goldYield;
-    public float baseScienceYield;
-    public float scienceYield;
-    public float baseCultureYield;
-    public float cultureYield;
-    public float baseHappinessYield;
-    public float happinessYield;
+    public Yields baseYields;
+    public Yields yields;
 
     public Building(BuildingType buildingType)
     {
@@ -44,23 +34,9 @@ public class Building
             this.maintenanceCost = buildingInfo.MaintenanceCost;
             this.baseMaintenanceCost = buildingInfo.MaintenanceCost;
             
-            this.foodYield = buildingInfo.FoodYield;
-            this.baseFoodYield = buildingInfo.FoodYield;
+            this.yields = yields;
+            this.baseYields = yields;
             
-            this.productionYield = buildingInfo.ProductionYield;
-            this.baseProductionYield = buildingInfo.ProductionYield;
-            
-            this.goldYield = buildingInfo.GoldYield;
-            this.baseGoldYield = buildingInfo.GoldYield;
-            
-            this.scienceYield = buildingInfo.ScienceYield;
-            this.baseScienceYield = buildingInfo.ScienceYield;
-            
-            this.cultureYield = buildingInfo.CultureYield;
-            this.baseCultureYield = buildingInfo.CultureYield;
-            
-            this.happinessYield = buildingInfo.HappinessYield;
-            this.baseHappinessYield = buildingInfo.HappinessYield;
             this.buildingEffects = new();
             foreach (String effectName in buildingInfo.Effects)
             {
@@ -94,18 +70,8 @@ public class Building
     public void RecalculateYields()
     {
         //reset all Yields to base
-        productionCost = baseProductionCost;
-        goldCost = baseGoldCost;
-        maintenanceCost = baseMaintenanceCost;
-        foodYield = baseFoodYield;
-        productionYield = baseProductionYield;
-        goldYield = baseGoldYield;
-        scienceYield = baseScienceYield;
-        cultureYield = baseCultureYield;
-        happinessYield = baseHappinessYield;
-        //also order all effects, multiply/divide after add/subtract priority
-        //0 means it is applied first 100 means it is applied "last" (highest number last)
-        //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
+        yields = baseYields;
+        
         PriorityQueue<BuildingEffect, int> orderedEffects = new();
         foreach(BuildingEffect effect1 in buildingEffects)
         {
@@ -117,11 +83,6 @@ public class Building
         {
             effect.ApplyEffect(this);
         }
-        ourDistrict.ourGameHex.foodYield += foodYield;
-        ourDistrict.ourGameHex.productionYield += productionYield;
-        ourDistrict.ourGameHex.goldYield += goldYield;
-        ourDistrict.ourGameHex.scienceYield += scienceYield;
-        ourDistrict.ourGameHex.cultureYield += cultureYield;
-        ourDistrict.ourGameHex.happinessYield += happinessYield;            
+        ourDistrict.ourGameHex.yields += yields;
     }
 }
