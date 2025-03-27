@@ -36,7 +36,7 @@ public class Building
         //LOAD INFORMATION FROM XML USING NAME
         //So far we have requested
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
-        if (Enum.TryParse(name, out UnitType unitType) && unitData.TryGetValue(unitType, out UnitInfo unitInfo))
+        if (Enum.TryParse(name, out UnitType unitType) && BuildingLoader.buildingsDict.TryGetValue(unitType, out UnitInfo unitInfo))
                 {
             BuildingType buildingType = Enum.Parse(name);
             current
