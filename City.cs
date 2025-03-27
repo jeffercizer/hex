@@ -237,6 +237,7 @@ public class City
                 scienceYield += building.scienceYield;
                 cultureYield += building.cultureYield;
                 happinessYield += building.happinessYield;
+                happinessYield -= 1; //reduce 1 per population
             }
         }
         foreach(ResourceType resource in heldResources)
