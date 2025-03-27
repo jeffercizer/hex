@@ -24,15 +24,14 @@ public struct UnitInfo
     public Dictionary<String, int> Abilities { get; set; }
 }
 
-public class UnitLoader
+public static class UnitLoader
 {
-    Dictionary<UnitType, UnitInfo> unitsDict;
-    public delegate void UnitEffect(UnitInfo UnitInfo);
+    public static Dictionary<UnitType, UnitInfo> unitsDict;
     
     public UnitLoader()
     {
         string xmlPath = "Units.xml";
-        Units = LoadUnitData(xmlPath);
+        unitsDict = LoadUnitData(xmlPath);
         //if (Units.TryGetValue(Unit, out UnitInfo info))
         //ExecuteUnitEffect(Unit);
     }
