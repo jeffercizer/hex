@@ -120,9 +120,9 @@ public class BuildingEffect
     }
     void ProcessFunctionString(String functionString, Building building)
     {
-        if(functionString == "FreshWaterEffect")
+        if(functionString == "WaterSupplyEffect")
         {
-            FreshWaterEffect(building);
+            WaterSupplyEffect(building);
         }
 
         else if(functionString == "GranaryWarehouseEffect")
@@ -130,8 +130,9 @@ public class BuildingEffect
             GranaryWarehouseEffect(building);
         }
     }
-    void FreshWaterEffect(Building building)
+    void WaterSupplyEffect(Building building)
     {
+        foreach(Hexh hex on building.ourDistrict.ourGameHex.WrappingNeighbors(building.ourDistrict.ourGameHex.gameBoard.left, building.ourDistrict.ourGameHex.gameBoard.right))
         building.happinessYield += 10.0f;
     }
     void GranaryWarehouseEffect(Building building)
