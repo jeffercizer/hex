@@ -1,1 +1,28 @@
+<Buildings> //'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
+  <Building Name="Palace" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="5.0" CultureYield="5.0" HappinessYield="5.0" MaintenanceCost="0.0">
+    <Effects>
+      <Effect Name="WaterSupplyEffect" />
+    </Effects>
+  </Building>
+  <Building Name="City Center" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="1.0" CultureYield="1.0" HappinessYield="0.0" MaintenanceCost="0.0">
+    <Effects>
+      <Effect Name="WaterSupplyEffect" />
+    </Effects>
+  </Building>
+  <Building Name="Granery" ProductionCost="0" GoldCost="0" FoodYield="0.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="0.0" HappinessYield="0.0" MaintenanceCost="1.0">
+    <Effects>
+      <Effect Name="GraneryWarehouseEffect" />
+    </Effects>
+  </Building>
+</Buildings>
 
+    public int ProductionCost { get; set; }
+    public int GoldCost { get; set; }
+    public float FoodYield { get; set; }
+    public float ProductionYield { get; set; }
+    public float GoldYield { get; set; }
+    public float ScienceYield { get; set; }
+    public float CultureYield { get; set; }
+    public float HappinessYield { get; set; }
+    public float MaintenanceCost { get; set; }
+    public List<String> Effects { get; set; }
