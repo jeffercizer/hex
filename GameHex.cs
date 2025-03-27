@@ -45,6 +45,7 @@ public class GameHex
         this.resourceType = resourceType;
         this.unitsList = unitsList;
         this.district = district;
+        this.ownedBy = -1;
     }
 
     public Hex hex;
@@ -64,7 +65,7 @@ public class GameHex
     {
         yields = new();
         //if the distrit is urban the buildings will set our yields
-        if (district != null & !district.isUrban)
+        if (district == null || !district.isUrban)
         {
             //calculate the rural value
             if(terrainType == TerrainType.Flat)
@@ -112,8 +113,12 @@ public class GameHex
             {
                 yields.production += 1;
             }
+            if(featureSet.Contains(FeatureType.Wetland))
+            {
+                yields.food += 1;
+            }
         }
-        else if(district == null)
+        else
         {
             SetUnownedHexYields();
         }
@@ -185,18 +190,20 @@ public class GameHex
         return true;
     }
 
-    public void ClaimHex(int teamNum, City city)
+    public void ClaimHex(City city)
     {
-        ownedBy = teamNum;
+        ownedBy = city.teamNum;
         owningCity = city;
+        owningCity.heldHexes.Add(hex);
     }
 
-    public bool TryClaimHex(int teamNum, City city)
+    public bool TryClaimHex(City city)
     {
         if(ownedBy == -1)
         {
-            ownedBy = teamNum;
+            ownedBy = city.teamNum;
             owningCity = city;
+            owningCity.heldHexes.Add(hex);
             return true;
         }
         return false;
