@@ -67,11 +67,8 @@ public class Building
         ourDistrict.ourCity.RecalculateYields();
     }
 
-    public void RecalculateYields()
+    public void PrepareYieldRecalculate()
     {
-        //reset all Yields to base
-        yields = baseYields;
-        
         PriorityQueue<BuildingEffect, int> orderedEffects = new();
         foreach(BuildingEffect effect1 in buildingEffects)
         {
@@ -83,6 +80,11 @@ public class Building
         {
             effect.ApplyEffect(this);
         }
+        yields = baseYields;
+    }
+
+    public void RecalculateYields()
+    {
         ourDistrict.ourGameHex.yields += yields;
     }
 }
