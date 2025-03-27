@@ -117,5 +117,11 @@ public class Building
         {
             effect.ApplyEffect(this);
         }
+        ourDistrict.ourGameHex.foodYield += foodYield;
+        ourDistrict.ourGameHex.productionYield += productionYield;
+        ourDistrict.ourGameHex.goldYield += goldYield;
+        ourDistrict.ourGameHex.scienceYield += scienceYield;
+        ourDistrict.ourGameHex.cultureYield += cultureYield;
+        ourDistrict.ourGameHex.happinessYield += happinessYield;            
     }
 }
