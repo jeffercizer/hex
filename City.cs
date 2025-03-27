@@ -238,10 +238,10 @@ public class City
     public void RecalculateYields()
     {
         yields = new();
+        SetBaseHexYields();
         foreach(District district in districts)
         {
-            district.RecalculateYields();
-            yields += district.ourGameHex.yields;
+            district.PrepareYieldRecalculate();            
         }
         foreach(ResourceType resource in heldResources)
         {
@@ -253,6 +253,11 @@ public class City
             {
                 ResourceLoader.ExecuteResourceEffect(ResourceLoader.resourceEffects[resource]);
             }
+        }
+        foreach(District district in disctricts)
+        {
+            district.RecalculateYields();
+            yields += district.ourGameHex.yields;
         }
     }
 
