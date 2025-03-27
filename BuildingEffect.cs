@@ -124,10 +124,17 @@ public class BuildingEffect
         {
             WaterSupplyEffect(building);
         }
-
         else if(functionString == "GranaryWarehouseEffect")
         {
             GranaryWarehouseEffect(building);
+        }
+        else if(functionString == "StoneCutterWarehouseEffect")
+        {
+            StoneCutterWarehouseEffect(building);
+        }
+        else if(functionString == "AncientWallEffect")
+        {
+            AncientWallEffect(building);
         }
     }
     void WaterSupplyEffect(Building building)
@@ -159,5 +166,12 @@ public class BuildingEffect
     void StoneCutterWarehouseEffect(Building building)
     {
         building.ourDistrict.ourCity.roughYields.production += 1;
+    }
+    void AncientWallEffect(Building building)
+    {
+        if(!building.district.hasWalls)
+        {
+            building.district.AddWalls(100.0f);
+        }
     }
 }
