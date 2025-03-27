@@ -2,11 +2,13 @@
   <Building Name="Palace" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="5.0" CultureYield="5.0" HappinessYield="5.0" MaintenanceCost="0.0">
     <Effects>
       <Effect Name="WaterSupplyEffect" />
+      <Effect Name="AncientWallEffect" />
     </Effects>
   </Building>
   <Building Name="City Center" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="1.0" CultureYield="1.0" HappinessYield="0.0" MaintenanceCost="0.0">
     <Effects>
       <Effect Name="WaterSupplyEffect" />
+      <Effect Name="CityCenterWallEffect" />
     </Effects>
   </Building>
   <Building Name="Granary" ProductionCost="20" GoldCost="100" FoodYield="0.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="0.0" HappinessYield="0.0" MaintenanceCost="1.0">
