@@ -22,13 +22,13 @@ public enum TerrainMoveType
 public class Unit
 {
 
-    public Unit(string name, GameHex currentGameHex, int teamNum)
+    public Unit(UnitType unitType, GameHex currentGameHex, int teamNum)
     {
-        this.name = name;
+        this.name = unitType.ToString();
         this.currentGameHex = currentGameHex;
         this.teamNum = teamNum;
     
-        if (Enum.TryParse(name, out UnitType unitType) && UnitLoader.unitsDict.TryGetValue(unitType, out UnitInfo unitInfo))
+        if (UnitLoader.unitsDict.TryGetValue(unitType, out UnitInfo unitInfo))
         {
             this.movementCosts = unitInfo.MovementCosts;
             this.baseMovementCosts = unitInfo.MovementCosts;
