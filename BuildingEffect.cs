@@ -120,21 +120,22 @@ public class BuildingEffect
     }
     void ProcessFunctionString(String functionString, Building building)
     {
-        if(functionString == "WaterSupplyEffect")
+        Dictionary<String, Action<Building>> effectFunctions = new Dictionary<string, Action<Building>>
         {
-            WaterSupplyEffect(building);
+            { "WaterSupplyEffect", WaterSupplyEffect },
+            { "GranaryWarehouseEffect", GranaryWarehouseEffect },
+            { "StoneCutterWarehouseEffect", StoneCutterWarehouseEffect },
+            { "AncientWallEffect", AncientWallEffect },
+            { "CityCenterWallEffect", CityCenterWallEffect }
+        };
+        
+        if (effectFunctions.TryGetValue(functionString, out Action<Building> effectFunction))
+        {
+            effectFunction(building);
         }
-        else if(functionString == "GranaryWarehouseEffect")
+        else
         {
-            GranaryWarehouseEffect(building);
-        }
-        else if(functionString == "StoneCutterWarehouseEffect")
-        {
-            StoneCutterWarehouseEffect(building);
-        }
-        else if(functionString == "AncientWallEffect")
-        {
-            AncientWallEffect(building);
+            throw new ArgumentException($"Function '{functionString}' not recognized in BuildingEffect from Buildings file.");
         }
     }
     void WaterSupplyEffect(Building building)
@@ -172,6 +173,14 @@ public class BuildingEffect
         if(!building.district.hasWalls)
         {
             building.district.AddWalls(100.0f);
+        }
+    }
+    void CityCenterWallEffect(Building building)
+    {
+        if(!building.district.hasWalls)
+        {
+            building.district.maxHealth = 50.0f;;
+            building.district.currentHealth = 50.0f;
         }
     }
 }
