@@ -24,16 +24,19 @@ public class District
         this.ourCity = ourCity;
         buildings = new();
         this.ourGameHex = ourGameHex;
-        ourGameHex.ClaimHex(ourCity.teamNum);
+        
+        ourGameHex.ClaimHex(ourCity);
+        ourGameHex.district = this;
+        foreach(Hex hex in ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
+        {
+            ourGameHex.ourGameBoard.gameHexDict[hex].TryClaimHex(ourCity);
+        }
+        
         if(ourGameHex.resourceType != ResourceType.None)
         {
             AddResource();
         }
-        ourGameHex.district = this;
-        foreach(Hex hex in ourGameHex.hex.WrappingNeighbors(ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right))
-        {
-            ourGameHex.ourGameBoard.gameHexDict[hex].TryClaimHex(ourCity.teamNum);
-        }
+
         this.isCityCenter = isCityCenter;
         this.isUrban = isUrban;
         if(isUrban)
