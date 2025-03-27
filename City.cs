@@ -75,22 +75,8 @@ public class City
     private District AddCityCenter()
     {
         Building building = new Building("City Center");
-        Action<Building> adjacentDistrictsGoldFunction = (building) =>
-        {
-            GameHex temp = building.ourDistrict.ourGameHex;
-            int counter = 0;
-            foreach(Hex hex in temp.hex.WrappingNeighbors(temp.ourGameBoard.left, temp.ourGameBoard.right))
-            {
-                if(temp.ourGameBoard.gameHexDict[hex].terrainType == TerrainType.Mountain)
-                {
-                    counter++;
-                }
-            }
-            building.goldYield += counter;
-        };
         District district = new District(ourGameHex, building, true, true, this);
         building.ourDistrict = district;
-        building.AddEffect(new BuildingEffect(adjacentDistrictsGoldFunction, 5));
         districts.Add(district);
         return district;
     }
@@ -228,17 +214,31 @@ public class City
         foreach(District district in districts)
         {
             district.RecalculateYields();
-            foreach(Building building in district.buildings)
+            if(district.isUrban)
             {
-                foodYield += building.foodYield;
-                productionYield += building.productionYield;
-                goldYield -= building.maintenanceCost;
-                goldYield += building.goldYield;
-                scienceYield += building.scienceYield;
-                cultureYield += building.cultureYield;
-                happinessYield += building.happinessYield;
+                foreach(Building building in district.buildings)
+                {
+                    foodYield += building.foodYield;
+                    productionYield += building.productionYield;
+                    goldYield -= building.maintenanceCost;
+                    goldYield += building.goldYield;
+                    scienceYield += building.scienceYield;
+                    cultureYield += building.cultureYield;
+                    happinessYield += building.happinessYield;
+                    happinessYield -= 1; //reduce 1 per population
+                }
+            }
+            else
+            {
+                foodYield += district.ourGameHex.foodYield;
+                productionYield += district.ourGameHex.productionYield;
+                goldYield += district.ourGameHex.goldYield;
+                scienceYield += district.ourGameHex.scienceYield;
+                cultureYield += district.ourGameHex.cultureYield;
+                happinessYield += district.ourGameHex.happinessYield;
                 happinessYield -= 1; //reduce 1 per population
             }
+
         }
         foreach(ResourceType resource in heldResources)
         {
