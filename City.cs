@@ -245,9 +245,9 @@ public class City
         }
         foreach(ResourceType resource in heldResources)
         {
-            if(ourGameHex.ourGameBoard.game.resourceLoader.resourceEffects[resource])
+            if(ResourceLoader.resourceEffects[resource])
             {
-                ourGameHex.ourGameBoard.game.resourceLoader.ExecuteResourceEffect(ourGameHex.ourGameBoard.game.resourceLoader.resourceEffects[resource]);
+                ResourceLoader.ExecuteResourceEffect(ResourceLoader.resourceEffects[resource]);
             }
         }
     }
