@@ -28,7 +28,7 @@ public class Unit
         this.currentGameHex = currentGameHex;
         this.teamNum = teamNum;
     
-        if (Enum.TryParse(name, out UnitType unitType) && currentGameHex.ourGameBoard.game.unitsLoader.unitsDict.TryGetValue(unitType, out UnitInfo unitInfo))
+        if (Enum.TryParse(name, out UnitType unitType) && UnitLoader.unitsDict.TryGetValue(unitType, out UnitInfo unitInfo))
         {
             this.movementCosts = unitInfo.MovementCosts;
             this.baseMovementCosts = unitInfo.MovementCosts;
