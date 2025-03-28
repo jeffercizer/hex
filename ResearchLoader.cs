@@ -21,7 +21,6 @@ public enum ResearchType
 
 public struct ResearchInfo
 {
-    public float Cost;
     public int Tier;
     public List<BuildingType> BuildingUnlocks;
     public List<UnitType> UnitUnlocks;
@@ -61,7 +60,6 @@ public static class ResearchLoader
                 r => Enum.Parse<ResearchType>(r.Attribute("Name").Value),
                 r => new ResearchInfo
                 {
-                    Cost = float.Parse(r.Attribute("Cost").Value),
                     Tier = int.Parse(r.Attribute("Tier").Value),
                     BuildingUnlocks = r.Element("BuildingUnlocks").Elements("BuildingType").Select(e => Enum.Parse<BuildingType>(e.Value)).ToList(),
                     UnitUnlocks = r.Element("UnitUnlocks").Elements("UnitUnlocks").Select(e => Enum.Parse<UnitType>(e.Value)).ToList(),
