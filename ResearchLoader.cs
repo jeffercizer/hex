@@ -93,12 +93,34 @@ public static class ResearchLoader
             throw new ArgumentException($"Function '{functionString}' not recognized in BuildingEffect from Buildings file.");
         }
     }
+    void ProcessFunctionString(String functionString, Player player)
+    {
+        Dictionary<String, Action<Player>> effectFunctions = new Dictionary<string, Action<Player>>
+        {
+            { "AgricultureEffect", AgricultureEffect },
+            { "SailingEffect", SailingEffect },
+            { "PotteryEffect", PotteryEffect },
+            { "AnimalHusbandryEffect", AnimalHusbandryEffect },
+            { "IrrigationEffect", IrrigationEffect },
+            { "WritingEffect", WritingEffect },
+            { "MasonryEffect", MasonryEffect },
+        };
+        
+        if (effectFunctions.TryGetValue(functionString, out Action<Player> effectFunction))
+        {
+            effectFunction(player);
+        }
+        else
+        {
+            throw new ArgumentException($"Function '{functionString}' not recognized in ResearchEffects from Researches file.");
+        }
+    }
     void AgricultureEffect(Player player)
     {
     }
     void SailingEffect(Player player)
     {
-       player.unitResearchEffects.Add((new UnitEffect("EnableEmbarkDisembark"), ));
+       player.unitResearchEffects.Add((new UnitEffect("EnableEmbarkDisembark"), UnitClass.Recon));
     }
     void PotteryEffect(Player player)
     {
