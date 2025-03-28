@@ -22,7 +22,7 @@ public enum ResearchType
 public struct ResearchInfo
 {
     public int Tier;
-    public List<Requirements> Requirements;
+    public List<ResearchType> Requirements;
     public List<BuildingType> BuildingUnlocks;
     public List<UnitType> UnitUnlocks;
     public List<String> Effects;
@@ -69,5 +69,51 @@ public static class ResearchLoader
                 }
             );
         return ResearchData;
+    }
+    
+    void ProcessResearchFunctionString(String functionString, Player player)
+    {
+        Dictionary<String, Action<Player>> effectFunctions = new Dictionary<string, Action<Player>>
+        {
+            { "AgricultureEffect", AgricultureEffect },
+            { "SailingEffect", SailingEffect },
+            { "PotteryEffect", PotteryEffect },
+            { "AnimalHusbandryEffect", AnimalHusbandryEffect },
+            { "IrrigationEffect", IrrigationEffect },
+            { "WritingEffect", WritingEffect },
+            { "MasonryEffect", MasonryEffect },
+        };
+        
+        if (effectFunctions.TryGetValue(functionString, out Action<Player> effectFunction))
+        {
+            effectFunction(player);
+        }
+        else
+        {
+            throw new ArgumentException($"Function '{functionString}' not recognized in BuildingEffect from Buildings file.");
+        }
+    }
+    void AgricultureEffect(Player player)
+    {
+    }
+    void SailingEffect(Player player)
+    {
+       player.unitResearchEffects.Add((new UnitEffect("EnableEmbarkDisembark"), ));
+    }
+    void PotteryEffect(Player player)
+    {
+    }
+    void AnimalHusbandryEffect(Player player)
+    {
+        player.unitResearchEffects.Add(new UnitEffect(UnitEffectType.MovementSpeed, EffectOperation.Add, 1.0f, 5));
+    }
+    void IrrigationEffect(Player player)
+    {
+    }
+    void WritingEffect(Player player)
+    {
+    }
+    void MasonryEffect(Player player)
+    {
     }
 }
