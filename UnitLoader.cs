@@ -68,8 +68,11 @@ public static class UnitLoader
                     Effects = r.Element("Effects")?.Elements("Effect").Select(e => e.Value).ToList() ?? new List<string>(),
                     Abilities = r.Element("Abilities")?.Elements("Ability").ToDictionary(
                         a => a.Attribute("Name")?.Value ?? throw new Exception("Invalid Ability Name"),
-                        a => int.TryParse(a.Attribute("UsageCount")?.Value, out var usageCount) ? usageCount : 0
-                    ) ?? new Dictionary<string, int>()
+                        a => (
+                            int.TryParse(a.Attribute("UsageCount")?.Value, out var usageCount) ? usageCount : 0,
+                            float.TryParse(a.Attribute("CombatPower")?.Value, out var combatPower) ? combatPower : 0
+                        )
+                    ) ?? new Dictionary<string, (int,float)>()
                 }
             );
         return UnitData;
