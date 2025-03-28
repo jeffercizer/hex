@@ -50,6 +50,7 @@ public class City
 
         
         citySize = 0;
+        readyToExpand = 0;
         foodToGrow = 10.0f;
         RecalculateYields();
         SetBaseHexYields();
@@ -80,6 +81,7 @@ public class City
     public HashSet<Hex> heldHexes;
     public int baseMaxResourcesHeld;
     public int maxResourcesHeld;
+    public int readyToExpand;
 
     private District AddCityCenter()
     {
@@ -294,7 +296,7 @@ public class City
         foodStockpile += yields.food;
         if (foodToGrow <= foodStockpile)
         {
-            citySize += 1;
+            readyToExpand += 1;
             foodStockpile = Math.Max(0.0f, foodStockpile - foodToGrow);
         }
     }
@@ -302,6 +304,34 @@ public class City
     public void OnTurnEnded(int turnNumber)
     {
 
+    }
+
+    public void districtFell()
+    {
+        bool allDistrictsFell = true;
+        bool cityCenterOccupied = false;
+        foreach(District district in districts)
+        {
+            if(district.currentHealth > 0.0f)
+            {
+                allDistrictsFell = false;
+            }
+            if(district.isCityCenter && district.currentHealth <= 0.0f)
+            {
+                if (district.gameHex.unitsList.Any())
+                {
+                    Unit unit = district.gameHex.unitsList[0];
+                    if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                    {
+                        cityCenterOccupied = true;
+                    }
+                }
+            }
+        }
+        if(allDistrictsFell && cityCenterOccupied)
+        {
+            ChangeTeam(district.gameHex.unitsList[0].teamNum);
+        }
     }
 
     public void RecalculateYields()
@@ -354,8 +384,16 @@ public class City
 
     public void ExpandToHex(Hex hex)
     {
-        District district = new District(gameHex, false, false, this);
-        districts.Add(district);
+        if(readyToExpand > 0)
+        {
+            District district = new District(gameHex, false, false, this);
+            districts.Add(district);
+            readyToExpand -= 1;
+        }
+        else
+        {
+            Console.WriteLine("tried to expand without readyToExpand > 0");
+        }
     }
 
     //valid hexes for a rural district
