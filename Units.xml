@@ -83,4 +83,33 @@
       <TerrainMoveType Name="Disembark" Value="0" />
     </SightCosts>
   </Unit>
+  <Unit Name="Slinger" ProductionCost="50" GoldCost="200" MovementSpeed="2.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1">
+    <MovementCosts>
+      <TerrainMoveType Name="Flat" Value="1" />
+      <TerrainMoveType Name="Rough" Value="2" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="1" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Embark" Value="0" />
+      <TerrainMoveType Name="Disembark" Value="0" />
+    </MovementCosts>
+    <SightCosts>
+      <TerrainMoveType Name="Flat" Value="1" />
+      <TerrainMoveType Name="Rough" Value="2" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="1" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Embark" Value="0" />
+      <TerrainMoveType Name="Disembark" Value="0" />
+    </SightCosts>
+    <Abilities>
+      <Ability Name="RangedAttack" UsageCount="1" CombatPower="10" />
+    </Abilities>
+  </Unit>
 </Units>
