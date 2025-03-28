@@ -9,6 +9,7 @@ public class Game
 {
     public GameBoard? mainGameBoard;
     public Dictionary<int, Player> playerDictionary;
+    public HashSet<BuildingType> builtWonders;
     public TeamManager? teamManager;
     public TurnManager turnManager;
     int currentID = 0;
