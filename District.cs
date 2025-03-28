@@ -86,6 +86,16 @@ public class District
         AddResource();
     }
 
+    public float GetCombatStrength()
+    {
+        float strength = gameHex.gameBoard.game.playerDictionary[city.teamNum].strongestUnitBuilt;
+        if (hasWalls)
+        {
+            strength += 15.0f;
+        }
+        return strength;
+    }
+
     public void DestroyDistrict()
     {
         RemoveVision();
