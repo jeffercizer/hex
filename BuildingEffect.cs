@@ -126,6 +126,7 @@ public class BuildingEffect
             { "GranaryWarehouseEffect", GranaryWarehouseEffect },
             { "StoneCutterWarehouseEffect", StoneCutterWarehouseEffect },
             { "AncientWallEffect", AncientWallEffect },
+            { "StonehengeEffect", StonehengeEffect },
             { "CityCenterWallEffect", CityCenterWallEffect }
         };
         
@@ -174,6 +175,10 @@ public class BuildingEffect
         {
             building.district.AddWalls(100.0f);
         }
+    }
+    void StonehengeEffect(Building building)
+    {
+        //idk whatever stonehenge would do
     }
     void CityCenterWallEffect(Building building)
     {
