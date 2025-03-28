@@ -252,7 +252,7 @@ public class City
     {
         foreach(District district in districts)
         {
-            district.Heal(15.0f);
+            district.HealForTurn(10.0f);
         }
         RecalculateYields();
         productionOverflow += yields.production;
@@ -321,7 +321,7 @@ public class City
                 if (district.gameHex.unitsList.Any())
                 {
                     Unit unit = district.gameHex.unitsList[0];
-                    if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                    if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                     {
                         cityCenterOccupied = true;
                     }
