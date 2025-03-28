@@ -24,7 +24,10 @@ public enum UnitType
 {
     None,
     Scout,
-    Settler
+    Settler,
+    Galley,
+    Slinger,
+    Warrior
 }
 
 public struct UnitInfo
@@ -53,6 +56,7 @@ public static class UnitLoader
         { UnitType.Settler, "Settler" },
         { UnitType.Galley, "Galley" },
         { UnitType.Slinger, "Slinger" },
+        { UnitType.Warrior, "Warrior" },
     };
     
     static UnitLoader()
