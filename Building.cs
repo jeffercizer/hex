@@ -45,6 +45,7 @@ public class Building
                 buildingEffects.Add(new BuildingEffect(effectName));
             }
         }
+        district.gameHex.gameBoard.game.builtWonder.Add(buildingType);
     }
 
     public void SwitchTeams()
@@ -55,6 +56,10 @@ public class Building
     public void DestroyBuilding()
     {
         district = null;
+        if(BuildingLoader.buildingsDict[buildingType].Wonder)
+        {
+            district.gameHex.gameBoard.game.builtWonder.Remove(buildingType);
+        }
     }
 
     public void AddEffect(BuildingEffect effect)
