@@ -44,12 +44,40 @@ public struct ResourceInfo
 
 public static class ResourceLoader
 {
-    public Dictionary<ResourceType, ResourceInfo> resources;
-    public Dictionary<ResourceType, ResourceEffect> resourceEffects;
+    public static Dictionary<ResourceType, ResourceInfo> resources;
+    public static Dictionary<ResourceType, Action> resourceEffects;
+    public static Dictionary<String, ResourceType> resourceNames = new Dictionary<String, ResourceType>
+    {
+        { "0", ResourceType.None},
+        { "I", ResourceType.Iron },
+        { "H", ResourceType.Horses },
+        { "N", ResourceType.Niter },
+        { "C", ResourceType.Coal },
+        { "O", ResourceType.Oil },
+        { "U", ResourceType.Uranium },
+        { "L", ResourceType.Lithium },
+        { "S", ResourceType.SciFi },
+        { "j", ResourceType.Jade },
+        { "w", ResourceType.Wheat },
+        { "s", ResourceType.Sheep },
+        { "m", ResourceType.Marble },
+        { "d", ResourceType.Dates },
+        { "u", ResourceType.Silk },
+        { "n", ResourceType.Salt },
+        { "R", ResourceType.Rubber },
+        { "i", ResourceType.Ivory },
+        { "g", ResourceType.Gold },
+        { "k", ResourceType.Silver },
+        { "c", ResourceType.Camels },
+        { "e", ResourceType.Coffee },
+        { "q", ResourceType.Cotton },
+        { "t", ResourceType.Tobacco },
+        { "z", ResourceType.Stone }
+    };
     
-    public ResourceLoader()
+    static ResourceLoader()
     { //Iron, Horses, Niter, Coal, Oil, Uranium, Lithium, Jade, Silk, Tobacco, Silver, Gold, Camels
-        resourceEffects = new Dictionary<ResourceType, ResourceEffect>
+        resourceEffects = new Dictionary<ResourceType, Action>
         {
             { ResourceType.Iron, ApplyIronEffect },
             { ResourceType.Horses, ApplyHorsesEffect },
@@ -92,77 +120,77 @@ public static class ResourceLoader
 
         return resourceData;
     }
-    public void ExecuteResourceEffect(ResourceType resourceType)
+    public static void ExecuteResourceEffect(ResourceType resourceType)
     {
         if (resources.TryGetValue(resourceType, out ResourceInfo info) &&
-            resourceEffects.TryGetValue(resourceType, out ResourceEffect effect))
+            resourceEffects.TryGetValue(resourceType, out Action effect))
         {
-            effect.Invoke(info);
+            effect.Invoke();
         }
     }
     
     //all infantry (non-horse, non-siege land) +1 cs
-    void ApplyIronEffect()
+    static void ApplyIronEffect()
     {
     }
     
     //all mounted units (horse, siege) +1 cs
-    void ApplyHorsesEffect()    
+    static void ApplyHorsesEffect()    
     {
     }
     
     //idk
-    void ApplyNiterEffect()
+    static void ApplyNiterEffect()
     {
     }
     
     //idk
-    void ApplyCoalEffect()
+    static void ApplyCoalEffect()
     {
     }
     
     //idk
-    void ApplyOilEffect()
+    static void ApplyOilEffect()
     {
     }
     
     //idk
-    void ApplyUraniumEffect()
+    static void ApplyUraniumEffect()
     {
     }
     
     //idk
-    void ApplyLithiumEffect()
+    static void ApplyLithiumEffect()
     {
     }
     
     //15% more gold in city
-    void ApplyJadeEffect()
+    static void ApplyJadeEffect()
     {
     }
     
     //10% more culture in city
-    void ApplySilkEffect()
+    static void ApplySilkEffect()
     {
     }
 
     //10% more science in city
-    void ApplyCoffeeEffect()
+    static void ApplyCoffeeEffect()
     {
     }
 
     //15% off units purchased with gold
-    void ApplySilverEffect()
+    static void ApplySilverEffect()
     {
     }
 
     //15% off buildings purchased with gold
-    void ApplyGoldEffect()
+    static void ApplyGoldEffect()
     {
     }
 
     //allow 3 more resources to be assigned to this city
-    void ApplyCamelsEffect()
+    static void ApplyCamelsEffect()
     {
     }
 }

@@ -35,10 +35,10 @@ public enum FeatureType
 [Serializable]
 public class GameHex
 {
-    public GameHex(Hex hex, GameBoard ourGameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, ResourceType resourceType, HashSet<FeatureType> featureSet, List<Unit> unitsList, District district)
+    public GameHex(Hex hex, GameBoard gameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, ResourceType resourceType, HashSet<FeatureType> featureSet, List<Unit> unitsList, District district)
     {
         this.hex = hex;
-        this.ourGameBoard = ourGameBoard;
+        this.gameBoard = gameBoard;
         this.terrainType = terrainType;
         this.terrainTemp = terrainTemp;
         this.featureSet = featureSet;
@@ -49,7 +49,7 @@ public class GameHex
     }
 
     public Hex hex;
-    public GameBoard ourGameBoard;
+    public GameBoard gameBoard;
     public TerrainType terrainType;
     public TerrainTemperature terrainTemp;
     public ResourceType resourceType;
@@ -64,50 +64,50 @@ public class GameHex
     public void RecalculateYields()
     {
         yields = new();
-        //if the distrit is urban the buildings will set our yields
+        //if the district is urban the buildings will set our yields
         if (district == null || !district.isUrban)
         {
             //calculate the rural value
             if(terrainType == TerrainType.Flat)
             {
-                ourCity.AddFlatYields(this);
+                owningCity.AddFlatYields(this);
             }
             else if (terrainType == TerrainType.Rough)
             {
-                ourCity.AddRoughYields(this);
+                owningCity.AddRoughYields(this);
             }
             else if (terrainType == TerrainType.Mountain)
             {
-                ourCity.AddMountainYields(this);
+                owningCity.AddMountainYields(this);
             }
             else if (terrainType == TerrainType.Coast)
             {
-                ourCity.AddCoastYields(this);
+                owningCity.AddCoastYields(this);
             }
             else if (terrainType == TerrainType.Ocean)
             {
-                ourCity.AddOceanYields(this);
+                owningCity.AddOceanYields(this);
             }
             
             if(terrainTemp == TerrainTemperature.Desert)
             {
-                ourCity.AddDesertYields(this);
+                owningCity.AddDesertYields(this);
             }
             else if (terrainTemp == TerrainTemperature.Plains)
             {
-                ourCity.AddPlainsYields(this);
+                owningCity.AddPlainsYields(this);
             }
             else if (terrainTemp == TerrainTemperature.Grassland)
             {
-                ourCity.AddGrasslandYields(this);
+                owningCity.AddGrasslandYields(this);
             }
             else if (terrainTemp == TerrainTemperature.Tundra)
             {
-                ourCity.AddTundraYields(this);
+                owningCity.AddTundraYields(this);
             }
             else
             {
-                ourCity.AddArcticYields(this);
+                owningCity.AddArcticYields(this);
             }
             if(featureSet.Contains(FeatureType.Forest))
             {
@@ -118,7 +118,7 @@ public class GameHex
                 yields.food += 1;
             }
         }
-        else
+        else if(district == null)
         {
             SetUnownedHexYields();
         }
@@ -126,47 +126,47 @@ public class GameHex
 
     public void SetUnownedHexYields()
     {
-            if(terrainType == TerrainType.Flat)
-            {
-                yields.food += 1;
-            }
-            else if (terrainType == TerrainType.Rough)
-            {
-                yields.production += 1;
-            }
-            else if (terrainType == TerrainType.Mountain)
-            {
-                //nothing
-            }
-            else if (terrainType == TerrainType.Coast)
-            {
-                yields.food += 1;
-            }
-            else if (terrainType == TerrainType.Ocean)
-            {
-                yields.gold += 1;
-            }
-            
-            if(terrainTemp == TerrainTemperature.Desert)
-            {
-                yields.gold += 1;
-            }
-            else if (terrainTemp == TerrainTemperature.Plains)
-            {
-                yields.production += 1;
-            }
-            else if (terrainTemp == TerrainTemperature.Grassland)
-            {
-                yields.food += 1;
-            }
-            else if (terrainTemp == TerrainTemperature.Tundra)
-            {
-                yields.happiness += 1;
-            }
-            else
-            {
-                //nothing
-            }
+        if(terrainType == TerrainType.Flat)
+        {
+            yields.food += 1;
+        }
+        else if (terrainType == TerrainType.Rough)
+        {
+            yields.production += 1;
+        }
+        else if (terrainType == TerrainType.Mountain)
+        {
+            //nothing
+        }
+        else if (terrainType == TerrainType.Coast)
+        {
+            yields.food += 1;
+        }
+        else if (terrainType == TerrainType.Ocean)
+        {
+            yields.gold += 1;
+        }
+        
+        if(terrainTemp == TerrainTemperature.Desert)
+        {
+            yields.gold += 1;
+        }
+        else if (terrainTemp == TerrainTemperature.Plains)
+        {
+            yields.production += 1;
+        }
+        else if (terrainTemp == TerrainTemperature.Grassland)
+        {
+            yields.food += 1;
+        }
+        else if (terrainTemp == TerrainTemperature.Tundra)
+        {
+            yields.happiness += 1;
+        }
+        else
+        {
+            //nothing
+        }
     }
 
     public void OnTurnStarted(int turnNumber)
@@ -194,7 +194,7 @@ public class GameHex
     {
         ownedBy = city.teamNum;
         owningCity = city;
-        owningCity.heldHexes.Add(hex);
+        city.heldHexes.Add(hex);
     }
 
     public bool TryClaimHex(City city)
@@ -217,9 +217,9 @@ public class GameHex
         {
             if (flexible)
             {
-                foreach(Hex rangeHex in hex.WrappingRange(3, ourGameBoard.left, ourGameBoard.right, ourGameBoard.top, ourGameBoard.bottom))
+                foreach(Hex rangeHex in hex.WrappingRange(3, gameBoard.left, gameBoard.right, gameBoard.top, gameBoard.bottom))
                 {
-                    if(ourGameBoard.gameHexDict[rangeHex].SpawnUnit(newUnit, stackable, false))
+                    if(gameBoard.gameHexDict[rangeHex].SpawnUnit(newUnit, stackable, false))
                     {
                         return true;
                     }

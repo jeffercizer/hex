@@ -20,7 +20,6 @@ public struct Yields
         {
             food = a.food + b.food,
             production = a.production + b.production,
-            productionOverflow = a.productionOverflow + b.productionOverflow,
             gold = a.gold + b.gold,
             science = a.science + b.science,
             culture = a.culture + b.culture,

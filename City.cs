@@ -13,7 +13,7 @@ public enum ProductionType
 public class ProductionQueueType
 {
 
-    public ProductionQueueType(String name, ProductionType prodType, GameHex targetGameHex, float productionCost, float productionLeft, bool isUnique)
+    public ProductionQueueType(String name, BuildingType buildingType, UnitType unitType, ProductionType prodType, GameHex targetGameHex, float productionCost, float productionLeft, bool isUnique)
     {
         this.name = name;
         this.prodType = prodType;
@@ -21,8 +21,12 @@ public class ProductionQueueType
         this.productionCost = productionCost;
         this.productionLeft = productionLeft;
         this.isUnique = isUnique;
+        this.buildingType = buildingType;
+        this.unitType = unitType;
     }
     public String name;
+    public BuildingType buildingType;
+    public UnitType unitType;
     public ProductionType prodType;
     public GameHex targetGameHex;
     public float productionLeft;
@@ -34,19 +38,20 @@ public class ProductionQueueType
 [Serializable]
 public class City
 {
-    public City(int id, int teamNum, String name, GameHex ourGameHex)
+    public City(int id, int teamNum, String name, GameHex gameHex)
     {
         this.id = id;
         this.teamNum = teamNum;
         this.name = name;
-        this.ourGameHex = ourGameHex;
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].cityList.Add(this);
-        districts = new();
-        AddCityCenter();
+        this.gameHex = gameHex;
         productionQueue = new();
         partialProductionDictionary = new();
         heldResources = new();
         heldHexes = new();
+        gameHex.gameBoard.game.playerDictionary[teamNum].cityList.Add(this);
+        districts = new();
+        AddCityCenter();
+
         
         citySize = 0;
         foodToGrow = 10.0f;
@@ -57,7 +62,7 @@ public class City
     public int teamNum;
     public String name;
     public List<District> districts;
-    public GameHex ourGameHex;
+    public GameHex gameHex;
     public Yields yields;
     public int citySize;
     public float foodToGrow;
@@ -76,15 +81,15 @@ public class City
     public List<ProductionQueueType> productionQueue;
     public Dictionary<string, ProductionQueueType> partialProductionDictionary;
     public Dictionary<Hex, ResourceType> heldResources;
-    public Hashset<Hex> heldHexes;
+    public HashSet<Hex> heldHexes;
     public int baseMaxResourcesHeld;
     public int maxResourcesHeld;
 
     private District AddCityCenter()
     {
-        Building building = new Building("City Center");
-        District district = new District(ourGameHex, building, true, true, this);
-        building.ourDistrict = district;
+        Building building = new Building(BuildingType.CityCenter);
+        District district = new District(gameHex, building, true, true, this);
+        building.district = district;
         districts.Add(district);
         return district;
     }
@@ -146,7 +151,7 @@ public class City
         return false;
     }
 
-    public bool AddToQueue(String name, ProductionType prodType, GameHex targetGameHex, float productionCost, bool isUnique)
+    public bool AddToQueue(String name, BuildingType buildingType, UnitType unitType, ProductionType prodType, GameHex targetGameHex, float productionCost, bool isUnique)
     {
         foreach(ProductionQueueType queueItem in productionQueue)
         {
@@ -159,11 +164,11 @@ public class City
         if(partialProductionDictionary.TryGetValue(name, out queueItem1))
         {
             partialProductionDictionary.Remove(name);
-            productionQueue.Add(new ProductionQueueType(name, prodType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost, isUnique));
+            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, prodType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost, isUnique));
             return true;
         }
 
-        productionQueue.Add(new ProductionQueueType(name, prodType, targetGameHex, productionCost, productionCost, isUnique));
+        productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, prodType, targetGameHex, productionCost, productionCost, isUnique));
         return true;
     }
 
@@ -173,7 +178,7 @@ public class City
         {
             district.BeforeSwitchTeam();
         }
-        heldResource.Clear();
+        heldResources.Clear();
         teamNum = newTeamNum;
         foreach (District district in districts)
         {
@@ -196,10 +201,10 @@ public class City
         }
         RecalculateYields();
         productionOverflow += yields.production;
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddGold(yields.gold);
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddScience(yields.science);
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddCulture(yields.culture);
-        ourGameHex.ourGameBoard.game.playerDictionary[teamNum].AddHappiness(yields.happiness);
+        gameHex.gameBoard.game.playerDictionary[teamNum].AddGold(yields.gold);
+        gameHex.gameBoard.game.playerDictionary[teamNum].AddScience(yields.science);
+        gameHex.gameBoard.game.playerDictionary[teamNum].AddCulture(yields.culture);
+        gameHex.gameBoard.game.playerDictionary[teamNum].AddHappiness(yields.happiness);
         if(productionQueue.Any())
         {
             productionQueue[0].productionLeft -= productionOverflow;
@@ -208,11 +213,11 @@ public class City
             {
                 if(productionQueue[0].prodType == ProductionType.Building)
                 {
-                    BuildOnHex(productionQueue[0].targetGameHex.hex, new Building(productionQueue[0].name));
+                    BuildOnHex(productionQueue[0].targetGameHex.hex, new Building(productionQueue[0].buildingType));
                 }
                 else if(productionQueue[0].prodType == ProductionType.Unit)
                 {
-                    Unit tempUnit = new Unit(productionQueue[0].name, productionQueue[0].targetGameHex, teamNum);
+                    Unit tempUnit = new Unit(Enum.Parse<UnitType>(productionQueue[0].name), productionQueue[0].targetGameHex, teamNum);
                     if(!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
                     {
                         tempUnit.name = "Ghost Man";
@@ -245,81 +250,50 @@ public class City
         {
             district.PrepareYieldRecalculate();            
         }
-        foreach(ResourceType resource in heldResources)
+        foreach(ResourceType resource in heldResources.Values)
         {
             ResourceInfo resourceInfo = ResourceLoader.resources[resource];
         }
-        foreach(ResourceType resource in heldResources)
+        foreach(ResourceType resource in heldResources.Values)
         {
-            if(ResourceLoader.resourceEffects[resource])
-            {
-                ResourceLoader.ExecuteResourceEffect(ResourceLoader.resourceEffects[resource]);
-            }
+            ResourceLoader.ExecuteResourceEffect(resource);
         }
-        foreach(District district in disctricts)
+        foreach(District district in districts)
         {
             district.RecalculateYields();
-            yields += district.ourGameHex.yields;
+            yields += district.gameHex.yields;
         }
     }
 
     public void BuildOnHex(Hex hex, Building building)
     {
-        if(ourGameHex.ourGameBoard.gameHexDict[hex].district == null)
+        if(gameHex.gameBoard.gameHexDict[hex].district == null)
         {
-            District district = new District(ourGameHex, building, false, true, this);
-            building.ourDistrict = district;
+            District district = new District(gameHex, building, false, true, this);
+            building.district = district;
             districts.Add(district);
         }
         else
         {
-            ourGameHex.ourGameBoard.gameHexDict[hex].district.AddBuilding(building);
-            building.ourDistrict = ourGameHex.ourGameBoard.gameHexDict[hex].district;
-            ourGameHex.ourGameBoard.gameHexDict[hex].district.isUrban = True;
+            gameHex.gameBoard.gameHexDict[hex].district.AddBuilding(building);
+            building.district = gameHex.gameBoard.gameHexDict[hex].district;
+            gameHex.gameBoard.gameHexDict[hex].district.isUrban = true;
         }
     }
 
     public void BuildDefenseOnHex(Hex hex, Building building)
     {
-        if(ourGameHex.ourGameBoard.gameHexDict[hex].district != null)
+        if(gameHex.gameBoard.gameHexDict[hex].district != null)
         {
-            ourGameHex.ourGameBoard.gameHexDict[hex].district.AddDefense(building);
-            building.ourDistrict = ourGameHex.ourGameBoard.gameHexDict[hex].district;
+            gameHex.gameBoard.gameHexDict[hex].district.AddDefense(building);
+            building.district = gameHex.gameBoard.gameHexDict[hex].district;
         }
     }
 
     public void ExpandToHex(Hex hex)
     {
-        District district = new District(ourGameHex, false, false, this);
+        District district = new District(gameHex, false, false, this);
         districts.Add(district);
-    }
-
-    public Building GetRuralBuilding(Hex hex)
-    {
-        Building ruralBuilding;
-        //TODO
-        switch (ourGameHex.ourGameBoard.gameHexDict[hex].terrainType)
-        {
-            case TerrainType.Flat:
-                ruralBuilding = new Building("Farm");
-                break;
-            case TerrainType.Rough:
-                ruralBuilding = new Building("Mine");
-                break;
-            case TerrainType.Mountain:
-                ruralBuilding = new Building("Hunting Camp");
-                break;
-            case TerrainType.Coast:
-                ruralBuilding = new Building("Fishing Boat");
-                break;
-            case TerrainType.Ocean:
-                ruralBuilding = new Building("Whaling Ship");
-                break;
-            default:
-                ruralBuilding = new Building("Sad Person");
-                break;
-        }
-        return ruralBuilding;
     }
 
     //valid hexes for a rural district
@@ -327,21 +301,21 @@ public class City
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in ourGameHex.hex.WrappingRange(3, ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right, ourGameHex.ourGameBoard.top, ourGameHex.ourGameBoard.bottom))
+        foreach(Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
         {
-            if(validTerrain.Contains(ourGameHex.ourGameBoard.gameHexDict[hex].terrainType))
+            if(validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
             {
                 //hex is unowned or owned by us so continue
-                if(ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == -1 | ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == teamNum)
+                if(gameHex.gameBoard.gameHexDict[hex].ownedBy == -1 | gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex does not have a district
-                    if (ourGameHex.ourGameBoard.gameHexDict[hex].district == null)
+                    if (gameHex.gameBoard.gameHexDict[hex].district == null)
                     {
                         //hex has only allies unit
                         bool valid = true;
-                        foreach(Unit unit in ourGameHex.ourGameBoard.gameHexDict[hex].unitsList)
+                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
                         {
-                            if(!ourGameHex.ourGameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
+                            if(!gameHex.gameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
                             {
                                 valid = false;
                             }
@@ -362,21 +336,21 @@ public class City
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in ourGameHex.hex.WrappingRange(3, ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right, ourGameHex.ourGameBoard.top, ourGameHex.ourGameBoard.bottom))
+        foreach(Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
         {
-            if(validTerrain.Contains(ourGameHex.ourGameBoard.gameHexDict[hex].terrainType))
+            if(validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
             {
                 //hex is unowned or owned by us so continue
-                if(ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == -1 | ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == teamNum)
+                if(gameHex.gameBoard.gameHexDict[hex].ownedBy == -1 | gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex does not have a district or it is not urban or has less than the max buildings TODO
-                    if (ourGameHex.ourGameBoard.gameHexDict[hex].district == null | !ourGameHex.ourGameBoard.gameHexDict[hex].district.isUrban | ourGameHex.ourGameBoard.gameHexDict[hex].district.buildings.Count() < ourGameHex.ourGameBoard.gameHexDict[hex].maxBuildings)
+                    if (gameHex.gameBoard.gameHexDict[hex].district == null | !gameHex.gameBoard.gameHexDict[hex].district.isUrban | gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
                     {
                         //hex doesnt have a non-friendly unit
                         bool valid = true;
-                        foreach(Unit unit in ourGameHex.ourGameBoard.gameHexDict[hex].unitsList)
+                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
                         {
-                            if(!ourGameHex.ourGameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
+                            if(!gameHex.gameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
                             {
                                 valid = false;
                             }
@@ -396,21 +370,21 @@ public class City
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in ourGameHex.hex.WrappingRange(3, ourGameHex.ourGameBoard.left, ourGameHex.ourGameBoard.right, ourGameHex.ourGameBoard.top, ourGameHex.ourGameBoard.bottom))
+        foreach(Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
         {
-            if(validTerrain.Contains(ourGameHex.ourGameBoard.gameHexDict[hex].terrainType))
+            if(validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
             {
                 //hex is owned by us so continue
-                if(ourGameHex.ourGameBoard.gameHexDict[hex].ownedBy == teamNum)
+                if(gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex has a district with less than the max defenses TODO
-                    if (ourGameHex.ourGameBoard.gameHexDict[hex].district != null & ourGameHex.ourGameBoard.gameHexDict[hex].district.defenses.Count() < ourGameHex.ourGameBoard.gameHexDict[hex].district.maxDefenses)
+                    if (gameHex.gameBoard.gameHexDict[hex].district != null & gameHex.gameBoard.gameHexDict[hex].district.defenses.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxDefenses)
                     {
                         //hex doesnt have a non-friendly unit
                         bool valid = true;
-                        foreach(Unit unit in ourGameHex.ourGameBoard.gameHexDict[hex].unitsList)
+                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
                         {
-                            if(!ourGameHex.ourGameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
+                            if(!gameHex.gameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
                             {
                                 valid = false;
                             }
@@ -443,7 +417,7 @@ public class City
     
     public void AddCoastYields(GameHex gameHex)
     {
-        gameHex.yields += coastYields;
+        gameHex.yields += coastalYields;
     }
     
     public void AddOceanYields(GameHex gameHex)
@@ -474,7 +448,7 @@ public class City
     
     public void AddArcticYields(GameHex gameHex)
     {
-        gameHex.yields += articYields;
+        gameHex.yields += arcticYields;
     }
 
 }

@@ -2,7 +2,7 @@
 -district vision
 -unit vision
 -unit abilities (good luck xd)
--resources (+fix the xml)
+-resces (+fix the xml)
 
 TODO
 -add unit xml

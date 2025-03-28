@@ -1,5 +1,5 @@
 <Units>
-  <Unit Name="Scout" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="15" MaintenanceCost="1">
+  <Unit Name="Scout" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -28,7 +28,7 @@
       <Ability Name="ScoutVisionAbility" UsageCount="1" />
     </Abilities>
   </Unit>
-  <Unit Name="Settler" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="15">
+  <Unit Name="Settler" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />

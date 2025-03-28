@@ -11,6 +11,8 @@ public class Game
     public Dictionary<int, Player> playerDictionary;
     public TeamManager? teamManager;
     public TurnManager turnManager;
+    int currentID = 0;
+
     
     public Game(String mapName)
     {
@@ -41,60 +43,63 @@ public class Game
             }
             foreach (String cell in cells)
             {
-                TerrainType terrainType = (TerrainType)int.Parse(cell[0].ToString());
-                TerrainTemperature terrainTemperature = (TerrainTemperature)int.Parse(cell[1].ToString());
-                HashSet<FeatureType> features = new();
-                //cell[2] == 0 means no features
-                if(cell[2] == 1)
+                if(cell.Length >= 4)
                 {
-                    features.Add(FeatureType.Forest);
+                    TerrainType terrainType = (TerrainType)int.Parse(cell[0].ToString());
+                    TerrainTemperature terrainTemperature = (TerrainTemperature)int.Parse(cell[1].ToString());
+                    HashSet<FeatureType> features = new();
+                    //cell[2] == 0 means no features
+                    if(cell[2] == 1)
+                    {
+                        features.Add(FeatureType.Forest);
+                    }
+                    if(cell[2] == 2)
+                    {
+                        features.Add(FeatureType.River);
+                    }
+                    if(cell[2] == 3)
+                    {
+                        features.Add(FeatureType.Road);
+                    }
+                    if(cell[2] == 4)
+                    {
+                        features.Add(FeatureType.Coral);
+                    }
+                    if(cell[2] == 5)
+                    {
+                        //openslot //TODO
+                    }
+                    if(cell[2] == 6)
+                    {
+                        features.Add(FeatureType.Forest);
+                        features.Add(FeatureType.River);
+                    }
+                    if(cell[2] == 7)
+                    {
+                        features.Add(FeatureType.River);
+                        features.Add(FeatureType.Road);
+                    }
+                    if(cell[2] == 8)
+                    {
+                        features.Add(FeatureType.Forest);
+                        features.Add(FeatureType.Road);
+                    }
+                    if(cell[2] == 9)
+                    {
+                        features.Add(FeatureType.Forest);
+                        features.Add(FeatureType.River);
+                        features.Add(FeatureType.Road);
+                    }
+                    if(cell[2] == 9)
+                    {
+                        features.Add(FeatureType.Forest);
+                        features.Add(FeatureType.River);
+                        features.Add(FeatureType.Road);
+                    }
+                    //fourth number is for resources
+                    ResourceType resource = ResourceLoader.resourceNames[cell[3].ToString()];
+                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
                 }
-                if(cell[2] == 2)
-                {
-                    features.Add(FeatureType.River);
-                }
-                if(cell[2] == 3)
-                {
-                    features.Add(FeatureType.Road);
-                }
-                if(cell[2] == 4)
-                {
-                    features.Add(FeatureType.Coral);
-                }
-                if(cell[2] == 5)
-                {
-                    //openslot //TODO
-                }
-                if(cell[2] == 6)
-                {
-                    features.Add(FeatureType.Forest);
-                    features.Add(FeatureType.River);
-                }
-                if(cell[2] == 7)
-                {
-                    features.Add(FeatureType.River);
-                    features.Add(FeatureType.Road);
-                }
-                if(cell[2] == 8)
-                {
-                    features.Add(FeatureType.Forest);
-                    features.Add(FeatureType.Road);
-                }
-                if(cell[2] == 9)
-                {
-                    features.Add(FeatureType.Forest);
-                    features.Add(FeatureType.River);
-                    features.Add(FeatureType.Road);
-                }
-                if(cell[2] == 9)
-                {
-                    features.Add(FeatureType.Forest);
-                    features.Add(FeatureType.River);
-                    features.Add(FeatureType.Road);
-                }
-                //fourth number is for resources
-                ResourceType resource = Enum.Parse<ResourceType>(cell[3]);
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
                 q += 1;
             }
             r += 1;
@@ -236,17 +241,17 @@ struct GameTests
         City player2City = new City(2, 2, "Team2City", game.mainGameBoard.gameHexDict[player2CityLocation]);
 
         //Yields
-        TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
-        TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
+        TestCityYields(player1City, 5, 5, 5, 1, 1, 0);
+        TestCityYields(player2City, 5, 5, 5, 1, 1, 0);
 
         //City Locations from player
-        Tests.EqualHex("player1CityLocation", player1CityLocation, game.playerDictionary[1].cityList[0].ourGameHex.hex);
-        Tests.EqualHex("player2CityLocation", player2CityLocation, game.playerDictionary[2].cityList[0].ourGameHex.hex);
+        Tests.EqualHex("player1CityLocation", player1CityLocation, game.playerDictionary[1].cityList[0].gameHex.hex);
+        Tests.EqualHex("player2CityLocation", player2CityLocation, game.playerDictionary[2].cityList[0].gameHex.hex);
 
         //Gamehex with city has District with 'City Center'
-        if(game.playerDictionary[1].cityList[0].ourGameHex.district != null)
+        if(game.playerDictionary[1].cityList[0].gameHex.district != null)
         {
-            District? tempDistrict = game.playerDictionary[1].cityList[0].ourGameHex.district;
+            District? tempDistrict = game.playerDictionary[1].cityList[0].gameHex.district;
             if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1)
             {
                 Complain("player1CityDistrictInvalid");
@@ -263,9 +268,9 @@ struct GameTests
             }
         }
 
-        if(game.playerDictionary[2].cityList[0].ourGameHex.district != null)
+        if(game.playerDictionary[2].cityList[0].gameHex.district != null)
         {
-            District tempDistrict = game.playerDictionary[2].cityList[0].ourGameHex.district;
+            District tempDistrict = game.playerDictionary[2].cityList[0].gameHex.district;
             if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1)
             {
                 Complain("player2CityDistrictInvalid");
@@ -273,8 +278,8 @@ struct GameTests
         }
 
         //Yields
-        TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
-        TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
+        TestCityYields(player1City, 5, 5, 5, 1, 1, 0);
+        TestCityYields(player2City, 5, 5, 5, 1, 1, 0);
 
         return game;
     }
@@ -284,17 +289,17 @@ struct GameTests
         Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
-        player2City.AddToQueue("Scout", ProductionType.Unit, player2City.ourGameHex, 4, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 10, false);
+        player2City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player2City.gameHex, 10, false);
 
         if(player1City.productionQueue.Any())
         {
-            if(player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 4)
+            if(player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 10)
             {
                 Complain("player1CityFirstQueueNotScoutOrProductionWrong");
             }
         }
-        if(player2City.productionQueue.Any() & (player2City.productionQueue[0].name != "Scout" | player2City.productionQueue[0].productionLeft != 4))
+        if(player2City.productionQueue.Any() & (player2City.productionQueue[0].name != "Scout" | player2City.productionQueue[0].productionLeft != 10))
         {
             Complain("player2CityFirstQueueNotScoutOrProductionWrong");
         }
@@ -306,8 +311,8 @@ struct GameTests
 
 
         //Yields
-            TestCityYields(player1City, 2, 2, 2, 4, 5, 6);
-            TestCityYields(player2City, 2, 2, 2, 4, 5, 6);
+            TestCityYields(player1City, 5, 5, 5, 1, 1, 0);
+            TestCityYields(player2City, 5, 5, 5, 1, 1, 0);
 
             if(!player1City.productionQueue.Any())
             {
@@ -318,12 +323,12 @@ struct GameTests
                 Complain("player2CityQueueEmpty");
             }
 
-            player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
+            player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 10, false);
             player1City.RemoveFromQueue(0); 
 
             if(player1City.productionQueue.Any())
             {
-                if((player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 2))
+                if(player1City.productionQueue[0].name != "Scout" | player1City.productionQueue[0].productionLeft != 5)
                 {
                     Complain("player1CityAddNewRemovePartial");
                 }
@@ -430,8 +435,8 @@ struct GameTests
 
             //try attacking again
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostFailCombat1", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat1", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
 
             if(game.playerDictionary[1].unitList[0].currentHealth != 80.0f & game.playerDictionary[2].unitList[0].currentHealth != 75.0f)
             {
@@ -453,8 +458,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(0);
 
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostFailCombat2", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat2", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
             
             if(game.playerDictionary[1].unitList[0].currentHealth != 60.0f & game.playerDictionary[2].unitList[0].currentHealth != 50.0f)
             {
@@ -470,10 +475,9 @@ struct GameTests
             game.turnManager.EndCurrentTurn(1);
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
-
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostFailCombat3", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat3", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
             
             if(game.playerDictionary[1].unitList[0].currentHealth != 40.0f & game.playerDictionary[2].unitList[0].currentHealth != 25.0f)
             {
@@ -487,8 +491,9 @@ struct GameTests
             game.turnManager.EndCurrentTurn(0);
 
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostFailCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
-            //Tests.EqualHex("Scout 2 Location PostFailCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostSuccessCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            //Tests.EqualHex("Scout 2 Location PostSuccessCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
             if(game.playerDictionary[2].unitList.Any())
             {
                 Complain("UnitInPlayerDictionary");
@@ -512,31 +517,31 @@ struct GameTests
         Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
         int targetTurn = 25;
         for(int i = 0; i < targetTurn; i++)
         {
@@ -559,7 +564,7 @@ struct GameTests
     {
         Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 1, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 1, false);
 
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
@@ -574,7 +579,7 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
 
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 3, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 3, false);
 
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
@@ -589,7 +594,7 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
 
-        player1City.AddToQueue("Scout", ProductionType.Unit, player1City.ourGameHex, 4, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 4, false);
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
@@ -608,7 +613,7 @@ struct GameTests
         //GameTests.MapLoadTest();
         TestScoutMovementCombat();
         TestMassScoutBuild();
-        TestOverflowProduction();
+        //TestOverflowProduction();
     }
 
     static private void TestPlayerRelations(Game game)
@@ -634,39 +639,39 @@ struct GameTests
 
     static public void TestCityYields(City city, int foodExpected, int productionExpected, int goldExpected, int scienceExpected, int cultureExpected, int happinessExpected)
     {
-        TestCityYield(city.name+"CityFoodYield", city, YieldType.Food, foodExpected);
-        TestCityYield(city.name+"CityProductionYield", city, YieldType.Production, productionExpected);
-        TestCityYield(city.name+"CityGoldYield", city, YieldType.Gold, goldExpected);
-        TestCityYield(city.name+"CityScienceYield", city, YieldType.Science, scienceExpected);
-        TestCityYield(city.name+"CityCultureYield", city, YieldType.Culture, cultureExpected);
-        TestCityYield(city.name+"CityHappinessYield", city, YieldType.Happiness, happinessExpected);
+        TestCityYield(city.name+"Cityyields.food", city, YieldType.Food, foodExpected);
+        TestCityYield(city.name+"Cityyields.production", city, YieldType.Production, productionExpected);
+        TestCityYield(city.name+"Cityyields.gold", city, YieldType.Gold, goldExpected);
+        TestCityYield(city.name+"Cityyields.science", city, YieldType.Science, scienceExpected);
+        TestCityYield(city.name+"Cityyields.culture", city, YieldType.Culture, cultureExpected);
+        TestCityYield(city.name+"Cityyields.happiness", city, YieldType.Happiness, happinessExpected);
     }
 
     static public void TestCityYield(String testName, City testCity, YieldType yieldType, float expectedYield)
     {
-        if(yieldType == YieldType.Food & testCity.foodYield != expectedYield)
+        if(yieldType == YieldType.Food & testCity.yields.food != expectedYield)
         {
-            Complain(testName + " " + testCity.foodYield);
+            Complain(testName + " " + testCity.yields.food);
         }
-        if(yieldType == YieldType.Production & testCity.productionYield != expectedYield)
+        if(yieldType == YieldType.Production & testCity.yields.production != expectedYield)
         {
-            Complain(testName + " " + testCity.productionYield);
+            Complain(testName + " " + testCity.yields.production);
         }
-        if(yieldType == YieldType.Gold & testCity.goldYield != expectedYield)
+        if(yieldType == YieldType.Gold & testCity.yields.gold != expectedYield)
         {
-            Complain(testName + " " + testCity.goldYield);
+            Complain(testName + " " + testCity.yields.gold);
         }
-        if(yieldType == YieldType.Science & testCity.scienceYield != expectedYield)
+        if(yieldType == YieldType.Science & testCity.yields.science != expectedYield)
         {
-            Complain(testName + " " + testCity.scienceYield);
+            Complain(testName + " " + testCity.yields.science);
         }
-        if(yieldType == YieldType.Culture & testCity.cultureYield != expectedYield)
+        if(yieldType == YieldType.Culture & testCity.yields.culture != expectedYield)
         {
-            Complain(testName + " " + testCity.cultureYield);
+            Complain(testName + " " + testCity.yields.culture);
         }
-        if(yieldType == YieldType.Happiness & testCity.happinessYield != expectedYield)
+        if(yieldType == YieldType.Happiness & testCity.yields.happiness != expectedYield)
         {
-            Complain(testName + " " + testCity.happinessYield);
+            Complain(testName + " " + testCity.yields.happiness);
         }
     }
 

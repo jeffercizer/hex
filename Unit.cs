@@ -24,7 +24,7 @@ public class Unit
 
     public Unit(UnitType unitType, GameHex currentGameHex, int teamNum)
     {
-        this.name = unitType.ToString();
+        this.name = UnitLoader.unitNames[unitType];
         this.currentGameHex = currentGameHex;
         this.teamNum = teamNum;
     
@@ -41,14 +41,14 @@ public class Unit
             this.combatStrength = unitInfo.CombatPower;
             this.maintenanceCost = unitInfo.MaintenanceCost;
 
-            foreach (String effectName in unitInfo.Effect.Keys)
+            foreach (String effectName in unitInfo.Effects)
             {
                 AddEffect(new UnitEffect(effectName));
             }
     
             foreach (String abilityName in unitInfo.Abilities.Keys)
             {
-                AddAbility(new UnitEffect(abilityName));
+                AddAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName]);
             }
         }
         else
@@ -56,7 +56,7 @@ public class Unit
             throw new ArgumentException($"Unit type '{name}' not found in unit data.");
         }
     
-        currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
+        currentGameHex.gameBoard.game.playerDictionary[teamNum].unitList.Add(this);
         AddVision();
     }
 
@@ -77,7 +77,7 @@ public class Unit
         this.combatStrength = combatStrength;
         this.baseMaintenanceCost = maintenanceCost;
         this.maintenanceCost = maintenanceCost;
-        currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Add(this);
+        currentGameHex.gameBoard.game.playerDictionary[teamNum].unitList.Add(this);
         AddVision();
     }
 
@@ -99,12 +99,12 @@ public class Unit
     public float maintenanceCost = 1.0f;
     public int maxAttackCount = 1;
     public int attacksLeft = 1;
-    public int healingFactor = 15;
+    public int healingFactor;
     public int teamNum;
     public List<Hex>? currentPath = new();
-    public List<Hex> ourVisibleHexes = new();
-    public List<UnitEffect> ourEffects = new();
-    public List<(int,UnitEffect)> ourAbilities = new();
+    public List<Hex> visibleHexes = new();
+    public List<UnitEffect> effects = new();
+    public List<(int,UnitEffect)> abilities = new();
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
@@ -115,12 +115,12 @@ public class Unit
 
     public void OnTurnEnded(int turnNumber)
     {
-        currentGameHex.ourGameBoard.game.playerDictionary[teamNum].AddGold(maintenanceCost);
+        currentGameHex.gameBoard.game.playerDictionary[teamNum].AddGold(maintenanceCost);
         if(remainingMovement > 0.0f & currentPath.Any())
         {
-            MoveTowards(currentGameHex.ourGameBoard.gameHexDict[currentPath.Last()], currentGameHex.ourGameBoard.game.teamManager ,isTargetEnemy);
+            MoveTowards(currentGameHex.gameBoard.gameHexDict[currentPath.Last()], currentGameHex.gameBoard.game.teamManager ,isTargetEnemy);
         }
-        if(remaningMovement >= movementSpeed & attacksLeft == maxAttackCount)
+        if(remainingMovement >= movementSpeed & attacksLeft == maxAttackCount)
         {
             increaseCurrentHealth(healingFactor);
         }
@@ -139,7 +139,7 @@ public class Unit
         //0 means it is applied first 100 means it is applied "last" (highest number last)
         //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
         PriorityQueue<UnitEffect, int> orderedEffects = new();
-        foreach(UnitEffect effect1 in ourEffects)
+        foreach(UnitEffect effect1 in effects)
         {
             orderedEffects.Enqueue(effect1, effect1.priority);
         }
@@ -154,34 +154,38 @@ public class Unit
 
     public void AddEffect(UnitEffect effect)
     {
-        ourEffects.Add(effect);
+        effects.Add(effect);
         RecalculateEffects();
     }
 
     public void RemoveEffect(UnitEffect effect)
     {
-        ourEffects.Remove(effect);
+        effects.Remove(effect);
         RecalculateEffects();
     }
 
     public void AddAbility(UnitEffect ability, int usageCount)
     {
-        ourAbilities.Add((ability, usageCount));
+        abilities.Add((usageCount, ability));
     }
 
     public void UseAbilities()
     {
-        foreach((UnitEffect, int) ability in ourAbilities)
+        for (int i = 0; i < abilities.Count; i++)
         {
-            if(ability.Item2 >= 1)
+            var ability = abilities[i];
+            if (ability.Item1 >= 1)
             {
-                ability.Item1.Apply(this);
-                ability.Item2 -= 1;
+                ability.Item2.Apply(this);
+                ability.Item1 -= 1; // Update the tuple directly
+                abilities[i] = ability; // Write the modified tuple back to the list
             }
         }
     }
 
-    public bool AttackTarget(GameHex targetGameHex, TeamManager teamManager)
+
+
+    public bool AttackTarget(GameHex targetGameHex, float moveCost, TeamManager teamManager)
     {
         remainingMovement -= moveCost;
         if (targetGameHex.unitsList.Any())
@@ -193,6 +197,7 @@ public class Unit
                 //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
                 attacksLeft -= 1;
                 return !decreaseCurrentHealth(20.0f) & unit.decreaseCurrentHealth(25.0f);
+
             }
             return false;
         }
@@ -205,6 +210,7 @@ public class Unit
     public void increaseCurrentHealth(float amount)
     {
         currentHealth += amount;
+        currentHealth = Math.Min(currentHealth, 100.0f);
     }
 
     public bool decreaseCurrentHealth(float amount)
@@ -224,7 +230,7 @@ public class Unit
     public void onDeathEffects()
     {
         currentGameHex.unitsList.Remove(this);
-        currentGameHex.ourGameBoard.game.playerDictionary[teamNum].unitList.Remove(this);
+        currentGameHex.gameBoard.game.playerDictionary[teamNum].unitList.Remove(this);
         RemoveVision();
     }
 
@@ -236,38 +242,38 @@ public class Unit
 
     public void RemoveVision()
     {
-        foreach (Hex hex in ourVisibleHexes)
+        foreach (Hex hex in visibleHexes)
         {            
             int count;
-            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            if(currentGameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
             {
                 if(count <= 1)
                 {
-                    currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.Remove(hex);
+                    currentGameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict.Remove(hex);
                 }
                 else
                 {
-                    currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count - 1;
+                    currentGameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count - 1;
                 }
             }
         }
-        ourVisibleHexes.Clear();
+        visibleHexes.Clear();
     }
 
     public void AddVision()
     {
-        ourVisibleHexes = CalculateVision().Keys.ToList();
-        foreach (Hex hex in ourVisibleHexes)
+        visibleHexes = CalculateVision().Keys.ToList();
+        foreach (Hex hex in visibleHexes)
         {
-            currentGameHex.ourGameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+            currentGameHex.gameBoard.game.playerDictionary[teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
             int count;
-            if(currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            if(currentGameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryGetValue(hex, out count))
             {
-                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
+                currentGameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict[hex] = count + 1;
             }
             else
             {
-                currentGameHex.ourGameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                currentGameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
             }
         }
     }
@@ -283,10 +289,10 @@ public class Unit
         {
             Hex current = frontier.Dequeue();
 
-            foreach (Hex next in currentGameHex.hex.WrappingNeighbors(currentGameHex.ourGameBoard.left, currentGameHex.ourGameBoard.right))
+            foreach (Hex next in currentGameHex.hex.WrappingNeighbors(currentGameHex.gameBoard.left, currentGameHex.gameBoard.right))
             {
                 float sightLeft = sightRange - reached[current];
-                float visionCost = VisionCost(currentGameHex.ourGameBoard.gameHexDict[next], sightLeft); //vision cost is at most the cost of our remaining sight if we have atleast 1
+                float visionCost = VisionCost(currentGameHex.gameBoard.gameHexDict[next], sightLeft); //vision cost is at most the cost of our remaining sight if we have atleast 1
                 if (visionCost <= sightLeft)
                 {
                     if (!reached.Keys.Contains(next))
@@ -337,7 +343,7 @@ public class Unit
         }
     }
 
-    public void MovementRange()
+    public Dictionary<Hex, float> MovementRange()
     {
         //breadth first using movement speed and move costs
         Queue<Hex> frontier = new();
@@ -349,10 +355,10 @@ public class Unit
         {
             Hex current = frontier.Dequeue();
 
-            foreach (Hex next in currentGameHex.hex.WrappingNeighbors(currentGameHex.ourGameBoard.left, currentGameHex.ourGameBoard.right))
+            foreach (Hex next in currentGameHex.hex.WrappingNeighbors(currentGameHex.gameBoard.left, currentGameHex.gameBoard.right))
             {
                 float movementLeft = movementSpeed - reached[current];
-                float moveCost = TravelCost(current, next, teamManager, true, movementCosts, unitMovementSpeed, reached[current]); 
+                float moveCost = TravelCost(current, next, currentGameHex.gameBoard.game.teamManager, true, movementCosts, movementSpeed, reached[current]); 
                 if (moveCost <= movementLeft)
                 {
                     if (!reached.Keys.Contains(next))
@@ -391,7 +397,7 @@ public class Unit
         {
             if(isTargetEnemy & targetGameHex.hex.Equals(currentPath.Last()) & attacksLeft > 0)
             {
-                if(AttackTarget(targetGameHex, teamManager))
+                if(AttackTarget(targetGameHex, moveCost, teamManager))
                 {
                     UpdateVision();
                     currentGameHex.unitsList.Remove(this);
@@ -425,11 +431,11 @@ public class Unit
     public bool MoveTowards(GameHex targetGameHex, TeamManager teamManager, bool isTargetEnemy)
     {
         this.isTargetEnemy = isTargetEnemy;
-        currentPath = PathFind(currentGameHex.hex, targetGameHex.hex, currentGameHex.ourGameBoard.game.teamManager, movementCosts, movementSpeed);
+        currentPath = PathFind(currentGameHex.hex, targetGameHex.hex, currentGameHex.gameBoard.game.teamManager, movementCosts, movementSpeed);
         currentPath.Remove(currentGameHex.hex);
         while (currentPath.Count > 0)
         {
-            GameHex nextHex = currentGameHex.ourGameBoard.gameHexDict[currentPath[0]];
+            GameHex nextHex = currentGameHex.gameBoard.gameHexDict[currentPath[0]];
             if (!TryMoveToGameHex(nextHex, teamManager))
             {
                 return false;
@@ -444,11 +450,11 @@ public class Unit
         //cost for river, embark, disembark are custom (0 = end turn to enter, 1/2/3/4 = normal cost)\\
         GameHex firstHex;
         GameHex secondHex;
-        if (!currentGameHex.ourGameBoard.gameHexDict.TryGetValue(first, out firstHex)) //if firstHex is somehow off the table return max
+        if (!currentGameHex.gameBoard.gameHexDict.TryGetValue(first, out firstHex)) //if firstHex is somehow off the table return max
         {
             return 111111;
         }
-        if (!currentGameHex.ourGameBoard.gameHexDict.TryGetValue(second, out secondHex)) //if secondHex is off the table return max
+        if (!currentGameHex.gameBoard.gameHexDict.TryGetValue(second, out secondHex)) //if secondHex is off the table return max
         {
             return 333333;
         }
@@ -560,7 +566,7 @@ public class Unit
 
     private int AstarHeuristic(Hex start, Hex end)
     {
-        return start.WrapDistance(end, currentGameHex.ourGameBoard.right - currentGameHex.ourGameBoard.left);
+        return start.WrapDistance(end, currentGameHex.gameBoard.right - currentGameHex.gameBoard.left);
     }
 
     public List<Hex> PathFind(Hex start, Hex end, TeamManager teamManager, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed)
@@ -591,7 +597,7 @@ public class Unit
                 return path;
             }
     
-            foreach (Hex next in current.WrappingNeighbors(currentGameHex.ourGameBoard.left, currentGameHex.ourGameBoard.right))
+            foreach (Hex next in current.WrappingNeighbors(currentGameHex.gameBoard.left, currentGameHex.gameBoard.right))
             {
                 float new_cost = cost_so_far[current] + TravelCost(current, next, teamManager, isTargetEnemy, movementCosts, unitMovementSpeed, cost_so_far[current]);
                 //if cost_so_far doesn't have next as a key yet or the new cost is lower than the lowest cost of this node previously

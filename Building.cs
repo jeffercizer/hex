@@ -8,7 +8,7 @@ using System.Data;
 public class Building
 {
     public String name;
-    public District? ourDistrict;
+    public District? district;
     public List<BuildingEffect> buildingEffects;
     public float baseProductionCost;
     public float productionCost;
@@ -21,12 +21,12 @@ public class Building
 
     public Building(BuildingType buildingType)
     {
-        this.name = buildingType.ToString();
+        this.name = BuildingLoader.buildingNames[buildingType];
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
         if (BuildingLoader.buildingsDict.TryGetValue(buildingType, out BuildingInfo buildingInfo))
         {
-            this.productionCost = buildingInfo.BuildCost;
-            this.baseProductionCost = buildingInfo.BuildCost;
+            this.productionCost = buildingInfo.ProductionCost;
+            this.baseProductionCost = buildingInfo.ProductionCost;
             
             this.goldCost = buildingInfo.GoldCost;
             this.baseGoldCost = buildingInfo.GoldCost;
@@ -34,13 +34,13 @@ public class Building
             this.maintenanceCost = buildingInfo.MaintenanceCost;
             this.baseMaintenanceCost = buildingInfo.MaintenanceCost;
             
-            this.yields = yields;
-            this.baseYields = yields;
+            this.yields = buildingInfo.yields;
+            this.baseYields = buildingInfo.yields;
             
             this.buildingEffects = new();
             foreach (String effectName in buildingInfo.Effects)
             {
-                buildingEffects.Add(new BuildingEffect(effectName))
+                buildingEffects.Add(new BuildingEffect(effectName));
             }
         }
     }
@@ -52,19 +52,19 @@ public class Building
 
     public void DestroyBuilding()
     {
-        ourDistrict = null;
+        district = null;
     }
 
     public void AddEffect(BuildingEffect effect)
     {
         buildingEffects.Add(effect);
-        ourDistrict.ourCity.RecalculateYields();
+        district.city.RecalculateYields();
     }
 
     public void RemoveEffect(BuildingEffect effect)
     {
         buildingEffects.Remove(effect);
-        ourDistrict.ourCity.RecalculateYields();
+        district.city.RecalculateYields();
     }
 
     public void PrepareYieldRecalculate()
@@ -85,6 +85,6 @@ public class Building
 
     public void RecalculateYields()
     {
-        ourDistrict.ourGameHex.yields += yields;
+        district.gameHex.yields += yields;
     }
 }

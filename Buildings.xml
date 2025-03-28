@@ -5,7 +5,7 @@
       <Effect Name="AncientWallEffect" />
     </Effects>
   </Building>
-  <Building Name="City Center" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="1.0" CultureYield="1.0" HappinessYield="0.0" MaintenanceCost="0.0">
+  <Building Name="CityCenter" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="1.0" CultureYield="1.0" HappinessYield="0.0" MaintenanceCost="0.0">
     <Effects>
       <Effect Name="WaterSupplyEffect" />
       <Effect Name="CityCenterWallEffect" />

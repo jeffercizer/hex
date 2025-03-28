@@ -58,7 +58,7 @@ public class BuildingEffect
         }
         else if (functionName != "")
         {
-            ProcessFunctionString(functionName, unit);
+            ProcessFunctionString(functionName, building);
         }
         else
         {
@@ -141,32 +141,32 @@ public class BuildingEffect
     void WaterSupplyEffect(Building building)
     {
         float waterHappinessYield = 0.0f;
-        if(building.ourDistrict.ourGameHex.terrainType == TerrainType.Coastal ||building.ourDistrict.ourGameHex.featureSet.Contains(FeatureType.River) 
-                || building.ourDistrict.ourGameHex.featureSet.Contains(FeatureType.Wetland))
+        if(building.district.gameHex.terrainType == TerrainType.Coast ||building.district.gameHex.featureSet.Contains(FeatureType.River) 
+                || building.district.gameHex.featureSet.Contains(FeatureType.Wetland))
         {
             waterHappinessYield = 10.0f;
         }
         else
         {
-            foreach(Hex hex on building.ourDistrict.ourGameHex.WrappingNeighbors(building.ourDistrict.ourGameHex.gameBoard.left, building.ourDistrict.ourGameHex.gameBoard.right))
+            foreach(Hex hex in building.district.gameHex.hex.WrappingNeighbors(building.district.gameHex.gameBoard.left, building.district.gameHex.gameBoard.right))
             {
-                if (building.ourDistrict.ourGameHex.gameBoard.gameHexDict[hex].terrainType == TerrainType.Coastal || building.ourDistrict.ourGameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.River) 
-                    || building.ourDistrict.ourGameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Wetland))
+                if (building.district.gameHex.gameBoard.gameHexDict[hex].terrainType == TerrainType.Coast || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.River) 
+                    || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Wetland))
                 {
                     waterHappinessYield = 10.0f;
                     break;
                 }
             }
         }
-        building.yields.happiness += waterhappinessYield;
+        building.yields.happiness += waterHappinessYield;
     }
     void GranaryWarehouseEffect(Building building)
     {
-        building.ourDistrict.ourCity.flatYields.food += 1;
+        building.district.city.flatYields.food += 1;
     }
     void StoneCutterWarehouseEffect(Building building)
     {
-        building.ourDistrict.ourCity.roughYields.production += 1;
+        building.district.city.roughYields.production += 1;
     }
     void AncientWallEffect(Building building)
     {

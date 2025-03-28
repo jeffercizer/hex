@@ -76,11 +76,9 @@ public class Player
     {
         if(targetCity.heldResources.Count < targetCity.maxResourcesHeld)
         {
-            if(targetCity.heldResources.Add(hex, resourceType))
-            {
-                unassignedResources.Remove(hex);
-                return true;
-            }
+            targetCity.heldResources.Add(hex, resourceType);
+            unassignedResources.Remove(hex);
+            return true;
         }
         return false;
     }
@@ -89,11 +87,11 @@ public class Player
     {
         foreach(City city in cityList)
         {
-            if(city.heldResources.Contains(hex))
+            if(city.heldResources.Keys.Contains(hex))
             {
                 ResourceType temp = city.heldResources[hex];
-                city.heldResources.Remove(hex)
-                unassignedResources.Add(temp);
+                city.heldResources.Remove(hex);
+                unassignedResources.Add(hex, temp);
                 return true;
             }
         }

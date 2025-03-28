@@ -149,7 +149,8 @@ public class UnitEffect
     }
     public bool SettleCity(Unit unit, String cityName)
     {
-        new City(unit.ourGameBoard.game.GetUniqueID(), 1, cityName, game.mainGameBoard.gameHexDict[player1CityLocation]);
+        new City(unit.currentGameHex.gameBoard.game.GetUniqueID(), 1, cityName, unit.currentGameHex);
         unit.decreaseCurrentHealth(99999.0f);
+        return true;
     }
 }
