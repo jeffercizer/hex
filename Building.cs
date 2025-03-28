@@ -8,6 +8,7 @@ using System.Data;
 public class Building
 {
     public String name;
+    public BuildingType buildingType;
     public District? district;
     public List<BuildingEffect> buildingEffects;
     public float baseProductionCost;
@@ -21,6 +22,7 @@ public class Building
 
     public Building(BuildingType buildingType)
     {
+        this.buildingType = buildingType;
         this.name = BuildingLoader.buildingNames[buildingType];
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
         if (BuildingLoader.buildingsDict.TryGetValue(buildingType, out BuildingInfo buildingInfo))
