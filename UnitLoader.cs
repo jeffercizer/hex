@@ -3,6 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
+[Flags]
+public enum UnitClass
+{
+    None = 0,
+    Civilian = 1 << 0,
+    Combat = 1 << 1,
+    Land = 1 << 2,
+    Naval = 1 << 3,
+    Air = 1 << 4,
+    Infantry = 1 << 5,
+    Ranged = 1 << 6,
+    Cavalry = 1 << 7,
+    Siege = 1 << 8,
+    Recon = 1 << 9,
+}
+
+
 public enum UnitType
 {
     None,
@@ -12,6 +29,7 @@ public enum UnitType
 
 public struct UnitInfo
 {
+    public UnitClass Class { get; set; }
     public int ProductionCost { get; set; }
     public int GoldCost { get; set; }
     public float MovementSpeed { get; set; }
@@ -50,6 +68,7 @@ public static class UnitLoader
                 r => (UnitType)Enum.Parse(typeof(UnitType), r.Attribute("Name").Value),
                 r => new UnitInfo
                 {
+                    Class = Enum.TryParse<UnitClass>(r.Attribute("Class")?.Value, out var unitClass) ? unitClass : UnitClass.None,
                     ProductionCost = int.TryParse(r.Attribute("ProductionCost")?.Value, out var productionCost) ? productionCost : 0,
                     GoldCost = int.TryParse(r.Attribute("GoldCost")?.Value, out var goldCost) ? goldCost : 0,
                     MovementSpeed = float.TryParse(r.Attribute("MovementSpeed")?.Value, out var movementSpeed) ? movementSpeed : 0.0f,
