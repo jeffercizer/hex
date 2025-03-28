@@ -65,6 +65,7 @@ public class District
     public float maxHealth = 0.0f;
     public int maxBuildings = 2;
     public int maxDefenses = 1;
+    public int turnsUntilHealing = 0;
 
     public void BeforeSwitchTeam()
     {
@@ -84,6 +85,17 @@ public class District
         }
         AddVision();
         AddResource();
+    }
+
+    public bool decreaseCurrentHealth(float amount)
+    {
+        currentHealth -= amount;
+        currentHealth = Math.Max(0.0f, currentHealth);
+        if(currenHealth <= 0.0f)
+        {
+            city.DistrictFell();
+            turnsUntilHealing = 5;
+        }
     }
 
     public float GetCombatStrength()
@@ -112,10 +124,25 @@ public class District
         }
     }
 
-    public void Heal(float healAmount)
+    public void HealForTurn(float healAmount)
     {
-        currentHealth += healAmount;
-        currentHealth = Math.Min(currentHealth, maxHealth);
+        if(turnsUntilHealing <= 0)
+        {
+            currentHealth += healAmount;
+            currentHealth = Math.Min(currentHealth, maxHealth);
+        }
+        else if(turnsUntilHealing > 0)
+        {
+            if (gameHex.unitsList.Any())
+            {
+                Unit unit = gameHex.unitsList[0];
+                if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                {
+                    turnsUntilHealing += 1;
+                }
+            }
+            turnsUntilHealing -= 1;
+        }
     }
 
     public void AddWalls(float wallStrength)
