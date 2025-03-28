@@ -30,6 +30,7 @@ public class Unit
     
         if (UnitLoader.unitsDict.TryGetValue(unitType, out UnitInfo unitInfo))
         {
+            this.unitClass = unitInfo.Class;
             this.movementCosts = unitInfo.MovementCosts;
             this.baseMovementCosts = unitInfo.MovementCosts;
             this.sightCosts = unitInfo.SightCosts;
@@ -101,6 +102,7 @@ public class Unit
     public int attacksLeft = 1;
     public int healingFactor;
     public int teamNum;
+    public UnitClass unitClass;
     public List<Hex>? currentPath = new();
     public List<Hex> visibleHexes = new();
     public List<UnitEffect> effects = new();
