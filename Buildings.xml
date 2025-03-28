@@ -16,6 +16,11 @@
       <Effect Name="GranaryWarehouseEffect" />
     </Effects>
   </Building>
+  <Building Name="Dock" ProductionCost="25" GoldCost="120" FoodYield="0.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="0.0" HappinessYield="0.0" MaintenanceCost="1.0" PerCity="1" PerPlayer="0" Wonder="False">
+    <Effects>
+      <Effect Name="DockWarehouseEffect" />
+    </Effects>
+  </Building>
   <Building Name="StoneCutter" ProductionCost="20" GoldCost="100" FoodYield="0.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="0.0" HappinessYield="0.0" MaintenanceCost="1.0" PerCity="1" PerPlayer="0" Wonder="False">
     <Effects>
       <Effect Name="StoneCutterWarehouseEffect" />
