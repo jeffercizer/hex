@@ -26,7 +26,7 @@
       <Effect Name="AncientWallEffect" />
     </Effects>
   </Building>
-  <Building Name="Stonehenge" ProductionCost="200" GoldCost="0" FoodYield="0.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="4.0" HappinessYield="2.0" MaintenanceCost="0.0" PerCity="1" PerPlayer="0" Wonder="True">
+  <Building Name="Stonehenge" ProductionCost="200" GoldCost="0" FoodYield="0.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="4.0" HappinessYield="2.0" MaintenanceCost="0.0" PerCity="1" PerPlayer="1" Wonder="True">
     <Effects>
       <Effect Name="StonehengeEffect" />
     </Effects>
