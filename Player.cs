@@ -23,6 +23,7 @@ public class Player
         this.buildingResearchEffects = new();
         this.queuedResearch = new();
         game.teamManager.AddTeam(teamNum, 50);
+        OnResearchComplete(ResearchType.Agriculture);
     }
     public Player(Game game, int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
     {
@@ -46,7 +47,9 @@ public class Player
     public bool turnFinished;
     public Dictionary<Hex, int> visibleGameHexDict;
     public Dictionary<Hex, bool> seenGameHexDict;
-    public Queue<ResearchType> queuedResearch;
+    public Queue<ResearchQueueType> queuedResearch;
+    public Dictionary<string, ResearchQueueType> partialResearchDictionary;
+    public ResearchType currentResearch;
     public List<Unit> unitList;
     public List<City> cityList;
     public List<(UnitEffect, UnitClass)> unitResearchEffects;
@@ -71,6 +74,18 @@ public class Player
         {
             city.OnTurnStarted(turnNumber);
         }
+        if(queuedResearch.Any())
+        {
+            float cost = queuedResearch[0].researchLeft;
+            queuedResearch[0].researchLeft -= scienceTotal;
+            scienceTotal -= cost;
+            scienceTotal = Math.Max(0.0f, scienceTotal);
+            if(queuedResearch[0].researchLeft <= 0)
+            {
+                OnResearchComplete(queuedResearch[0]);
+                queuedResearch.RemoveAt(0);
+            }
+        }
     }
 
     public void OnTurnEnded(int turnNumber)
@@ -86,11 +101,14 @@ public class Player
         turnFinished = true;
     }
 
-    public Queue<ResearchType> SelectResearch(ResearchType researchType)
+    public List<ResearchQueueType> SelectResearch(ResearchType researchType)
     {
         HashSet<String> visited = new();
-        Queue<ResearchType> queue = new();
-
+        List<ResearchQueueType> queue = new();
+        if(queuedResearch.Any())
+        {
+            partialResearchDict[researchType] = queuedResearch[0];
+        }
         void TopologicalSort(ResearchType researchType)
         {
             if (visited.Contains(researchType))
@@ -105,17 +123,34 @@ public class Player
                     TopologicalSort(requirement);
                 }
             }
-            queue.Enqueue(ResearchType);
+            if(partialResearchDict[researchType])
+            {
+                List.Add(partialResearchDict[researchType]);
+            }
+            else
+            {
+                List.Add(new ResearchQueueType(researchType, ResearchLoader.researchsDict[researchType].Tier, ResearchLoader.researchsDict[researchType].Tier)); //apply cost mod TODO
+            }
         }
 
         TopologicalSort(researchType);
         return queue;
     }
 
-    public void OnResearchComplete()
+    public void OnResearchComplete(ResearchType researchType)
     {
-        //activate research effect
-        
+        foreach(UnitType unitType in ResearchLoader.researchsDict[researchType].UnitUnlocks)
+        {
+            allowedUnits.Add(unitType)
+        }
+        foreach(BuildingType buildingType in ResearchLoader.researchsDict[researchType].BuildingType)
+        {
+            allowedBuildings.Add(buildingType)
+        }
+        foreach(String effect in ResearchLoader.researchsDict[researchType].Effects)
+        {
+            ProcessFunctionString(effect, this);
+        }
     }
 
     public bool AddResource(Hex hex, ResourceType resourceType, City targetCity)
@@ -176,4 +211,18 @@ public class Player
         happinessTotal += happiness;
     }
 
+}
+
+public class ResearchQueueType
+{
+
+    public ResearchQueueType(ResearchType researchType, float researchCost, float researchLeft)
+    {
+        this.researchType = researchType;
+        this.researchCost = researchCost;
+        this.researchLeft = researchLeft;
+    }
+    public ResearchType researchType;
+    public float researchCost;
+    public float researchLeft;
 }
