@@ -45,7 +45,10 @@ public class Building
                 buildingEffects.Add(new BuildingEffect(effectName));
             }
         }
-        district.gameHex.gameBoard.game.builtWonder.Add(buildingType);
+        if(BuildingLoader.buildingsDict[buildingType].Wonder)
+        {
+            district.gameHex.gameBoard.game.builtWonder.Add(buildingType);
+        }
     }
 
     public void SwitchTeams()
