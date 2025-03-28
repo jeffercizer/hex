@@ -424,7 +424,16 @@ public class City
                                 valid = false;
                             }
                         }
-                        if(valid)
+                        bool adjacentDistrict = false;
+                        foreach(Hex hex in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if(gameHex.gameBoard.gameHexDict[hex].district != null)
+                            {
+                                adjacentDistrict = true;
+                                break;
+                            }
+                        }
+                        if(valid && adjacentDistrict)
                         {
                             validHexes.Add(hex);
                         }
@@ -451,15 +460,26 @@ public class City
                     if (gameHex.gameBoard.gameHexDict[hex].district == null | !gameHex.gameBoard.gameHexDict[hex].district.isUrban | gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
                     {
                         //hex doesnt have a non-friendly unit
-                        bool valid = true;
+                        bool noEnemyUnit = true;
                         foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
                         {
                             if(!gameHex.gameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
                             {
-                                valid = false;
+                                noEnemyUnit = false;
+                                break;
                             }
                         }
-                        if(valid)
+                        bool adjacentUrbanDistrict = false;
+                        foreach(Hex hex in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if(gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban)
+                            {
+                                adjacentUrbanDistrict = true;
+                                break;
+                            }
+                        }
+                                
+                        if(noEnemyUnit && adjacentUrbanDistrict)
                         {
                             validHexes.Add(hex);
                         }
