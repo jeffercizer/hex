@@ -22,6 +22,7 @@ public enum ResearchType
 public struct ResearchInfo
 {
     public int Tier;
+    public List<Requirements> Requirements;
     public List<BuildingType> BuildingUnlocks;
     public List<UnitType> UnitUnlocks;
     public List<String> Effects;
@@ -61,6 +62,7 @@ public static class ResearchLoader
                 r => new ResearchInfo
                 {
                     Tier = int.Parse(r.Attribute("Tier").Value),
+                    Requirements = r.Element("Requirements").Elements("ResearchType").Select(e => Enum.Parse<ResearchType>(e.Value)).ToList(),
                     BuildingUnlocks = r.Element("BuildingUnlocks").Elements("BuildingType").Select(e => Enum.Parse<BuildingType>(e.Value)).ToList(),
                     UnitUnlocks = r.Element("UnitUnlocks").Elements("UnitType").Select(e => Enum.Parse<UnitType>(e.Value)).ToList(),
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
