@@ -20,6 +20,9 @@ public struct BuildingInfo
     public int GoldCost;
     public Yields yields;
     public float MaintenanceCost;
+    public int PerCity;
+    public int PerPlayer;
+    public bool Wonder;
     public List<String> Effects;
 }
 
@@ -63,6 +66,9 @@ public static class BuildingLoader
                         happiness = float.Parse(r.Attribute("HappinessYield").Value),
                     },
                     MaintenanceCost = float.Parse(r.Attribute("MaintenanceCost").Value),
+                    PerCity = int.Parse(r.Attribute("PerCity").Value),
+                    PerPlayer = int.Parse(r.Attribute("PerPlayer").Value),
+                    Wonder = bool.Parse(r.Attribute("Wonder").Value),
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
                 }
 
