@@ -17,6 +17,8 @@ public class Player
         this.unitList = new();
         this.cityList = new();
         this.unassignedResources = new();
+        this.allowedBuildings = new();
+        this.allowedUnits = new();
         game.teamManager.AddTeam(teamNum, 50);
     }
     public Player(Game game, int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
@@ -31,6 +33,9 @@ public class Player
         this.cultureTotal = cultureTotal;
         this.goldTotal = goldTotal;
         this.happinessTotal = happinessTotal;
+        this.unassignedResources = new();
+        this.allowedBuildings = new();
+        this.allowedUnits = new();
         game.teamManager.AddTeam(teamNum, 50);
     }
     public Game game;
@@ -40,6 +45,8 @@ public class Player
     public Dictionary<Hex, bool> seenGameHexDict;
     public List<Unit> unitList;
     public List<City> cityList;
+    public HashSet<BuildingType> allowedBuildings;
+    public HashSet<UnitType> allowedUnits;
     public Dictionary<Hex, ResourceType> unassignedResources;
     public float scienceTotal;
     public float cultureTotal;
