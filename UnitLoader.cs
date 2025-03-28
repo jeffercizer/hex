@@ -32,7 +32,9 @@ public static class UnitLoader
     public static Dictionary<UnitType, string> unitNames = new Dictionary<UnitType, string>
     {
         { UnitType.Scout, "Scout" },
-        { UnitType.Settler, "Settler" }
+        { UnitType.Settler, "Settler" },
+        { UnitType.Galley, "Galley" },
+        { UnitType.Slinger, "Slinger" },
     };
     
     static UnitLoader()
