@@ -24,6 +24,7 @@ public struct BuildingInfo
     public int PerPlayer;
     public bool Wonder;
     public List<String> Effects;
+    public List<TerrainType> TerrainTypes;
 }
 
 public static class BuildingLoader
@@ -70,9 +71,8 @@ public static class BuildingLoader
                     PerPlayer = int.Parse(r.Attribute("PerPlayer").Value),
                     Wonder = bool.Parse(r.Attribute("Wonder").Value),
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
+                    TerrainTypes = r.Element("TerrainTypes").Elements("TerrainType").Select(t => Enum.Parse<TerrainType>(t.Value)).ToList(),
                 }
-
-
             );
         return BuildingData;
     }
