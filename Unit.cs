@@ -183,11 +183,24 @@ public class Unit
         }
     }
 
+    private bool DistrictCombat(GameHex targetGameHex)
+    {
+        return !decreaseCurrentHealth(targetGameHex.district.GetCombatStrength()) & targetGameHex.district.decreaseCurrentHealth(combatStrength);
+    }
 
+    private bool UnitCombat(GameHex targetGameHex)
+    {
+        return !decreaseCurrentHealth(20.0f) & unit.decreaseCurrentHealth(25.0f);
+    }
 
     public bool AttackTarget(GameHex targetGameHex, float moveCost, TeamManager teamManager)
     {
         remainingMovement -= moveCost;
+        if (targetGameHex.district != null && teamManager.GetEnemies(teamNum).Contains(targetGameHex.district.city.teamNum) && targetGameHex.district.currentHealth > 0.0f)
+        {
+            attacksLeft -= 1;
+            return DistrictCombat(targetGameHex);;
+        }
         if (targetGameHex.unitsList.Any())
         {
             Unit unit = targetGameHex.unitsList[0];
@@ -196,8 +209,7 @@ public class Unit
                 //combat math TODO
                 //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
                 attacksLeft -= 1;
-                return !decreaseCurrentHealth(20.0f) & unit.decreaseCurrentHealth(25.0f);
-
+                return UnitCombat(targetGameHex);
             }
             return false;
         }
@@ -554,10 +566,6 @@ public class Unit
             {
                 moveCost += 555555;
             }
-            // if (unit.teamNum != this.teamNum | stacking) //add back if we allow units of the same team to stack
-            // {
-            //     break;
-            // }
         }
         return moveCost;
     }
