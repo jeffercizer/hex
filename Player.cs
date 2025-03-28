@@ -52,6 +52,7 @@ public class Player
     public float cultureTotal;
     public float goldTotal;
     public float happinessTotal;
+    public float strongestUnitBuilt = 0.0f;
     
     public void OnTurnStarted(int turnNumber)
     {
