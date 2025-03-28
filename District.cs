@@ -117,6 +117,19 @@ public class District
             hasWalls = true;
         }
     }
+
+    public int CountBuildingType(BuildingType buildingType)
+    {
+        int count = 0;
+        foreach(Building building in buildings)
+        {
+            if(building.buildingType == buildingType)
+            {
+                count += 1;
+            }
+        }
+        return count;
+    }
     
     public void RecalculateYields()
     {
