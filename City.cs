@@ -306,7 +306,7 @@ public class City
 
     }
 
-    public void districtFell()
+    public void DistrictFell()
     {
         bool allDistrictsFell = true;
         bool cityCenterOccupied = false;
