@@ -124,6 +124,7 @@ public class BuildingEffect
         {
             { "WaterSupplyEffect", WaterSupplyEffect },
             { "GranaryWarehouseEffect", GranaryWarehouseEffect },
+            { "DockWarehouseEffect", DockWarehouseEffect },
             { "StoneCutterWarehouseEffect", StoneCutterWarehouseEffect },
             { "AncientWallEffect", AncientWallEffect },
             { "StonehengeEffect", StonehengeEffect },
@@ -164,6 +165,10 @@ public class BuildingEffect
     void GranaryWarehouseEffect(Building building)
     {
         building.district.city.flatYields.food += 1;
+    }
+    void DockWarehouseEffect(Building building)
+    {
+        building.district.city.coastYields.food += 1;
     }
     void StoneCutterWarehouseEffect(Building building)
     {
