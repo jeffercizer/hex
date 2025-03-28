@@ -57,4 +57,30 @@
       <Ability Name="SettleCityAbility" UsageCount="1" />
     </Abilities>
   </Unit>
+  <Unit Name="Galley" ProductionCost="75" GoldCost="300" MovementSpeed="3.0" SightRange="3.0" CombatPower="15.0" HealingFactor="5">
+    <MovementCosts>
+      <TerrainMoveType Name="Flat" Value="9999" />
+      <TerrainMoveType Name="Rough" Value="9999" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="9999" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Road" Value="9999" />
+      <TerrainMoveType Name="Embark" Value="9999" />
+      <TerrainMoveType Name="Disembark" Value="9999" />
+    </MovementCosts>
+    <SightCosts>
+      <TerrainMoveType Name="Flat" Value="1" />
+      <TerrainMoveType Name="Rough" Value="2" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="1" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Embark" Value="0" />
+      <TerrainMoveType Name="Disembark" Value="0" />
+    </SightCosts>
+  </Unit>
 </Units>
