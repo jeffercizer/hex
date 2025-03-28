@@ -1,0 +1,84 @@
+<Researches> //'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
+    <Research Name="Agriculture" Tier="0">
+        <BuildingUnlocks>
+            <BuildingType Name="Granary" />
+        </BuildingUnlocks>
+        <UnitUnlocks>
+            <UnitType Name="Scout" />
+            <UnitType Name="Warrior" />
+        </UnitUnlocks>
+        <Effects>
+            <Effect Name="AgricultureEffect" />
+        </Effects>
+    </Research>  
+    <Research Name="Sailing" Tier="1">
+        <Requirements>
+            <ResearchType Name="Agriculture">
+        </Requirements>
+        <BuildingUnlocks>
+            <BuildingType Name="Dock" />
+        </BuildingUnlocks>
+        <UnitUnlocks>
+            <UnitType Name="Galley" />
+        </UnitUnlocks>
+        <Effects>
+            <Effect Name="SailingEffect" />
+        </Effects>
+    </Research>
+    <Research Name="Pottery" Tier="1">
+        <Requirements>
+            <ResearchType Name="Agriculture">
+        </Requirements>
+        <BuildingUnlocks>
+            <BuildingType Name="StoneCutter" />
+        </BuildingUnlocks>
+        <Effects>
+            <Effect Name="PotteryEffect" />
+        </Effects>
+    </Research>
+    <Research Name="AnimalHusbandry" Tier="1">
+        <Requirements>
+            <ResearchType Name="Agriculture">
+        </Requirements>
+        <UnitUnlocks>
+            <UnitType Name="Slinger" />
+        </UnitUnlocks>
+        <Effects>
+            <Effect Name="AnimalHusbandryEffect" />
+        </Effects>
+    </Research>
+    <Research Name="Irrigation" Tier="2">
+        <Requirements>
+            <ResearchType Name="Pottery">
+            <ResearchType Name="AnimalHusbandry">
+        </Requirements>
+        <BuildingUnlocks>
+            <BuildingType Name="Garden" />
+        </BuildingUnlocks>
+        <Effects>
+            <Effect Name="IrrigationEffect" />
+        </Effects>
+    </Research>
+    <Research Name="Writing" Tier="2">
+        <Requirements>
+            <ResearchType Name="Pottery">
+        </Requirements>
+        <BuildingUnlocks>
+            <BuildingType Name="Library" />
+        </BuildingUnlocks>
+        <Effects>
+            <Effect Name="WritingEffect" />
+        </Effects>
+    </Research>
+    <Research Name="Masonry" Tier="2">
+        <Requirements>
+            <ResearchType Name="AnimalHusbandry">
+        </Requirements>
+        <BuildingUnlocks>
+            <BuildingType Name="AncientWalls" />
+        </BuildingUnlocks>
+        <Effects>
+            <Effect Name="MasonryEffect" />
+        </Effects>
+    </Research>
+</Researches>
