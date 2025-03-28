@@ -109,7 +109,7 @@
       <TerrainMoveType Name="Disembark" Value="0" />
     </SightCosts>
     <Abilities>
-      <Ability Name="RangedAttack" UsageCount="1" CombatPower="10" />
+      <Ability Name="RangedAttack" UsageCount="1" CombatPower="15.0" />
     </Abilities>
   </Unit>
 </Units>
