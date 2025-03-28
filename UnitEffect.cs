@@ -146,11 +146,19 @@ public class UnitEffect
             unit.sightRange += 1;
             unit.UpdateVision();
         }
+        else if(functionString == "RangedAttack")
+        {
+            RangedAttack(unit);
+        }
     }
     public bool SettleCity(Unit unit, String cityName)
     {
         new City(unit.currentGameHex.gameBoard.game.GetUniqueID(), 1, cityName, unit.currentGameHex);
         unit.decreaseCurrentHealth(99999.0f);
         return true;
+    }
+    public bool RangedAttack(Unit unit)
+    {
+        return false;
     }
 }
