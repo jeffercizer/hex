@@ -18,7 +18,7 @@ public enum EffectOperation
     Multiply,
     Divide,
     Add,
-    Subtract
+    Subtract,
 }
 
 [Serializable]
@@ -149,6 +149,21 @@ public class UnitEffect
         else if(functionString == "RangedAttack")
         {
             RangedAttack(unit);
+        }
+        else if(functionString == "EnableEmbarkDisembark")
+        {
+            EnableEmbarkDisembark();
+        }
+    }
+    public void EnableEmbarkDisembark(Unit unit)
+    {
+        if(unit.movementCosts[TerrainMoveType.Embark] < 0)
+        {
+            unit.movementCosts[TerrainMoveType.Embark] = 0;
+        }
+        if(unit.movementCosts[TerrainMoveType.Disembark] < 0)
+        {
+            unit.movementCosts[TerrainMoveType.Disembark] = 0;
         }
     }
     public bool SettleCity(Unit unit, String cityName)
