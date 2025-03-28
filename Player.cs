@@ -19,6 +19,8 @@ public class Player
         this.unassignedResources = new();
         this.allowedBuildings = new();
         this.allowedUnits = new();
+        this.unitResearchEffects = new();
+        this.buildingResearchEffects = new();
         game.teamManager.AddTeam(teamNum, 50);
     }
     public Player(Game game, int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
@@ -45,6 +47,8 @@ public class Player
     public Dictionary<Hex, bool> seenGameHexDict;
     public List<Unit> unitList;
     public List<City> cityList;
+    public List<(UnitEffect, UnitClass)> unitResearchEffects;
+    public List<(BuildingEffect, BuildingType)> buildingResearchEffects;
     public HashSet<BuildingType> allowedBuildings;
     public HashSet<UnitType> allowedUnits;
     public Dictionary<Hex, ResourceType> unassignedResources;
@@ -80,6 +84,12 @@ public class Player
         turnFinished = true;
     }
 
+    public void OnResearchComplete()
+    {
+        //activate research effect
+        
+    }
+
     public bool AddResource(Hex hex, ResourceType resourceType, City targetCity)
     {
         if(targetCity.heldResources.Count < targetCity.maxResourcesHeld)
@@ -90,6 +100,8 @@ public class Player
         }
         return false;
     }
+
+
 
     public bool RemoveResource(Hex hex)
     {
