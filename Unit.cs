@@ -56,7 +56,15 @@ public class Unit
         {
             throw new ArgumentException($"Unit type '{name}' not found in unit data.");
         }
-    
+
+        foreach((UnitEffect, UnitClass) effect in unitResearchEffects)
+        {
+            if(unitClass.HasFlag(effect.Item2))
+            {
+                AddEffect(effect.Item1);
+            }
+        }
+        
         currentGameHex.gameBoard.game.playerDictionary[teamNum].unitList.Add(this);
         AddVision();
     }
