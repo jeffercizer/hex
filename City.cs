@@ -13,25 +13,21 @@ public enum ProductionType
 public class ProductionQueueType
 {
 
-    public ProductionQueueType(String name, BuildingType buildingType, UnitType unitType, ProductionType prodType, GameHex targetGameHex, float productionCost, float productionLeft, bool isUnique)
+    public ProductionQueueType(String name, BuildingType buildingType, UnitType unitType, GameHex targetGameHex, float productionCost, float productionLeft)
     {
         this.name = name;
-        this.prodType = prodType;
         this.targetGameHex = targetGameHex;
         this.productionCost = productionCost;
         this.productionLeft = productionLeft;
-        this.isUnique = isUnique;
         this.buildingType = buildingType;
         this.unitType = unitType;
     }
     public String name;
     public BuildingType buildingType;
     public UnitType unitType;
-    public ProductionType prodType;
     public GameHex targetGameHex;
     public float productionLeft;
     public float productionCost;
-    public bool isUnique;
 }
 
 
@@ -120,10 +116,11 @@ public class City
         //arcticYields
     }
 
+    public (List<BuildingType>, List<UnitType>) GetProducables()
+    {
+        foreach(BuildingType buildingType in gameHex.gameBoard.game.playerDictionary[teamNum])
+    }
 
-        //TODO a fun edge case if we have two of the same unit and remove one we should keep the most recent one as the partial built
-        //ie this situation showcases it well, the new top item will be a scout with 10 prod left but we have a 5 prod left scout in the partialDictionary'
-        //so when we remove check the whole queue for a item that matches our name and replace it if our prodLeft is < than theirs
     public bool RemoveFromQueue(int index)
     {
         if(productionQueue.Count > index)
@@ -151,24 +148,45 @@ public class City
         return false;
     }
 
-    public bool AddToQueue(String name, BuildingType buildingType, UnitType unitType, ProductionType prodType, GameHex targetGameHex, float productionCost, bool isUnique)
+    public int CountBuildingType(BuildingType buildingType)
     {
+        int count = 0;
+        foreach(District district in districts)
+        {
+            count += district.CountBuildingType(buildingType);
+        }
+        return count;
+    }
+
+    public bool AddToQueue(String name, BuildingType buildingType, UnitType unitType, GameHex targetGameHex, float productionCost)
+    {
+        int count = 0;
+        if(buildingType != 0 & BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
+        {
+            count = CountBuildingType(buildingType);
+        }
         foreach(ProductionQueueType queueItem in productionQueue)
         {
-            if(queueItem.name == name & (isUnique | queueItem.isUnique))
+            if (queueItem.buildingType == buildingType)
             {
-                return false;
+                count += 1;
             }
         }
+        if(count >= BuildingLoader.buildingsDict[buildingType].PerCity)
+        {
+            return false;
+        }
+        
         ProductionQueueType queueItem1;
         if(partialProductionDictionary.TryGetValue(name, out queueItem1))
         {
             partialProductionDictionary.Remove(name);
-            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, prodType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost, isUnique));
-            return true;
+            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost));
         }
-
-        productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, prodType, targetGameHex, productionCost, productionCost, isUnique));
+        else
+        {
+            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, productionCost, productionCost));
+        }
         return true;
     }
 
@@ -185,6 +203,8 @@ public class City
             district.AfterSwitchTeam();
         }
         RecalculateYields();
+        productionQueue = new();
+        partialProductionDictionary = new();
         return true;
     }
 
@@ -211,11 +231,11 @@ public class City
             Math.Max(productionOverflow - productionQueue[0].productionLeft, 0);
             if(productionQueue[0].productionLeft <= 0)
             {
-                if(productionQueue[0].prodType == ProductionType.Building)
+                if(productionQueue[0].buildingType > (BuildingType)0)
                 {
                     BuildOnHex(productionQueue[0].targetGameHex.hex, new Building(productionQueue[0].buildingType));
                 }
-                else if(productionQueue[0].prodType == ProductionType.Unit)
+                else if(productionQueue[0].unitType > (UnitType)0)
                 {
                     Unit tempUnit = new Unit(Enum.Parse<UnitType>(productionQueue[0].name), productionQueue[0].targetGameHex, teamNum);
                     if(!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
