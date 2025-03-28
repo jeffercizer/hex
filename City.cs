@@ -118,7 +118,36 @@ public class City
 
     public (List<BuildingType>, List<UnitType>) GetProducables()
     {
-        foreach(BuildingType buildingType in gameHex.gameBoard.game.playerDictionary[teamNum])
+        List<BuildingType> buildings = new();
+        List<UnitType> units = new();
+        foreach(BuildingType buildingType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedBuildings)
+        {
+            int count = 0;
+            if(buildingType != 0 & BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
+            {
+                count = CountBuildingType(buildingType);
+            }
+            foreach(ProductionQueueType queueItem in productionQueue)
+            {
+                if (queueItem.buildingType == buildingType)
+                {
+                    count += 1;
+                }
+            }
+            if(!builtWonders.Contains(buildingType) & !BuildingLoader.buildingsDict[buildingType].Wonder)
+            {
+                if(count < BuildingLoader.buildingsDict[buildingType].PerCity)
+                {
+                    buildings.Add(buildingType);
+                }
+            }
+        }
+
+        foreach(UnitType unitType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedUnits)
+        {
+            units.Add(unitType);
+        }
+        return (buildings, units);
     }
 
     public bool RemoveFromQueue(int index)
@@ -176,6 +205,10 @@ public class City
         {
             return false;
         }
+        if(builtWonders.Contains(buildingType))
+        {
+            return false
+        }
         
         ProductionQueueType queueItem1;
         if(partialProductionDictionary.TryGetValue(name, out queueItem1))
@@ -225,6 +258,15 @@ public class City
         gameHex.gameBoard.game.playerDictionary[teamNum].AddScience(yields.science);
         gameHex.gameBoard.game.playerDictionary[teamNum].AddCulture(yields.culture);
         gameHex.gameBoard.game.playerDictionary[teamNum].AddHappiness(yields.happiness);
+        
+        foreach(ProductionQueueType queueItem in productionQueue)
+        {
+            if(gameHex.gameBoard.game.builtWonders.Contains(queueItem.buildingType))
+            {
+                productionQueue.Remove(queueItem);
+                productionOverflow += queueItem.productionCost - queueItem.productionLeft;
+            }
+        }
         if(productionQueue.Any())
         {
             productionQueue[0].productionLeft -= productionOverflow;
