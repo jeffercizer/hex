@@ -28,6 +28,35 @@
       <Ability Name="ScoutVisionAbility" UsageCount="1" />
     </Abilities>
   </Unit>
+  <Unit Name="Warrior" Class="Combat, Land, Infantry" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="2.0" CombatPower="20.0" HealingFactor="15" MaintenanceCost="1">
+    <MovementCosts>
+      <TerrainMoveType Name="Flat" Value="1" />
+      <TerrainMoveType Name="Rough" Value="2" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="1" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Embark" Value="0" />
+      <TerrainMoveType Name="Disembark" Value="0" />
+    </MovementCosts>
+    <SightCosts>
+      <TerrainMoveType Name="Flat" Value="1" />
+      <TerrainMoveType Name="Rough" Value="2" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="1" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Embark" Value="0" />
+      <TerrainMoveType Name="Disembark" Value="0" />
+    </SightCosts>
+    <Abilities>
+      <Ability Name="ScoutVisionAbility" UsageCount="1" />
+    </Abilities>
+  </Unit>
   <Unit Name="Settler" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
