@@ -21,6 +21,7 @@ public class Player
         this.allowedUnits = new();
         this.unitResearchEffects = new();
         this.buildingResearchEffects = new();
+        this.queuedResearch = new();
         game.teamManager.AddTeam(teamNum, 50);
     }
     public Player(Game game, int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
@@ -45,6 +46,7 @@ public class Player
     public bool turnFinished;
     public Dictionary<Hex, int> visibleGameHexDict;
     public Dictionary<Hex, bool> seenGameHexDict;
+    public Queue<ResearchType> queuedResearch;
     public List<Unit> unitList;
     public List<City> cityList;
     public List<(UnitEffect, UnitClass)> unitResearchEffects;
@@ -82,6 +84,32 @@ public class Player
             city.OnTurnEnded(turnNumber);
         }
         turnFinished = true;
+    }
+
+    public Queue<ResearchType> SelectResearch(ResearchType researchType)
+    {
+        HashSet<String> visited = new();
+        Queue<ResearchType> queue = new();
+
+        void TopologicalSort(ResearchType researchType)
+        {
+            if (visited.Contains(researchType))
+                return; 
+
+            visited.Add(researchType);
+
+            if (researchDependencies.ContainsKey(researchType))
+            {
+                foreach (ResearchType requirement in researchDependencies[researchType])
+                {
+                    TopologicalSort(requirement);
+                }
+            }
+            queue.Enqueue(ResearchType);
+        }
+
+        TopologicalSort(researchType);
+        return queue;
     }
 
     public void OnResearchComplete()
