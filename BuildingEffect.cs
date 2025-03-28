@@ -126,6 +126,8 @@ public class BuildingEffect
             { "GranaryWarehouseEffect", GranaryWarehouseEffect },
             { "DockWarehouseEffect", DockWarehouseEffect },
             { "StoneCutterWarehouseEffect", StoneCutterWarehouseEffect },
+            { "GardenEffect", GardenEffect },
+            { "LibraryEffect", LibraryEffect },
             { "AncientWallEffect", AncientWallEffect },
             { "StonehengeEffect", StonehengeEffect },
             { "CityCenterWallEffect", CityCenterWallEffect }
@@ -174,6 +176,14 @@ public class BuildingEffect
     {
         building.district.city.roughYields.production += 1;
     }
+    void GardenEffect(Building building)
+    {
+        //garden effect TODO
+    }
+    void LibraryEffect(Building building)
+    {
+        //library effect TODO
+    }
     void AncientWallEffect(Building building)
     {
         if(!building.district.hasWalls)
@@ -183,7 +193,7 @@ public class BuildingEffect
     }
     void StonehengeEffect(Building building)
     {
-        //idk whatever stonehenge would do
+        //stonehenge effect TODO
     }
     void CityCenterWallEffect(Building building)
     {
