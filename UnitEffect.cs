@@ -152,7 +152,7 @@ public class UnitEffect
         }
         else if(functionString == "EnableEmbarkDisembark")
         {
-            EnableEmbarkDisembark();
+            EnableEmbarkDisembark(unit);
         }
     }
     public void EnableEmbarkDisembark(Unit unit)

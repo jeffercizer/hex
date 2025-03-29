@@ -13,7 +13,7 @@
     </Research>  
     <Research Name="Sailing" Tier="1">
         <Requirements>
-            <ResearchType Name="Agriculture">
+            <ResearchType Name="Agriculture"/>
         </Requirements>
         <BuildingUnlocks>
             <BuildingType Name="Dock" />
@@ -27,7 +27,7 @@
     </Research>
     <Research Name="Pottery" Tier="1">
         <Requirements>
-            <ResearchType Name="Agriculture">
+            <ResearchType Name="Agriculture"/>
         </Requirements>
         <BuildingUnlocks>
             <BuildingType Name="StoneCutter" />
@@ -38,7 +38,7 @@
     </Research>
     <Research Name="AnimalHusbandry" Tier="1">
         <Requirements>
-            <ResearchType Name="Agriculture">
+            <ResearchType Name="Agriculture"/>
         </Requirements>
         <UnitUnlocks>
             <UnitType Name="Slinger" />
@@ -49,8 +49,8 @@
     </Research>
     <Research Name="Irrigation" Tier="2">
         <Requirements>
-            <ResearchType Name="Pottery">
-            <ResearchType Name="AnimalHusbandry">
+            <ResearchType Name="Pottery"/>
+            <ResearchType Name="AnimalHusbandry"/>
         </Requirements>
         <BuildingUnlocks>
             <BuildingType Name="Garden" />
@@ -61,7 +61,7 @@
     </Research>
     <Research Name="Writing" Tier="2">
         <Requirements>
-            <ResearchType Name="Pottery">
+            <ResearchType Name="Pottery"/>
         </Requirements>
         <BuildingUnlocks>
             <BuildingType Name="Library" />
@@ -72,7 +72,7 @@
     </Research>
     <Research Name="Masonry" Tier="2">
         <Requirements>
-            <ResearchType Name="AnimalHusbandry">
+            <ResearchType Name="AnimalHusbandry"/>
         </Requirements>
         <BuildingUnlocks>
             <BuildingType Name="AncientWalls" />

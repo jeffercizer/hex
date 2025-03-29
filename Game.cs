@@ -109,6 +109,7 @@ public class Game
         mainBoard.right = q;
         mainBoard.gameHexDict = gameHexDict;
         this.mainGameBoard = mainBoard;
+        builtWonders = new();
     }
     public Game(int boardHeight, int boardWidth)
     {
@@ -290,8 +291,8 @@ struct GameTests
         Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 10, false);
-        player2City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player2City.gameHex, 10, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 10);
+        player2City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player2City.gameHex, 10);
 
         if(player1City.productionQueue.Any())
         {
@@ -324,7 +325,7 @@ struct GameTests
                 Complain("player2CityQueueEmpty");
             }
 
-            player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 10, false);
+            player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 10);
             player1City.RemoveFromQueue(0); 
 
             if(player1City.productionQueue.Any())
@@ -518,31 +519,31 @@ struct GameTests
         Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 2, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
         int targetTurn = 25;
         for(int i = 0; i < targetTurn; i++)
         {
@@ -565,7 +566,7 @@ struct GameTests
     {
         Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 1, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 1);
 
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
@@ -580,7 +581,7 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
 
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 3, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 3);
 
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
@@ -595,7 +596,7 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
 
-        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, ProductionType.Unit, player1City.gameHex, 4, false);
+        player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 4);
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();

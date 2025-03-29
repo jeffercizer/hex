@@ -49,7 +49,7 @@ public class Unit
     
             foreach (String abilityName in unitInfo.Abilities.Keys)
             {
-                AddAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName]);
+                AddAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName].Item1);
             }
         }
         else
@@ -57,7 +57,7 @@ public class Unit
             throw new ArgumentException($"Unit type '{name}' not found in unit data.");
         }
 
-        foreach((UnitEffect, UnitClass) effect in unitResearchEffects)
+        foreach((UnitEffect, UnitClass) effect in currentGameHex.gameBoard.game.playerDictionary[teamNum].unitResearchEffects)
         {
             if(unitClass.HasFlag(effect.Item2))
             {
@@ -198,7 +198,7 @@ public class Unit
         return !decreaseCurrentHealth(targetGameHex.district.GetCombatStrength()) & targetGameHex.district.decreaseCurrentHealth(combatStrength);
     }
 
-    private bool UnitCombat(GameHex targetGameHex)
+    private bool UnitCombat(GameHex targetGameHex, Unit unit)
     {
         return !decreaseCurrentHealth(20.0f) & unit.decreaseCurrentHealth(25.0f);
     }
@@ -219,7 +219,7 @@ public class Unit
                 //combat math TODO
                 //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
                 attacksLeft -= 1;
-                return UnitCombat(targetGameHex);
+                return UnitCombat(targetGameHex, unit);
             }
             return false;
         }

@@ -91,11 +91,13 @@ public class District
     {
         currentHealth -= amount;
         currentHealth = Math.Max(0.0f, currentHealth);
-        if(currenHealth <= 0.0f)
+        if(currentHealth <= 0.0f)
         {
             city.DistrictFell();
             turnsUntilHealing = 5;
+            return true;
         }
+        return false;
     }
 
     public float GetCombatStrength()
@@ -136,7 +138,7 @@ public class District
             if (gameHex.unitsList.Any())
             {
                 Unit unit = gameHex.unitsList[0];
-                if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                if (gameHex.gameBoard.game.teamManager.GetEnemies(city.teamNum).Contains(unit.teamNum))
                 {
                     turnsUntilHealing += 1;
                 }

@@ -170,7 +170,7 @@ public class BuildingEffect
     }
     void DockWarehouseEffect(Building building)
     {
-        building.district.city.coastYields.food += 1;
+        building.district.city.coastalYields.food += 1;
     }
     void StoneCutterWarehouseEffect(Building building)
     {

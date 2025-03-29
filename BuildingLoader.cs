@@ -12,6 +12,10 @@ public enum BuildingType
     Granary,
     StoneCutter,
     Market,
+    Dock,
+    Garden,
+    Library,
+    Stonehenge,
 }
 
 public struct BuildingInfo

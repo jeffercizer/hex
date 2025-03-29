@@ -45,55 +45,49 @@ public static class ResearchLoader
         { ResearchType.Archery, "Archery" },
         { ResearchType.Currency, "Currency" },
     };
-    public static Dictionary<ResearchType, ResearchInfo> researchsDict;
+    public static Dictionary<ResearchType, ResearchInfo> researchesDict;
     
     static ResearchLoader()
     {
         string xmlPath = "Researches.xml";
-        researchsDict = LoadResearchData(xmlPath);
+        researchesDict = LoadResearchData(xmlPath);
     }
-    
+        
     public static Dictionary<ResearchType, ResearchInfo> LoadResearchData(string xmlPath)
     {
+        // Load the XML file
         XDocument xmlDoc = XDocument.Load(xmlPath);
+
+        // Parse the research data into a dictionary, allowing for nulls
         var ResearchData = xmlDoc.Descendants("Research")
             .ToDictionary(
-                r => Enum.Parse<ResearchType>(r.Attribute("Name").Value),
+                r => Enum.Parse<ResearchType>(r.Attribute("Name")?.Value ?? throw new InvalidOperationException("Missing 'Name' attribute")),
                 r => new ResearchInfo
                 {
-                    Tier = int.Parse(r.Attribute("Tier").Value),
-                    Requirements = r.Element("Requirements").Elements("ResearchType").Select(e => Enum.Parse<ResearchType>(e.Value)).ToList(),
-                    BuildingUnlocks = r.Element("BuildingUnlocks").Elements("BuildingType").Select(e => Enum.Parse<BuildingType>(e.Value)).ToList(),
-                    UnitUnlocks = r.Element("UnitUnlocks").Elements("UnitType").Select(e => Enum.Parse<UnitType>(e.Value)).ToList(),
-                    Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
+                    Tier = int.Parse(r.Attribute("Tier")?.Value ?? "0"),
+                    Requirements = r.Element("Requirements")?.Elements("ResearchType")
+                        .Select(e => Enum.TryParse<ResearchType>(e.Value, out var result) ? result : default)
+                        .Where(e => e != default)
+                        .ToList() ?? new List<ResearchType>(),
+                    BuildingUnlocks = r.Element("BuildingUnlocks")?.Elements("BuildingType")
+                        .Select(e => Enum.TryParse<BuildingType>(e.Value, out var result) ? result : default)
+                        .Where(e => e != default)
+                        .ToList() ?? new List<BuildingType>(),
+                    UnitUnlocks = r.Element("UnitUnlocks")?.Elements("UnitType")
+                        .Select(e => Enum.TryParse<UnitType>(e.Value, out var result) ? result : default)
+                        .Where(e => e != default)
+                        .ToList() ?? new List<UnitType>(),
+                    Effects = r.Element("Effects")?.Elements("Effect")
+                        .Select(e => e.Value)
+                        .Where(e => !string.IsNullOrWhiteSpace(e))
+                        .ToList() ?? new List<string>(),
                 }
             );
+
         return ResearchData;
     }
     
-    void ProcessResearchFunctionString(String functionString, Player player)
-    {
-        Dictionary<String, Action<Player>> effectFunctions = new Dictionary<string, Action<Player>>
-        {
-            { "AgricultureEffect", AgricultureEffect },
-            { "SailingEffect", SailingEffect },
-            { "PotteryEffect", PotteryEffect },
-            { "AnimalHusbandryEffect", AnimalHusbandryEffect },
-            { "IrrigationEffect", IrrigationEffect },
-            { "WritingEffect", WritingEffect },
-            { "MasonryEffect", MasonryEffect },
-        };
-        
-        if (effectFunctions.TryGetValue(functionString, out Action<Player> effectFunction))
-        {
-            effectFunction(player);
-        }
-        else
-        {
-            throw new ArgumentException($"Function '{functionString}' not recognized in BuildingEffect from Buildings file.");
-        }
-    }
-    void ProcessFunctionString(String functionString, Player player)
+    public static void ProcessFunctionString(String functionString, Player player)
     {
         Dictionary<String, Action<Player>> effectFunctions = new Dictionary<string, Action<Player>>
         {
@@ -115,27 +109,27 @@ public static class ResearchLoader
             throw new ArgumentException($"Function '{functionString}' not recognized in ResearchEffects from Researches file.");
         }
     }
-    void AgricultureEffect(Player player)
+    static void AgricultureEffect(Player player)
     {
     }
-    void SailingEffect(Player player)
+    static void SailingEffect(Player player)
     {
-       player.unitResearchEffects.Add((new UnitEffect("EnableEmbarkDisembark"), UnitClass.Recon));
+       player.unitResearchEffects.Add((new UnitEffect("EnableEmbarkDisembark"), UnitClass.Land));
     }
-    void PotteryEffect(Player player)
-    {
-    }
-    void AnimalHusbandryEffect(Player player)
-    {
-        player.unitResearchEffects.Add(new UnitEffect(UnitEffectType.MovementSpeed, EffectOperation.Add, 1.0f, 5));
-    }
-    void IrrigationEffect(Player player)
+    static void PotteryEffect(Player player)
     {
     }
-    void WritingEffect(Player player)
+    static void AnimalHusbandryEffect(Player player)
+    {
+        player.unitResearchEffects.Add((new UnitEffect(UnitEffectType.MovementSpeed, EffectOperation.Add, 1.0f, 5), UnitClass.Recon));
+    }
+    static void IrrigationEffect(Player player)
     {
     }
-    void MasonryEffect(Player player)
+    static void WritingEffect(Player player)
+    {
+    }
+    static void MasonryEffect(Player player)
     {
     }
 }

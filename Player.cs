@@ -47,8 +47,8 @@ public class Player
     public bool turnFinished;
     public Dictionary<Hex, int> visibleGameHexDict;
     public Dictionary<Hex, bool> seenGameHexDict;
-    public Queue<ResearchQueueType> queuedResearch;
-    public Dictionary<string, ResearchQueueType> partialResearchDictionary;
+    public List<ResearchQueueType> queuedResearch;
+    public Dictionary<ResearchType, ResearchQueueType> partialResearchDictionary;
     public ResearchType currentResearch;
     public List<Unit> unitList;
     public List<City> cityList;
@@ -82,7 +82,7 @@ public class Player
             scienceTotal = Math.Max(0.0f, scienceTotal);
             if(queuedResearch[0].researchLeft <= 0)
             {
-                OnResearchComplete(queuedResearch[0]);
+                OnResearchComplete(queuedResearch[0].researchType);
                 queuedResearch.RemoveAt(0);
             }
         }
@@ -103,11 +103,11 @@ public class Player
 
     public List<ResearchQueueType> SelectResearch(ResearchType researchType)
     {
-        HashSet<String> visited = new();
+        HashSet<ResearchType> visited = new();
         List<ResearchQueueType> queue = new();
         if(queuedResearch.Any())
         {
-            partialResearchDict[researchType] = queuedResearch[0];
+            partialResearchDictionary[researchType] = queuedResearch[0];
         }
         void TopologicalSort(ResearchType researchType)
         {
@@ -116,20 +116,20 @@ public class Player
 
             visited.Add(researchType);
 
-            if (researchDependencies.ContainsKey(researchType))
+            if (ResearchLoader.researchesDict.ContainsKey(researchType))
             {
-                foreach (ResearchType requirement in researchDependencies[researchType])
+                foreach (ResearchType requirement in ResearchLoader.researchesDict[researchType].Requirements)
                 {
                     TopologicalSort(requirement);
                 }
             }
-            if(partialResearchDict[researchType])
+            if(partialResearchDictionary.ContainsKey(researchType))
             {
-                List.Add(partialResearchDict[researchType]);
+                queuedResearch.Add(partialResearchDictionary[researchType]);
             }
             else
             {
-                List.Add(new ResearchQueueType(researchType, ResearchLoader.researchsDict[researchType].Tier, ResearchLoader.researchsDict[researchType].Tier)); //apply cost mod TODO
+                queuedResearch.Add(new ResearchQueueType(researchType, ResearchLoader.researchesDict[researchType].Tier, ResearchLoader.researchesDict[researchType].Tier)); //apply cost mod TODO
             }
         }
 
@@ -139,17 +139,17 @@ public class Player
 
     public void OnResearchComplete(ResearchType researchType)
     {
-        foreach(UnitType unitType in ResearchLoader.researchsDict[researchType].UnitUnlocks)
+        foreach(UnitType unitType in ResearchLoader.researchesDict[researchType].UnitUnlocks)
         {
-            allowedUnits.Add(unitType)
+            allowedUnits.Add(unitType);
         }
-        foreach(BuildingType buildingType in ResearchLoader.researchsDict[researchType].BuildingType)
+        foreach(BuildingType buildingType in ResearchLoader.researchesDict[researchType].BuildingUnlocks)
         {
-            allowedBuildings.Add(buildingType)
+            allowedBuildings.Add(buildingType);
         }
-        foreach(String effect in ResearchLoader.researchsDict[researchType].Effects)
+        foreach(String effect in ResearchLoader.researchesDict[researchType].Effects)
         {
-            ProcessFunctionString(effect, this);
+            ResearchLoader.ProcessFunctionString(effect, this);
         }
     }
 

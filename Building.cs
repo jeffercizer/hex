@@ -47,7 +47,7 @@ public class Building
         }
         if(BuildingLoader.buildingsDict[buildingType].Wonder)
         {
-            district.gameHex.gameBoard.game.builtWonder.Add(buildingType);
+            district.gameHex.gameBoard.game.builtWonders.Add(buildingType);
         }
     }
 
@@ -61,7 +61,7 @@ public class Building
         district = null;
         if(BuildingLoader.buildingsDict[buildingType].Wonder)
         {
-            district.gameHex.gameBoard.game.builtWonder.Remove(buildingType);
+            district.gameHex.gameBoard.game.builtWonders.Remove(buildingType);
         }
     }
 

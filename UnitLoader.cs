@@ -43,7 +43,7 @@ public struct UnitInfo
     public Dictionary<TerrainMoveType, float> MovementCosts { get; set; }
     public Dictionary<TerrainMoveType, float> SightCosts { get; set; }
     public List<String> Effects { get; set; }
-    public Dictionary<String, int> Abilities { get; set; }
+    public Dictionary<string, (int, float)> Abilities { get; set; }
 }
 
 public static class UnitLoader
