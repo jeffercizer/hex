@@ -81,10 +81,11 @@ public struct Hex
 
     public Hex WrappingNeighbor(int direction, int left, int right)
     {
+        right = right - 1;
         Hex target = Add(Hex.Direction(direction));
         if(target.q < left)
         {
-            return(new Hex(right, target.r, -right-target.r));
+            return new Hex(right, target.r, -right-target.r);
         }
         else if(target.q > right)
         {
@@ -448,7 +449,7 @@ public struct Tests
     {
         if (!(a.q == b.q && a.s == b.s && a.r == b.r))
         {
-            Tests.Complain(name);
+            Tests.Complain(name + " " + "| Expected: " + b + " Got: " + a);
         }
     }
 

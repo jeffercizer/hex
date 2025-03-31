@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using System.Formats.Asn1;
 public enum TerrainMoveType
 {
     Flat,
@@ -497,7 +498,11 @@ public class Unit
             }
             else //second hex is on land so we are disembarking
             {
-                if (movementCosts[TerrainMoveType.Disembark] <= 0) //we must use all remaining movement to disembark
+                if(movementCosts[TerrainMoveType.Disembark] < 0) //we CANT disembark
+                {
+                    moveCost = 777777;
+                }
+                else if(movementCosts[TerrainMoveType.Disembark] == 0) //we must use all remaining movement to disembark
                 {
                     moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
                 }
@@ -528,7 +533,11 @@ public class Unit
             if (secondHex.terrainType == TerrainType.Coast || secondHex.terrainType == TerrainType.Ocean) //second hex is on water
             {
                 //embark costs all remaining movement and requires at least 1 so costSoFar % unitMovementSpeed = cost or if == 0 then = unitMovementSpeed
-                if (movementCosts[TerrainMoveType.Embark] <= 0)
+                if(movementCosts[TerrainMoveType.Embark] < 0) //we CANT disembark
+                {
+                    moveCost = 666666;
+                }
+                if (movementCosts[TerrainMoveType.Embark] == 0)
                 {
                     moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
                 }

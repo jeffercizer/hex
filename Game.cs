@@ -50,53 +50,53 @@ public class Game
                     TerrainTemperature terrainTemperature = (TerrainTemperature)int.Parse(cell[1].ToString());
                     HashSet<FeatureType> features = new();
                     //cell[2] == 0 means no features
-                    if(cell[2] == 1)
+                    if(int.Parse(cell[2].ToString()) == 1)
                     {
                         features.Add(FeatureType.Forest);
                     }
-                    if(cell[2] == 2)
+                    if(int.Parse(cell[2].ToString()) == 2)
                     {
                         features.Add(FeatureType.River);
                     }
-                    if(cell[2] == 3)
+                    if(int.Parse(cell[2].ToString()) == 3)
                     {
                         features.Add(FeatureType.Road);
                     }
-                    if(cell[2] == 4)
+                    if(int.Parse(cell[2].ToString()) == 4)
                     {
                         features.Add(FeatureType.Coral);
                     }
-                    if(cell[2] == 5)
+                    if(int.Parse(cell[2].ToString()) == 5)
                     {
                         //openslot //TODO
                     }
-                    if(cell[2] == 6)
+                    if(int.Parse(cell[2].ToString()) == 6)
                     {
                         features.Add(FeatureType.Forest);
                         features.Add(FeatureType.River);
                     }
-                    if(cell[2] == 7)
+                    if(int.Parse(cell[2].ToString()) == 7)
                     {
                         features.Add(FeatureType.River);
                         features.Add(FeatureType.Road);
                     }
-                    if(cell[2] == 8)
+                    if(int.Parse(cell[2].ToString()) == 8)
                     {
                         features.Add(FeatureType.Forest);
                         features.Add(FeatureType.Road);
                     }
-                    if(cell[2] == 9)
-                    {
-                        features.Add(FeatureType.Forest);
-                        features.Add(FeatureType.River);
-                        features.Add(FeatureType.Road);
-                    }
-                    if(cell[2] == 9)
+                    if(int.Parse(cell[2].ToString()) == 9)
                     {
                         features.Add(FeatureType.Forest);
                         features.Add(FeatureType.River);
                         features.Add(FeatureType.Road);
                     }
+                    // if(int.Parse(cell[2].ToString()) == 9)
+                    // {
+                    //     features.Add(FeatureType.Forest);
+                    //     features.Add(FeatureType.River);
+                    //     features.Add(FeatureType.Road);
+                    // }
                     //fourth number is for resources
                     ResourceType resource = ResourceLoader.resourceNames[cell[3].ToString()];
                     gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
@@ -108,7 +108,7 @@ public class Game
         mainBoard.bottom = r;
         mainBoard.right = q;
         mainBoard.gameHexDict = gameHexDict;
-        this.mainGameBoard = mainBoard;
+        mainGameBoard = mainBoard;
         builtWonders = new();
     }
     public Game(int boardHeight, int boardWidth)
@@ -194,7 +194,7 @@ public class Game
     public Game(TeamManager teamManager)
     {
         this.teamManager = teamManager;
-        this.playerDictionary = new();
+        playerDictionary = new();
     }
     public Game(Dictionary<int, Player> playerDictionary, TurnManager turnManager, TeamManager teamManager)
     {
@@ -233,16 +233,19 @@ struct GameTests
     static public Game MapLoadTest()
     {
         Game game = new Game("sample");
+        //test that hexes have features and such
+        
         game.AddPlayer(0.0f, 0);
         game.AddPlayer(50.0f, 1);
         game.AddPlayer(50.0f, 2);
         TestPlayerRelations(game);
         Hex player1CityLocation = new Hex(4, 3, -7);
-        Hex player2CityLocation = new Hex(14, 13, -27);
+        Hex player2CityLocation = new Hex(0, 10, -10);
         City player1City = new City(1, 1, "MyCity", game.mainGameBoard.gameHexDict[player1CityLocation]);
         City player2City = new City(2, 2, "Team2City", game.mainGameBoard.gameHexDict[player2CityLocation]);
 
         //Yields
+        //TestHexYield(new Hex())
         TestCityYields(player1City, 5, 5, 5, 1, 1, 0);
         TestCityYields(player2City, 5, 5, 5, 1, 1, 0);
 
@@ -349,15 +352,15 @@ struct GameTests
 
 
             Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(14, 13, -27));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(0, 10, -10));
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)], game.teamManager, false);
 
             game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, false);
 
 
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(5,4,-9));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(13, 12, -25));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(5,3,-8));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(21, 9, -30));
 
 
             game.turnManager.EndCurrentTurn(1);
@@ -369,8 +372,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,5,-11));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(12, 11, -23));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,4,-10));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(19, 9, -28));
 
         game.turnManager.StartNewTurn();
 
@@ -378,8 +381,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,7,-13));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,6,-12));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(17, 10, -27));
 
         game.turnManager.StartNewTurn();
         
@@ -387,7 +390,25 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(7,8,-15));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(7,7,-14));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(15, 10, -25));
+
+        game.turnManager.StartNewTurn();
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(7,9,-16));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(13, 10, -23));
+
+        game.turnManager.StartNewTurn();
+
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(8, 10, -18));
             Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
 
         game.turnManager.StartNewTurn();
@@ -396,8 +417,9 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(8,9,-17));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(9, 10, -19));
             Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+
 
         game.turnManager.StartNewTurn();
 
@@ -405,15 +427,7 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 9, -19));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
-
-        game.turnManager.StartNewTurn();
-
-            game.turnManager.EndCurrentTurn(1);
-            game.turnManager.EndCurrentTurn(2);
-            game.turnManager.EndCurrentTurn(0);
-
+            
             Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
             Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
 
@@ -510,7 +524,7 @@ struct GameTests
             }
 
         game.turnManager.StartNewTurn();
-
+        Console.WriteLine("TestScoutMovementCombat Finished");
         return game;
     }
 
@@ -559,6 +573,7 @@ struct GameTests
         {
             Complain("MassScout-PlayerUnitCountWrong");
         }
+        Console.WriteLine("TestMassScoutBuild Finished");
         return game;
     }
 
@@ -605,6 +620,8 @@ struct GameTests
             Complain("OverflowProduction-CityHasQueueLeft");
         }
 
+        Console.WriteLine("TestOverflowProduction Finished");
+
         return game;
     }
 
@@ -615,7 +632,7 @@ struct GameTests
         //GameTests.MapLoadTest();
         TestScoutMovementCombat();
         TestMassScoutBuild();
-        //TestOverflowProduction();
+        TestOverflowProduction();
     }
 
     static private void TestPlayerRelations(Game game)

@@ -290,7 +290,6 @@ public class City
                     {
                         tempUnit.name = "Ghost Man";
                         tempUnit.decreaseCurrentHealth(99999.9f);
-                        Console.WriteLine("NO VALID HEX TO SPAWN UNIT SO WE KILLED HIM ( ˶°ㅁ°)");
                     }
                 }
                 productionQueue.RemoveAt(0);

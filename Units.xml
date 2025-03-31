@@ -9,6 +9,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Coral" Value="1" />
       <TerrainMoveType Name="Embark" Value="-1" />
       <TerrainMoveType Name="Disembark" Value="-1" />
     </MovementCosts>
@@ -21,6 +22,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Coral" Value="1" />
       <TerrainMoveType Name="Embark" Value="-1" />
       <TerrainMoveType Name="Disembark" Value="-1" />
     </SightCosts>
@@ -38,6 +40,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Coral" Value="1" />
       <TerrainMoveType Name="Embark" Value="-1" />
       <TerrainMoveType Name="Disembark" Value="-1" />
     </MovementCosts>
@@ -50,6 +53,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Coral" Value="1" />
       <TerrainMoveType Name="Embark" Value="-1" />
       <TerrainMoveType Name="Disembark" Value="-1" />
     </SightCosts>
