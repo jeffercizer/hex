@@ -137,7 +137,11 @@ public class UnitEffect
     }
     void ProcessFunctionString(String functionString, Unit unit)
     {
-        if(functionString == "SettleCityAbility")
+        if(functionString == "SettleCapitalAbility")
+        {
+            SettleCapitalAbility(unit, "SettleCapitalAbility");
+        }
+        else if(functionString == "SettleCityAbility")
         {
             SettleCity(unit, "SettledCityName");
         }
@@ -155,6 +159,12 @@ public class UnitEffect
             EnableEmbarkDisembark(unit);
         }
     }
+    public bool SettleCapitalAbility(Unit unit, String cityName)
+    {
+        new City(unit.currentGameHex.gameBoard.game.GetUniqueID(), unit.teamNum, cityName, true, unit.currentGameHex);
+        unit.decreaseCurrentHealth(99999.0f);
+        return true;
+    }
     public void EnableEmbarkDisembark(Unit unit)
     {
         if(unit.movementCosts[TerrainMoveType.Embark] < 0)
@@ -168,7 +178,7 @@ public class UnitEffect
     }
     public bool SettleCity(Unit unit, String cityName)
     {
-        new City(unit.currentGameHex.gameBoard.game.GetUniqueID(), 1, cityName, unit.currentGameHex);
+        new City(unit.currentGameHex.gameBoard.game.GetUniqueID(), 1, cityName, false, unit.currentGameHex);
         unit.decreaseCurrentHealth(99999.0f);
         return true;
     }

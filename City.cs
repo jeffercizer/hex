@@ -34,7 +34,7 @@ public class ProductionQueueType
 [Serializable]
 public class City
 {
-    public City(int id, int teamNum, String name, GameHex gameHex)
+    public City(int id, int teamNum, String name, bool isCapital, GameHex gameHex)
     {
         this.id = id;
         this.teamNum = teamNum;
@@ -46,7 +46,7 @@ public class City
         heldHexes = new();
         gameHex.gameBoard.game.playerDictionary[teamNum].cityList.Add(this);
         districts = new();
-        AddCityCenter();
+        AddCityCenter(isCapital);
 
         
         citySize = 0;
@@ -83,9 +83,17 @@ public class City
     public int maxResourcesHeld;
     public int readyToExpand;
 
-    private District AddCityCenter()
+    private District AddCityCenter(bool isCapital)
     {
-        Building building = new Building(BuildingType.CityCenter);
+        Building building;
+        if(isCapital)
+        {
+            building = new Building(BuildingType.Palace);
+        }
+        else
+        {
+            building = new Building(BuildingType.CityCenter);
+        }
         District district = new District(gameHex, building, true, true, this);
         building.district = district;
         districts.Add(district);
@@ -424,7 +432,7 @@ public class City
                             }
                         }
                         bool adjacentDistrict = false;
-                        foreach(Hex hex2 in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        foreach(Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
                         {
                             if(gameHex.gameBoard.gameHexDict[hex2].district != null)
                             {
@@ -456,28 +464,27 @@ public class City
                 if(gameHex.gameBoard.gameHexDict[hex].ownedBy == -1 | gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex does not have a district or it is not urban or has less than the max buildings TODO
-                    if (gameHex.gameBoard.gameHexDict[hex].district == null | !gameHex.gameBoard.gameHexDict[hex].district.isUrban | gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
+                    if (gameHex.gameBoard.gameHexDict[hex].district == null || !gameHex.gameBoard.gameHexDict[hex].district.isUrban | gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
                     {
-                        //hex doesnt have a non-friendly unit
+                        //hex doesnt have a enemy unit
                         bool noEnemyUnit = true;
                         foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
                         {
-                            if(!gameHex.gameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
+                            if(gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                             {
                                 noEnemyUnit = false;
                                 break;
                             }
                         }
                         bool adjacentUrbanDistrict = false;
-                        foreach(Hex hex2 in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        foreach(Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
                         {
-                            if(gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban)
+                            if(gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
                             {
                                 adjacentUrbanDistrict = true;
                                 break;
                             }
                         }
-                                
                         if(noEnemyUnit && adjacentUrbanDistrict)
                         {
                             validHexes.Add(hex);

@@ -23,6 +23,7 @@ public enum UnitClass
 public enum UnitType
 {
     None,
+    Founder,
     Scout,
     Settler,
     Galley,
@@ -52,6 +53,7 @@ public static class UnitLoader
 
     public static Dictionary<UnitType, string> unitNames = new Dictionary<UnitType, string>
     {
+        { UnitType.Founder, "Founder"},
         { UnitType.Scout, "Scout" },
         { UnitType.Settler, "Settler" },
         { UnitType.Galley, "Galley" },

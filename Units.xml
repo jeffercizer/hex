@@ -1,4 +1,33 @@
 <Units>
+  <Unit Name="Founder" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="4.0" CombatPower="10.0" HealingFactor="0">
+    <MovementCosts>
+      <TerrainMoveType Name="Flat" Value="1" />
+      <TerrainMoveType Name="Rough" Value="2" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="1" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Coral" Value="1" />
+      <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Embark" Value="-1" />
+      <TerrainMoveType Name="Disembark" Value="-1" />
+    </MovementCosts>
+    <SightCosts>
+      <TerrainMoveType Name="Flat" Value="1" />
+      <TerrainMoveType Name="Rough" Value="2" />
+      <TerrainMoveType Name="Mountain" Value="9999" />
+      <TerrainMoveType Name="Coast" Value="1" />
+      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Forest" Value="1" />
+      <TerrainMoveType Name="River" Value="0" />
+      <TerrainMoveType Name="Coral" Value="1" />
+      <TerrainMoveType Name="Road" Value="0.5" />
+    </SightCosts>
+    <Abilities>
+      <Ability Name="SettleCapitalAbility" UsageCount="1" />
+    </Abilities>
+  </Unit>
   <Unit Name="Scout" Class="Combat, Land, Recon" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
@@ -23,8 +52,6 @@
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
       <TerrainMoveType Name="Coral" Value="1" />
-      <TerrainMoveType Name="Embark" Value="-1" />
-      <TerrainMoveType Name="Disembark" Value="-1" />
     </SightCosts>
     <Abilities>
       <Ability Name="ScoutVisionAbility" UsageCount="1" />
@@ -54,8 +81,6 @@
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
       <TerrainMoveType Name="Coral" Value="1" />
-      <TerrainMoveType Name="Embark" Value="-1" />
-      <TerrainMoveType Name="Disembark" Value="-1" />
     </SightCosts>
     <Abilities>
       <Ability Name="ScoutVisionAbility" UsageCount="1" />
@@ -71,6 +96,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Coral" Value="1" />
       <TerrainMoveType Name="Embark" Value="-1" />
       <TerrainMoveType Name="Disembark" Value="-1" />
     </MovementCosts>
@@ -83,8 +109,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
-      <TerrainMoveType Name="Embark" Value="0" />
-      <TerrainMoveType Name="Disembark" Value="0" />
+      <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
       <Ability Name="SettleCityAbility" UsageCount="1" />
@@ -100,6 +125,7 @@
       <TerrainMoveType Name="Forest" Value="9999" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="9999" />
+      <TerrainMoveType Name="Coral" Value="1" />
       <TerrainMoveType Name="Embark" Value="-1" />
       <TerrainMoveType Name="Disembark" Value="-1" />
     </MovementCosts>
@@ -112,8 +138,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
-      <TerrainMoveType Name="Embark" Value="0" />
-      <TerrainMoveType Name="Disembark" Value="0" />
+      <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
   </Unit>
   <Unit Name="Slinger" Class="Combat, Land, Randged" ProductionCost="50" GoldCost="200" MovementSpeed="2.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1">
@@ -126,6 +151,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
+      <TerrainMoveType Name="Coral" Value="1" />
       <TerrainMoveType Name="Embark" Value="-1" />
       <TerrainMoveType Name="Disembark" Value="-1" />
     </MovementCosts>
@@ -138,8 +164,7 @@
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
-      <TerrainMoveType Name="Embark" Value="0" />
-      <TerrainMoveType Name="Disembark" Value="0" />
+      <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
       <Ability Name="RangedAttack" UsageCount="1" CombatPower="15.0" />

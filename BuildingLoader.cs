@@ -74,7 +74,7 @@ public static class BuildingLoader
                     PerCity = int.Parse(r.Attribute("PerCity").Value),
                     PerPlayer = int.Parse(r.Attribute("PerPlayer").Value),
                     Wonder = bool.Parse(r.Attribute("Wonder").Value),
-                    Effects = r.Element("Effects").Elements("Effect").Select(e => e.Value).ToList(),
+                    Effects = r.Element("Effects").Elements("Effect").Select(e => e.Attribute("Name").Value).ToList(),
                     TerrainTypes = r.Element("TerrainTypes").Elements("TerrainType").Select(t => Enum.Parse<TerrainType>(t.Value)).ToList(),
                 }
             );

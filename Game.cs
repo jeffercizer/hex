@@ -234,20 +234,34 @@ struct GameTests
     {
         Game game = new Game("sample");
         //test that hexes have features and such
-        
+        if(game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType != TerrainType.Flat)
+        {
+            Console.WriteLine("Expected Flat Got " + game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType);
+        }
+        if(game.mainGameBoard.gameHexDict[new Hex(5,3, -8)].terrainType != TerrainType.Flat)
+        {
+            Console.WriteLine("Expected Flat Got " + game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType);
+        }
         game.AddPlayer(0.0f, 0);
         game.AddPlayer(50.0f, 1);
         game.AddPlayer(50.0f, 2);
         TestPlayerRelations(game);
         Hex player1CityLocation = new Hex(4, 3, -7);
         Hex player2CityLocation = new Hex(0, 10, -10);
-        City player1City = new City(1, 1, "MyCity", game.mainGameBoard.gameHexDict[player1CityLocation]);
-        City player2City = new City(2, 2, "Team2City", game.mainGameBoard.gameHexDict[player2CityLocation]);
+        Unit player1Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player1CityLocation], 1);
+        Unit player2Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player2CityLocation], 2);
+
+        player1Settler.abilities[0].Item2.Apply(player1Settler);
+
+        player2Settler.abilities[0].Item2.Apply(player2Settler);
+
+        City player1City = game.playerDictionary[1].cityList[0];
+        City player2City = game.playerDictionary[2].cityList[0];
 
         //Yields
         //TestHexYield(new Hex())
-        TestCityYields(player1City, 5, 5, 5, 1, 1, 0);
-        TestCityYields(player2City, 5, 5, 5, 1, 1, 0);
+        TestCityYields(player1City, 5, 5, 5, 5, 5, 5);
+        TestCityYields(player2City, 5, 5, 5, 5, 5, 5);
 
         //City Locations from player
         Tests.EqualHex("player1CityLocation", player1CityLocation, game.playerDictionary[1].cityList[0].gameHex.hex);
@@ -283,15 +297,14 @@ struct GameTests
         }
 
         //Yields
-        TestCityYields(player1City, 5, 5, 5, 1, 1, 0);
-        TestCityYields(player2City, 5, 5, 5, 1, 1, 0);
+        TestCityYields(player1City, 5, 5, 5, 5, 5, 5);
+        TestCityYields(player2City, 5, 5, 5, 5, 5, 5);
 
         return game;
     }
 
-    static public Game TestScoutMovementCombat()
+    static public Game TestScoutMovementCombat(Game game)
     {
-        Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
         player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 10);
@@ -316,8 +329,8 @@ struct GameTests
 
 
         //Yields
-            TestCityYields(player1City, 5, 5, 5, 1, 1, 0);
-            TestCityYields(player2City, 5, 5, 5, 1, 1, 0);
+            TestCityYields(player1City, 5, 5, 5, 5, 5, 5);
+            TestCityYields(player2City, 5, 5, 5, 5, 5, 5);
 
             if(!player1City.productionQueue.Any())
             {
@@ -528,9 +541,8 @@ struct GameTests
         return game;
     }
 
-    static public Game TestMassScoutBuild()
+    static public Game TestMassScoutBuild(Game game)
     {
-        Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
         player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
@@ -558,7 +570,7 @@ struct GameTests
         player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
         player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
         player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 2);
-        int targetTurn = 25;
+        int targetTurn = 30;
         for(int i = 0; i < targetTurn; i++)
         {
             game.turnManager.EndCurrentTurn(1);
@@ -569,17 +581,16 @@ struct GameTests
         {
             Complain("MassScout-CityHasQueueLeft");
         }
-        if(game.playerDictionary[1].unitList.Count != 23)
+        if(game.playerDictionary[1].unitList.Count != 26)
         {
-            Complain("MassScout-PlayerUnitCountWrong");
+            Complain("MassScout-PlayerUnitCountWrong Expected: 26 Got: " + game.playerDictionary[1].unitList.Count);
         }
         Console.WriteLine("TestMassScoutBuild Finished");
         return game;
     }
 
-    static public Game TestOverflowProduction()
+    static public Game TestOverflowProduction(Game game)
     {
-        Game game = MapLoadTest();
         City player1City = game.playerDictionary[1].cityList[0];
         player1City.AddToQueue("Scout", BuildingType.None, UnitType.Scout, player1City.gameHex, 1);
 
@@ -625,14 +636,57 @@ struct GameTests
         return game;
     }
 
+    static public Game TestCityExpand(Game game)
+    {
+        City player1City = game.playerDictionary[1].cityList[0];
+        City player2City = game.playerDictionary[2].cityList[0];
+
+        Console.WriteLine(player1City.gameHex.hex);
+        Console.WriteLine(player2City.gameHex.hex);
+        if(game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType != TerrainType.Flat)
+        {
+            Console.WriteLine("Expected Flat Got " + game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType);
+        }
+        if(game.mainGameBoard.gameHexDict[new Hex(5,3, -8)].terrainType != TerrainType.Flat)
+        {
+            Console.WriteLine("Expected Flat Got " + game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType);
+        }
+
+        //what hex we use from validHexes should come from the user
+        List<Hex> validHexes = player1City.ValidUrbanBuildHexes(BuildingLoader.buildingsDict[BuildingType.Granary].TerrainTypes);
+        player1City.AddToQueue(BuildingLoader.buildingNames[BuildingType.Granary], BuildingType.Granary, UnitType.None, game.mainGameBoard.gameHexDict[validHexes[0]], BuildingLoader.buildingsDict[BuildingType.Granary].ProductionCost);
+                
+        //what hex we use from validHexes should come from the user
+        validHexes = player2City.ValidUrbanBuildHexes(BuildingLoader.buildingsDict[BuildingType.StoneCutter].TerrainTypes);
+        player2City.AddToQueue(BuildingLoader.buildingNames[BuildingType.StoneCutter], BuildingType.StoneCutter, UnitType.None, game.mainGameBoard.gameHexDict[validHexes[0]], BuildingLoader.buildingsDict[BuildingType.StoneCutter].ProductionCost);
+
+        int count = 0;
+        while(count < (BuildingLoader.buildingsDict[BuildingType.StoneCutter].ProductionCost/player2City.yields.production))
+        {
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(0);
+            game.turnManager.StartNewTurn();
+            count++;
+        }
+
+        if(player1City.productionQueue.Any())
+        {
+            Complain("CityHasQueueLeft");
+        }
+
+        return game;
+    }
+
 
     static public void TestAll()
     {
-        //GameTests.SampleTest();
-        //GameTests.MapLoadTest();
-        TestScoutMovementCombat();
-        TestMassScoutBuild();
-        TestOverflowProduction();
+        Game game = MapLoadTest();
+        TestScoutMovementCombat(game);
+        TestMassScoutBuild(game);
+        TestOverflowProduction(game);
+        //TODO tests
+        //TestResearchBuildAndEffects();
+        TestCityExpand(game);
     }
 
     static private void TestPlayerRelations(Game game)

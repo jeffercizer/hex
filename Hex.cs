@@ -82,18 +82,18 @@ public struct Hex
     public Hex WrappingNeighbor(int direction, int left, int right)
     {
         right = right - 1;
-        Hex target = Add(Hex.Direction(direction));
+        Hex target = Add(Direction(direction));
         if(target.q < left)
         {
             return new Hex(right, target.r, -right-target.r);
         }
         else if(target.q > right)
         {
-            return(new Hex(left, target.r, -left-target.r));
+            return new Hex(left, target.r, -left-target.r);
         }
         else
         {
-            return Add(Hex.Direction(direction));
+            return Add(Direction(direction));
         }
     }
 
@@ -156,11 +156,14 @@ public List<Hex> WrappingRange(int range, int left, int right, int top, int bott
         for (int r = Math.Max(-range, -q - range); r <= Math.Min(range, -q + range); r++)
         {
             // Adjust the q coordinate using modular arithmetic for wrapping.
-            int wrappedQ = ((q - left) % width + width) % width + left;
-            int wrappedS = -wrappedQ - r;
-            if (r >= top & r < bottom)
+            int wrappedQ = ((q + this.q - left) % width + width) % width + left;
+            int wrappedR = r + this.r; // Offset r by the origin's r coordinate.
+            int wrappedS = -wrappedQ - wrappedR; // Calculate s based on wrapped q and r.
+
+            // Check bounds for r and add the hex to the results.
+            if (wrappedR >= top && wrappedR < bottom)
             {
-                results.Add(new Hex(wrappedQ, r, wrappedS));
+                results.Add(new Hex(wrappedQ, wrappedR, wrappedS));
             }
         }
     }
