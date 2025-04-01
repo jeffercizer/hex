@@ -44,7 +44,7 @@ public struct UnitInfo
     public Dictionary<TerrainMoveType, float> MovementCosts { get; set; }
     public Dictionary<TerrainMoveType, float> SightCosts { get; set; }
     public List<String> Effects { get; set; }
-    public Dictionary<string, (int, float)> Abilities { get; set; }
+    public Dictionary<string, (float CombatPower, int UsageCount, int Range, TargetSpecification? Specification)> Abilities { get; set; }
 }
 
 public static class UnitLoader
@@ -93,14 +93,45 @@ public static class UnitLoader
                     Effects = r.Element("Effects")?.Elements("Effect").Select(e => e.Value).ToList() ?? new List<string>(),
                     Abilities = r.Element("Abilities")?.Elements("Ability").ToDictionary(
                         a => a.Attribute("Name")?.Value ?? throw new Exception("Invalid Ability Name"),
-                        a => (
+                        a =>
+                        (
                             float.TryParse(a.Attribute("CombatPower")?.Value, out var combatPower) ? combatPower : 0,
                             int.TryParse(a.Attribute("UsageCount")?.Value, out var usageCount) ? usageCount : 1,
-                            int.TryParse(a.Attribute("Range")?.Value, out var range) ? range : 0
+                            int.TryParse(a.Attribute("Range")?.Value, out var range) ? range : 0,
+                            ParseTargetSpecification(a.Element("TargetSpecification"))
                         )
-                    ) ?? new Dictionary<string, (int,float)>()
+                    ) ?? new Dictionary<string, (float, int, int, TargetSpecification?)>();
                 }
             );
         return UnitData;
+    }
+    private TargetSpecification ParseTargetSpecification(XElement targetSpecElement)
+    {
+        if (targetSpecElement == null) return null;
+    
+        var targetSpecification = new TargetSpecification
+        {
+            AllowsAnyUnit = bool.TryParse(targetSpecElement.Attribute("AllowsAnyUnit")?.Value, out var allowsAnyUnit) && allowsAnyUnit
+            AllowsAnyBuilding = bool.TryParse(targetSpecElement.Attribute("AllowsAnyBuilding")?.Value, out var allowsAnyBuilding) && allowsAnyBuilding // New line
+        };
+    
+        targetSpecification.ValidUnitTypes = targetSpecElement.Element("ValidUnitTypes")?.Elements("UnitType")
+            .Select(u => Enum.TryParse<UnitType>(u.Attribute("Name")?.Value, out var unitType) ? unitType : throw new Exception("Invalid UnitType"))
+            .ToHashSet() ?? new HashSet<UnitType>();
+    
+        targetSpecification.AllowedUnitClasses = targetSpecElement.Element("AllowedUnitClasses")?.Value
+            .Split(", ", StringSplitOptions.RemoveEmptyEntries)
+            .Aggregate(UnitClass.None, (current, className) =>
+                Enum.TryParse<UnitClass>(className, out var unitClass) ? current | unitClass : throw new Exception("Invalid UnitClass"));
+    
+        targetSpecification.ValidBuildingTypes = targetSpecElement.Element("ValidBuildingTypes")?.Elements("BuildingType")
+            .Select(b => Enum.TryParse<BuildingType>(b.Attribute("Name")?.Value, out var buildingType) ? buildingType : throw new Exception("Invalid BuildingType"))
+            .ToHashSet() ?? new HashSet<BuildingType>();
+    
+        targetSpecification.ValidTerrainTypes = targetSpecElement.Element("ValidTerrainTypes")?.Elements("TerrainType")
+            .Select(t => Enum.TryParse<TerrainType>(t.Attribute("Name")?.Value, out var terrainType) ? terrainType : throw new Exception("Invalid TerrainType"))
+            .ToHashSet() ?? new HashSet<TerrainType>();
+    
+        return targetSpecification;
     }
 }
