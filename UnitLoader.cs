@@ -111,8 +111,12 @@ public static class UnitLoader
     
         var targetSpecification = new TargetSpecification
         {
-            AllowsAnyUnit = bool.TryParse(targetSpecElement.Attribute("AllowsAnyUnit")?.Value, out var allowsAnyUnit) && allowsAnyUnit
-            AllowsAnyBuilding = bool.TryParse(targetSpecElement.Attribute("AllowsAnyBuilding")?.Value, out var allowsAnyBuilding) && allowsAnyBuilding // New line
+            AllowsAnyUnit = bool.TryParse(targetSpecElement.Attribute("AllowsAnyUnit")?.Value, out var allowsAnyUnit) && allowsAnyUnit;
+            AllowsAnyBuilding = bool.TryParse(targetSpecElement.Attribute("AllowsAnyBuilding")?.Value, out var allowsAnyBuilding) && allowsAnyBuilding;
+            AllowsAnyTerrain = bool.TryParse(targetSpecElement.Attribute("AllowsAnyTerrain")?.Value, out var allowsAnyTerrain) && allowsAnyTerrain;
+            AllowsAlly = bool.TryParse(targetSpecElement.Attribute("AllowsAlly")?.Value, out var allowsAlly) && allowsAlly;
+            AllowsEnemy = bool.TryParse(targetSpecElement.Attribute("AllowsEnemy")?.Value, out var allowsEnemy) && allowsEnemy;
+            AllowsNeutral = bool.TryParse(targetSpecElement.Attribute("AllowsNeutral")?.Value, out var allowsNeutral) && allowsNeutral;
         };
     
         targetSpecification.ValidUnitTypes = targetSpecElement.Element("ValidUnitTypes")?.Elements("UnitType")
