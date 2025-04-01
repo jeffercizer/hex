@@ -120,6 +120,10 @@ public class Unit
 
     public void OnTurnStarted(int turnNumber)
     {
+        foreach (UnitAbility ability in abilities)
+        {
+            ability.ResetAbilityUses();
+        }
         remainingMovement = movementSpeed;
         attacksLeft = maxAttackCount;
     }
