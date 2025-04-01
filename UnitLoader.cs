@@ -94,8 +94,9 @@ public static class UnitLoader
                     Abilities = r.Element("Abilities")?.Elements("Ability").ToDictionary(
                         a => a.Attribute("Name")?.Value ?? throw new Exception("Invalid Ability Name"),
                         a => (
-                            int.TryParse(a.Attribute("UsageCount")?.Value, out var usageCount) ? usageCount : 0,
-                            float.TryParse(a.Attribute("CombatPower")?.Value, out var combatPower) ? combatPower : 0
+                            float.TryParse(a.Attribute("CombatPower")?.Value, out var combatPower) ? combatPower : 0,
+                            int.TryParse(a.Attribute("UsageCount")?.Value, out var usageCount) ? usageCount : 1,
+                            int.TryParse(a.Attribute("Range")?.Value, out var range) ? range : 0
                         )
                     ) ?? new Dictionary<string, (int,float)>()
                 }
