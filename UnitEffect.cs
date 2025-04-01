@@ -199,7 +199,7 @@ public class UnitEffect
     }
     public bool RangedAttack(Unit unit)
     {
-        
+        //TODO also look into TargetSpecification more
         return true;
     }
 }
