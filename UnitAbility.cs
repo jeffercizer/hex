@@ -13,14 +13,16 @@ public class UnitAbility
     public int currentCharges;
     public int maxChargesPerTurn; //-1 means no reset
     public int range;
+    public TargetSpecification validTargetTypes;
     
-    public UnitAbility(UnitEffect effect, float combatPower = 0.0f, int maxUsagePerTurn = 1, int range = 0)
+    public UnitAbility(UnitEffect effect, float combatPower = 0.0f, int maxUsagePerTurn = 1, int range = 0, validTargetTypes = new TargetSpecification())
     {
         name = effect.functionName;
         this.effect = effect;
         this.combatPower = combatPower;
         this.maxUsagePerTurn = maxUsagePerTurn;
         this.range = range;
+        this.validTargetTypes = validTargetTypes;
     }
 
     public void ResetAbilityUses()
