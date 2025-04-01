@@ -83,7 +83,7 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="ScoutVisionAbility" UsageCount="1" />
+      <Ability Name="Fortify" UsageCount="1" />
     </Abilities>
   </Unit>
   <Unit Name="Settler" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0">
@@ -167,7 +167,7 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="RangedAttack" UsageCount="1" CombatPower="15.0" />
+      <Ability Name="RangedAttack" CombatPower="15.0" UsageCount="1" Range="1"/>
     </Abilities>
   </Unit>
 </Units>
