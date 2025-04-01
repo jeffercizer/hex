@@ -55,7 +55,7 @@ public class UnitEffect
     public Action<Unit>? applyFunction;
     public String functionName = "";
     
-    public void Apply(Unit unit)
+    public bool Apply(Unit unit, var abilityTarget = null)
     {
         if (applyFunction != null)
         {
@@ -63,7 +63,14 @@ public class UnitEffect
         }
         else if (functionName != "")
         {
-            ProcessFunctionString(functionName, unit);
+            if(abilityTarget != null)
+            {
+                return ProcessFunctionString(functionName, unit, abilityTarget);
+            }
+            else
+            {
+                return ProcessFunctionString(functionName, unit);
+            }
         }
         else
         {
@@ -135,7 +142,7 @@ public class UnitEffect
                 break;
         }
     }
-    void ProcessFunctionString(String functionString, Unit unit)
+    bool ProcessFunctionString(String functionString, Unit unit, var abilityTarget = null)
     {
         if(functionString == "SettleCapitalAbility")
         {
@@ -152,12 +159,20 @@ public class UnitEffect
         }
         else if(functionString == "RangedAttack")
         {
-            RangedAttack(unit);
+            if(abilityTarget != null)
+            {
+                RangedAttack(unit, abilityTarget);
+            }
+            else
+            {
+                return false;
+            }
         }
         else if(functionString == "EnableEmbarkDisembark")
         {
             EnableEmbarkDisembark(unit);
         }
+        return true;
     }
     public bool SettleCapitalAbility(Unit unit, String cityName)
     {
