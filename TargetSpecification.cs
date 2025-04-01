@@ -7,6 +7,7 @@ using System.Formats.Asn1;
 
 public class TargetSpecification
 {
+    public bool AllowTargetSelf { get; set; } = true;
     public bool AllowsAnyUnit { get; set; } = false;
     public bool AllowsAnyBuilding { get; set; } = false; // New flag for wildcard building targets
     public HashSet<UnitType> ValidUnitTypes { get; set; } = new HashSet<UnitType>();
