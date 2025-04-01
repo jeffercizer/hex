@@ -167,7 +167,9 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="RangedAttack" CombatPower="15.0" UsageCount="1" Range="1"/>
+      <Ability Name="RangedAttack" CombatPower="15.0" UsageCount="1" Range="1">
+        <TargetSpecification AllowsAnyUnit="True" AllowsAnyBuilding="true" />
+      </Ability>
     </Abilities>
   </Unit>
 </Units>
