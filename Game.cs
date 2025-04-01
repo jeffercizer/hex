@@ -677,6 +677,55 @@ struct GameTests
         return game;
     }
 
+    static public Game TestSlingerCombat()
+    {
+        Game game = new Game("sample");
+
+        game.AddPlayer(0.0f, 0);
+        game.AddPlayer(50.0f, 1);
+        game.AddPlayer(50.0f, 2);
+        TestPlayerRelations(game);
+        Hex player1CityLocation = new Hex(4, 8, -12);
+        Hex player2CityLocation = new Hex(5, 10, -15);
+        Unit player1Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player1CityLocation], 1);
+        Unit player2Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player2CityLocation], 2);
+
+        player1Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility").ActivateAbility(player1Settler);
+        
+        player2Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility").ActivateAbility(player2Settler);
+
+        City player1City = game.playerDictionary[1].cityList[0];
+        City player2City = game.playerDictionary[2].cityList[0];
+        player1City.AddToQueue(UnitType.Slinger);
+        player2City.AddToQueue(UnitType.Slinger);
+        int count = 0;
+        while(count < 5)
+        {
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+            game.turnManager.StartNewTurn();
+        }
+        game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 9, -14)], game.teamManager, false);
+        count = 0;
+        while(count < 5)
+        {
+            game.turnManager.EndCurrentTurn(1);
+            game.turnManager.EndCurrentTurn(2);
+            game.turnManager.EndCurrentTurn(0);
+            game.turnManager.StartNewTurn();
+        }
+        Tests.EqualHex("Slinger 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(5, 9, -14));
+        Tests.EqualHex("Slinger 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(5, 10, -15));
+
+        //the way I imagine abilities will work is we iterate over the list to get each and put it into the list of buttons that will call the ability, each ability having an icon and such.
+        //main concern being that abilities being in different orders mean they are in different spots on the UI which is bad, so need assigned spots depending, thinking Starcraft inspo, grid bottom rightish
+        //for testing we just call it directly since references could be made via name but those also are bound to change
+        //abilities use 
+        
+        game.playerDictionary[1].unitList[0].abilities[0].ActivateAbility(game.playerDictionary[1].unitList[0], game.mainGameBoard.gameHexDict[new Hex(5, 10, -15)]);
+    }
+
 
     static public void TestAll()
     {
@@ -686,7 +735,9 @@ struct GameTests
         TestOverflowProduction(game);
         //TODO tests
         //TestResearchBuildAndEffects();
-        TestCityExpand(game);
+        TestCityExpand(game); //not finished
+        
+        TestSlingerCombat(); //not finished
     }
 
     static private void TestPlayerRelations(Game game)
