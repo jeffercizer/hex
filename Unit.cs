@@ -181,7 +181,7 @@ public class Unit
 
     public void AddAbility(string abilityName)
     {
-        abilities.Add(new UnitAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName].Item1, unitInfo.Abilities[abilityName].Item2, unitInfo.Abilities[abilityName].Item3));
+        abilities.Add(new UnitAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName].Item1, unitInfo.Abilities[abilityName].Item2, unitInfo.Abilities[abilityName].Item3, unitInfo.Abilities[abilityName].Item4));
     }
 
     public void UseAbilities()
