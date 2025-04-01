@@ -13,6 +13,7 @@ public class UnitAbility
     public int currentUsage;
     public int maxUsagePerTurn;
     public int range;
+    
     public UnitAbility(UnitEffect effect, float combatPower = 0.0f, int maxUsagePerTurn = 1, int range = 0)
     {
         name = effect.functionName;
