@@ -55,7 +55,7 @@ public class UnitEffect
     public Action<Unit>? applyFunction;
     public String functionName = "";
     
-    public bool Apply(Unit unit, var abilityTarget = null)
+    public bool Apply(Unit unit, var abilityInfo = null)
     {
         if (applyFunction != null)
         {
@@ -142,7 +142,7 @@ public class UnitEffect
                 break;
         }
     }
-    bool ProcessFunctionString(String functionString, Unit unit, var abilityTarget = null)
+    bool ProcessFunctionString(String functionString, Unit unit, var abilityInfo = null)
     {
         if(functionString == "SettleCapitalAbility")
         {
@@ -199,6 +199,7 @@ public class UnitEffect
     }
     public bool RangedAttack(Unit unit)
     {
-        return false;
+        
+        return true;
     }
 }
