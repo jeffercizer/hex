@@ -229,6 +229,42 @@ public class Unit
             return true;
         }
     }
+
+    private bool RangedDistrictCombat(GameHex targetGameHex, float rangedPower)
+    {
+        return targetGameHex.district.decreaseCurrentHealth(rangedPower);
+    }
+
+    private bool RangedUnitCombat(GameHex targetGameHex, Unit unit, float rangedPower)
+    {
+        return unit.decreaseCurrentHealth(rangedPower);
+    }
+
+    public bool RangedAttackTarget(GameHex targetGameHex, float rangedPower, TeamManager teamManager)
+    {
+        //remainingMovement -= moveCost;
+        if (targetGameHex.district != null && teamManager.GetEnemies(teamNum).Contains(targetGameHex.district.city.teamNum) && targetGameHex.district.currentHealth > 0.0f)
+        {
+            attacksLeft -= 1;
+            return RangedDistrictCombat(targetGameHex, rangedPower);;
+        }
+        if (targetGameHex.unitsList.Any())
+        {
+            Unit unit = targetGameHex.unitsList[0];
+            if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+            {
+                //combat math TODO
+                //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
+                attacksLeft -= 1;
+                return RangedUnitCombat(targetGameHex, unit, rangedPower);
+            }
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
     
     public void increaseCurrentHealth(float amount)
     {
