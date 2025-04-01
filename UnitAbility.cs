@@ -23,18 +23,18 @@ public class UnitAbility
         this.range = range;
     }
 
-    public bool ActivateAbility(Unit usingUnit, var abilityInfo = null)
+    public bool ActivateAbility(Unit usingUnit, var abilityTarget = null)
     {
         if(currentUsage < maxUsagePerTurn)
         {
             currentUsage += 1;
-            if(abilityInfo != null)
+            if(abilityTarget != null)
             {
-                effect.Apply(usingUnit, abilityInfo);
+                effect.Apply(usingUnit, combatPower, abilityTarget);
             }
             else
             {
-                effect.Apply(usingUnit);
+                effect.Apply(usingUnit, combatPower);
             }
 
         }
