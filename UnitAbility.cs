@@ -10,8 +10,8 @@ public class UnitAbility
     public String name;
     public UnitEffect effect;
     public float combatPower;
-    public int currentUsage;
-    public int maxUsagePerTurn;
+    public int currentCharges;
+    public int maxChargesPerTurn; //-1 means no reset
     public int range;
     
     public UnitAbility(UnitEffect effect, float combatPower = 0.0f, int maxUsagePerTurn = 1, int range = 0)
@@ -25,14 +25,17 @@ public class UnitAbility
 
     public void ResetAbilityUses()
     {
-        currentUsage = 0;
+        if(maxChargesPerTurn > -1)
+        {
+            currentCharges = maxChargesPerTurn;
+        }
     }
 
     public bool ActivateAbility(Unit usingUnit, GameHex abilityTarget = null)
     {
-        if(currentUsage < maxUsagePerTurn)
+        if(currentCharges > 0)
         {
-            currentUsage += 1;
+            currentCharges -= 1;
             if(abilityTarget != null)
             {
                 effect.Apply(usingUnit, combatPower, abilityTarget);
