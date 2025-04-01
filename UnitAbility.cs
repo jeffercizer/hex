@@ -49,4 +49,13 @@ public class UnitAbility
 
         }
     }
+
+    public List<Hex> ValidAbilityTargets(Unit unit)
+    {
+        foreach(Hex hex in unit.gameHex.hex.WrappingRange(range, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
+        {
+            IsValidTarget(UnitType? unitType, UnitClass? unitClass, BuildingType? buildingType, TerrainType? terrainType, bool isEnemy = false, bool isAlly = false)
+            //TODO
+        }
+    }
 }
