@@ -22,14 +22,14 @@ public class UnitAbility
         this.range = range;
     }
 
-    public bool ActivateAbility(Unit usingUnit, var abilityTarget = null)
+    public bool ActivateAbility(Unit usingUnit, var abilityInfo = null)
     {
         if(currentUsage < maxUsagePerTurn)
         {
             currentUsage += 1;
-            if(abilityTarget != null)
+            if(abilityInfo != null)
             {
-                effect.Apply(usingUnit, abilityTarget);
+                effect.Apply(usingUnit, abilityInfo);
             }
             else
             {
