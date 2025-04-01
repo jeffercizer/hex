@@ -251,6 +251,7 @@ struct GameTests
         Unit player1Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player1CityLocation], 1);
         Unit player2Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player2CityLocation], 2);
 
+        player1Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility")
         player1Settler.abilities[0].Item2.Apply(player1Settler);
 
         player2Settler.abilities[0].Item2.Apply(player2Settler);
