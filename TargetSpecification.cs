@@ -9,7 +9,8 @@ public class TargetSpecification
 {
     public bool AllowTargetSelf { get; set; } = true;
     public bool AllowsAnyUnit { get; set; } = false;
-    public bool AllowsAnyBuilding { get; set; } = false; // New flag for wildcard building targets
+    public bool AllowsAnyBuilding { get; set; } = false;
+    public bool AllowsAnyTerrain { get; set; } = true;
     public HashSet<UnitType> ValidUnitTypes { get; set; } = new HashSet<UnitType>();
     public UnitClass AllowedUnitClasses { get; set; } = UnitClass.None;
     public HashSet<BuildingType> ValidBuildingTypes { get; set; } = new HashSet<BuildingType>();
