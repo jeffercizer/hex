@@ -50,7 +50,7 @@ public class Unit
     
             foreach (String abilityName in unitInfo.Abilities.Keys)
             {
-                AddAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName].Item1);
+                AddAbility(abilityName);
             }
         }
         else
@@ -115,7 +115,7 @@ public class Unit
     public List<Hex>? currentPath = new();
     public List<Hex> visibleHexes = new();
     public List<UnitEffect> effects = new();
-    public List<(int,UnitEffect)> abilities = new();
+    public List<UnitAbility> abilities = new();
     public bool isTargetEnemy;
 
     public void OnTurnStarted(int turnNumber)
@@ -175,9 +175,9 @@ public class Unit
         RecalculateEffects();
     }
 
-    public void AddAbility(UnitEffect ability, int usageCount)
+    public void AddAbility(string abilityName)
     {
-        abilities.Add((usageCount, ability));
+        abilities.Add(new UnitAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName].Item1, unitInfo.Abilities[abilityName].Item2, unitInfo.Abilities[abilityName].Item3));
     }
 
     public void UseAbilities()
