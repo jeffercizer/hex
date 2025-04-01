@@ -23,7 +23,12 @@ public class UnitAbility
         this.range = range;
     }
 
-    public bool ActivateAbility(Unit usingUnit, var abilityTarget = null)
+    public void ResetAbilityUses()
+    {
+        currentUsage = 0;
+    }
+
+    public bool ActivateAbility(Unit usingUnit, GameHex abilityTarget = null)
     {
         if(currentUsage < maxUsagePerTurn)
         {
