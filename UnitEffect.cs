@@ -55,7 +55,7 @@ public class UnitEffect
     public Action<Unit>? applyFunction;
     public String functionName = "";
     
-    public bool Apply(Unit unit, var abilityInfo = null)
+    public bool Apply(Unit unit, float combatPower = 0.0f, GameHex abilityTarget = null)
     {
         if (applyFunction != null)
         {
@@ -65,11 +65,11 @@ public class UnitEffect
         {
             if(abilityTarget != null)
             {
-                return ProcessFunctionString(functionName, unit, abilityTarget);
+                return ProcessFunctionString(functionName, unit, combatPower, abilityTarget);
             }
             else
             {
-                return ProcessFunctionString(functionName, unit);
+                return ProcessFunctionString(functionName, combatPower, unit);
             }
         }
         else
@@ -142,7 +142,7 @@ public class UnitEffect
                 break;
         }
     }
-    bool ProcessFunctionString(String functionString, Unit unit, var abilityInfo = null)
+    bool ProcessFunctionString(String functionString, Unit unit, float combatPower, GameHex abilityTarget = null)
     {
         if(functionString == "SettleCapitalAbility")
         {
@@ -161,7 +161,7 @@ public class UnitEffect
         {
             if(abilityTarget != null)
             {
-                RangedAttack(unit, abilityTarget);
+                RangedAttack(unit, combatPower, abilityTarget);
             }
             else
             {
@@ -197,9 +197,8 @@ public class UnitEffect
         unit.decreaseCurrentHealth(99999.0f);
         return true;
     }
-    public bool RangedAttack(Unit unit)
+    public bool RangedAttack(Unit unit, float combatPower, GameHex target)
     {
-        //TODO also look into TargetSpecification more
-        return true;
+        return RangedAttackTarget(target, combatPower, unit.gameHex.gameBoard.game.teamManager);
     }
 }
