@@ -168,7 +168,7 @@
     </SightCosts>
     <Abilities>
       <Ability Name="RangedAttack" CombatPower="15.0" UsageCount="1" Range="1">
-        <TargetSpecification AllowsAnyUnit="True" AllowsAnyBuilding="true" />
+        <TargetSpecification AllowsAnyUnit="true" AllowsAnyBuilding="true" />
       </Ability>
     </Abilities>
   </Unit>
