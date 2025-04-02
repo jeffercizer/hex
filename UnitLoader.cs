@@ -100,23 +100,23 @@ public static class UnitLoader
                             int.TryParse(a.Attribute("Range")?.Value, out var range) ? range : 0,
                             ParseTargetSpecification(a.Element("TargetSpecification"))
                         )
-                    ) ?? new Dictionary<string, (float, int, int, TargetSpecification?)>();
+                    ) ?? new Dictionary<string, (float, int, int, TargetSpecification?)>(),
                 }
             );
         return UnitData;
     }
-    private TargetSpecification ParseTargetSpecification(XElement targetSpecElement)
+    static TargetSpecification ParseTargetSpecification(XElement targetSpecElement)
     {
         if (targetSpecElement == null) return null;
     
         var targetSpecification = new TargetSpecification
         {
-            AllowsAnyUnit = bool.TryParse(targetSpecElement.Attribute("AllowsAnyUnit")?.Value, out var allowsAnyUnit) && allowsAnyUnit;
-            AllowsAnyBuilding = bool.TryParse(targetSpecElement.Attribute("AllowsAnyBuilding")?.Value, out var allowsAnyBuilding) && allowsAnyBuilding;
-            AllowsAnyTerrain = bool.TryParse(targetSpecElement.Attribute("AllowsAnyTerrain")?.Value, out var allowsAnyTerrain) && allowsAnyTerrain;
-            AllowsAlly = bool.TryParse(targetSpecElement.Attribute("AllowsAlly")?.Value, out var allowsAlly) && allowsAlly;
-            AllowsEnemy = bool.TryParse(targetSpecElement.Attribute("AllowsEnemy")?.Value, out var allowsEnemy) && allowsEnemy;
-            AllowsNeutral = bool.TryParse(targetSpecElement.Attribute("AllowsNeutral")?.Value, out var allowsNeutral) && allowsNeutral;
+            AllowsAnyUnit = bool.TryParse(targetSpecElement.Attribute("AllowsAnyUnit")?.Value, out var allowsAnyUnit) && allowsAnyUnit,
+            AllowsAnyBuilding = bool.TryParse(targetSpecElement.Attribute("AllowsAnyBuilding")?.Value, out var allowsAnyBuilding) && allowsAnyBuilding,
+            AllowsAnyTerrain = bool.TryParse(targetSpecElement.Attribute("AllowsAnyTerrain")?.Value, out var allowsAnyTerrain) && allowsAnyTerrain,
+            AllowsAlly = bool.TryParse(targetSpecElement.Attribute("AllowsAlly")?.Value, out var allowsAlly) && allowsAlly,
+            AllowsEnemy = bool.TryParse(targetSpecElement.Attribute("AllowsEnemy")?.Value, out var allowsEnemy) && allowsEnemy,
+            AllowsNeutral = bool.TryParse(targetSpecElement.Attribute("AllowsNeutral")?.Value, out var allowsNeutral) && allowsNeutral,
         };
     
         targetSpecification.ValidUnitTypes = targetSpecElement.Element("ValidUnitTypes")?.Elements("UnitType")
@@ -126,7 +126,9 @@ public static class UnitLoader
         targetSpecification.AllowedUnitClasses = targetSpecElement.Element("AllowedUnitClasses")?.Value
             .Split(", ", StringSplitOptions.RemoveEmptyEntries)
             .Aggregate(UnitClass.None, (current, className) =>
-                Enum.TryParse<UnitClass>(className, out var unitClass) ? current | unitClass : throw new Exception("Invalid UnitClass"));
+                Enum.TryParse<UnitClass>(className, out var unitClass) ? current | unitClass : throw new Exception("Invalid UnitClass"))
+            ?? UnitClass.None;
+
     
         targetSpecification.ValidBuildingTypes = targetSpecElement.Element("ValidBuildingTypes")?.Elements("BuildingType")
             .Select(b => Enum.TryParse<BuildingType>(b.Attribute("Name")?.Value, out var buildingType) ? buildingType : throw new Exception("Invalid BuildingType"))

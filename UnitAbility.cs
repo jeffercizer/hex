@@ -15,13 +15,18 @@ public class UnitAbility
     public int range;
     public TargetSpecification validTargetTypes;
     
-    public UnitAbility(UnitEffect effect, float combatPower = 0.0f, int maxUsagePerTurn = 1, int range = 0, validTargetTypes = new TargetSpecification())
+    public UnitAbility(UnitEffect effect, float combatPower = 0.0f, int maxChargesPerTurn = 1, int range = 0, TargetSpecification validTargetTypes = null)
     {
         name = effect.functionName;
         this.effect = effect;
         this.combatPower = combatPower;
-        this.maxUsagePerTurn = maxUsagePerTurn;
+        this.maxChargesPerTurn = maxChargesPerTurn;
+        this.currentCharges = maxChargesPerTurn;
         this.range = range;
+        if(validTargetTypes == null)
+        {
+            validTargetTypes = new TargetSpecification();
+        }
         this.validTargetTypes = validTargetTypes;
     }
 
@@ -40,22 +45,22 @@ public class UnitAbility
             currentCharges -= 1;
             if(abilityTarget != null)
             {
-                effect.Apply(usingUnit, combatPower, abilityTarget);
+                return effect.Apply(usingUnit, combatPower, abilityTarget);
             }
             else
             {
-                effect.Apply(usingUnit, combatPower);
+                return effect.Apply(usingUnit, combatPower);
             }
-
         }
+        return false;
     }
 
-    public List<Hex> ValidAbilityTargets(Unit unit)
-    {
-        foreach(Hex hex in unit.gameHex.hex.WrappingRange(range, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
-        {
-            IsValidTarget(UnitType? unitType, UnitClass? unitClass, BuildingType? buildingType, TerrainType? terrainType, bool isEnemy = false, bool isAlly = false)
-            //TODO
-        }
-    }
+    // public List<Hex> ValidAbilityTargets(Unit unit)
+    // {
+    //     foreach(Hex hex in unit.gameHex.hex.WrappingRange(range, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
+    //     {
+    //         IsValidTarget(UnitType? unitType, UnitClass? unitClass, BuildingType? buildingType, TerrainType? terrainType, bool isEnemy = false, bool isAlly = false)
+    //         //TODO
+    //     }
+    // }
 }

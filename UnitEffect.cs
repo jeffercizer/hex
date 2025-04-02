@@ -60,6 +60,7 @@ public class UnitEffect
         if (applyFunction != null)
         {
             applyFunction(unit);
+            return true;
         }
         else if (functionName != "")
         {
@@ -69,7 +70,7 @@ public class UnitEffect
             }
             else
             {
-                return ProcessFunctionString(functionName, combatPower, unit);
+                return ProcessFunctionString(functionName, unit, combatPower);
             }
         }
         else
@@ -122,6 +123,7 @@ public class UnitEffect
                         break;
                 }
             }
+            return true;
         }
     }
     void ApplyOperation(ref float property)
@@ -146,22 +148,23 @@ public class UnitEffect
     {
         if(functionString == "SettleCapitalAbility")
         {
-            SettleCapitalAbility(unit, "SettleCapitalAbility");
+            return SettleCapitalAbility(unit, "SettleCapitalAbility");
         }
         else if(functionString == "SettleCityAbility")
         {
-            SettleCity(unit, "SettledCityName");
+            return SettleCity(unit, "SettledCityName");
         }
         else if(functionString == "ScoutVisionAbility")
         {
             unit.sightRange += 1;
             unit.UpdateVision();
+            return true;
         }
         else if(functionString == "RangedAttack")
         {
             if(abilityTarget != null)
             {
-                RangedAttack(unit, combatPower, abilityTarget);
+                return RangedAttack(unit, combatPower, abilityTarget);
             }
             else
             {
@@ -171,13 +174,14 @@ public class UnitEffect
         else if(functionString == "EnableEmbarkDisembark")
         {
             EnableEmbarkDisembark(unit);
+            return true;
         }
-        return true;
+        return false;
     }
     public bool SettleCapitalAbility(Unit unit, String cityName)
     {
-        new City(unit.currentGameHex.gameBoard.game.GetUniqueID(), unit.teamNum, cityName, true, unit.currentGameHex);
-        unit.decreaseCurrentHealth(99999.0f);
+        new City(unit.gameHex.gameBoard.game.GetUniqueID(), unit.teamNum, cityName, true, unit.gameHex);
+        unit.decreaseHealth(99999.0f);
         return true;
     }
     public void EnableEmbarkDisembark(Unit unit)
@@ -193,12 +197,12 @@ public class UnitEffect
     }
     public bool SettleCity(Unit unit, String cityName)
     {
-        new City(unit.currentGameHex.gameBoard.game.GetUniqueID(), 1, cityName, false, unit.currentGameHex);
-        unit.decreaseCurrentHealth(99999.0f);
+        new City(unit.gameHex.gameBoard.game.GetUniqueID(), 1, cityName, false, unit.gameHex);
+        unit.decreaseHealth(99999.0f);
         return true;
     }
     public bool RangedAttack(Unit unit, float combatPower, GameHex target)
     {
-        return RangedAttackTarget(target, combatPower, unit.gameHex.gameBoard.game.teamManager);
+        return unit.RangedAttackTarget(target, combatPower, unit.gameHex.gameBoard.game.teamManager);
     }
 }

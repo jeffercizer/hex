@@ -245,7 +245,7 @@ struct GameTests
         game.AddPlayer(0.0f, 0);
         game.AddPlayer(50.0f, 1);
         game.AddPlayer(50.0f, 2);
-        TestPlayerRelations(game);
+        TestPlayerRelations(game, 1, 2, 50, 50);
         Hex player1CityLocation = new Hex(4, 3, -7);
         Hex player2CityLocation = new Hex(0, 10, -10);
         Unit player1Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player1CityLocation], 1);
@@ -364,16 +364,16 @@ struct GameTests
 
 
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(4,3,-7));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(0, 10, -10));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(4,3,-7));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(0, 10, -10));
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)], game.teamManager, false);
 
             game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, false);
 
 
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(5,3,-8));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(21, 9, -30));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(5,3,-8));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(21, 9, -30));
 
 
             game.turnManager.EndCurrentTurn(1);
@@ -385,8 +385,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,4,-10));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(19, 9, -28));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(6,4,-10));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(19, 9, -28));
 
         game.turnManager.StartNewTurn();
 
@@ -394,8 +394,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(6,6,-12));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(17, 10, -27));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(6,6,-12));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(17, 10, -27));
 
         game.turnManager.StartNewTurn();
         
@@ -403,8 +403,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(7,7,-14));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(15, 10, -25));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(7,7,-14));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(15, 10, -25));
 
         game.turnManager.StartNewTurn();
 
@@ -412,8 +412,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(7,9,-16));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(13, 10, -23));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(7,9,-16));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(13, 10, -23));
 
         game.turnManager.StartNewTurn();
 
@@ -421,8 +421,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(8, 10, -18));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(8, 10, -18));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
 
         game.turnManager.StartNewTurn();
 
@@ -430,8 +430,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(9, 10, -19));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(9, 10, -19));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
 
 
         game.turnManager.StartNewTurn();
@@ -441,8 +441,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(0);
 
             
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
 
         game.turnManager.StartNewTurn();
 
@@ -451,27 +451,27 @@ struct GameTests
             game.teamManager.DecreaseRelationship(2, 1, 100);
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
 
-            if(game.playerDictionary[1].unitList[0].currentHealth != 80.0f & game.playerDictionary[2].unitList[0].currentHealth != 75.0f)
+            if(game.playerDictionary[1].unitList[0].health != 80.0f & game.playerDictionary[2].unitList[0].health != 75.0f)
             {
                 Complain("IncorrectHealthAfterCombatPlayerDict");
             }
-            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].currentHealth != 80.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].currentHealth != 75.0f)
+            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].health != 80.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].health != 75.0f)
             {
                 Complain("IncorrectHealthAfterCombatGameHex");
             }
-            Tests.EqualHex("Scout 1 Location PostCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location PostCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostCombat", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostCombat", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
 
             //try attacking again
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostFailCombat1", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location PostFailCombat1", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostFailCombat1", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat1", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
 
-            if(game.playerDictionary[1].unitList[0].currentHealth != 80.0f & game.playerDictionary[2].unitList[0].currentHealth != 75.0f)
+            if(game.playerDictionary[1].unitList[0].health != 80.0f & game.playerDictionary[2].unitList[0].health != 75.0f)
             {
                 Complain("IncorrectHealthAfterFailCombatPlayerDict");
             }
-            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].currentHealth != 80.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].currentHealth != 75.0f)
+            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].health != 80.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].health != 75.0f)
             {
                 Complain("IncorrectHealthAfterFailCombatGameHex");
             }
@@ -487,14 +487,14 @@ struct GameTests
             game.turnManager.EndCurrentTurn(0);
 
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostFailCombat2", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location PostFailCombat2", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostFailCombat2", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat2", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
             
-            if(game.playerDictionary[1].unitList[0].currentHealth != 60.0f & game.playerDictionary[2].unitList[0].currentHealth != 50.0f)
+            if(game.playerDictionary[1].unitList[0].health != 60.0f & game.playerDictionary[2].unitList[0].health != 50.0f)
             {
                 Complain("IncorrectHealthAfterCombatPlayerDict");
             }
-            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].currentHealth != 60.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].currentHealth != 50.0f)
+            if(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)].unitsList[0].health != 60.0f & game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList[0].health != 50.0f)
             {
                 Complain("IncorrectHealthAfterCombatGameHex");
             }
@@ -505,10 +505,10 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostFailCombat3", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location PostFailCombat3", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostFailCombat3", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location PostFailCombat3", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
             
-            if(game.playerDictionary[1].unitList[0].currentHealth != 40.0f & game.playerDictionary[2].unitList[0].currentHealth != 25.0f)
+            if(game.playerDictionary[1].unitList[0].health != 40.0f & game.playerDictionary[2].unitList[0].health != 25.0f)
             {
                 Complain("IncorrectHealthAfterCombatPlayerDict");
             }
@@ -520,14 +520,14 @@ struct GameTests
             game.turnManager.EndCurrentTurn(0);
 
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
-            Tests.EqualHex("Scout 1 Location PostSuccessCombat", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
-            //Tests.EqualHex("Scout 2 Location PostSuccessCombat", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location PostSuccessCombat", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(11, 10, -21));
+            //Tests.EqualHex("Scout 2 Location PostSuccessCombat", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
 
             if(game.playerDictionary[2].unitList.Any())
             {
                 Complain("UnitInPlayerDictionary");
             }
-            if(game.playerDictionary[1].unitList[0].currentHealth != 20.0f)
+            if(game.playerDictionary[1].unitList[0].health != 20.0f)
             {
                 Complain("IncorrectHealthAfterCombatPlayerDict");
             }
@@ -641,8 +641,6 @@ struct GameTests
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
 
-        Console.WriteLine(player1City.gameHex.hex);
-        Console.WriteLine(player2City.gameHex.hex);
         if(game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType != TerrainType.Flat)
         {
             Console.WriteLine("Expected Flat Got " + game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType);
@@ -674,6 +672,8 @@ struct GameTests
             Complain("CityHasQueueLeft");
         }
 
+        Console.WriteLine("TestCityExpand Finished");
+
         return game;
     }
 
@@ -684,7 +684,7 @@ struct GameTests
         game.AddPlayer(0.0f, 0);
         game.AddPlayer(50.0f, 1);
         game.AddPlayer(50.0f, 2);
-        TestPlayerRelations(game);
+        TestPlayerRelations(game, 1, 2, 50, 50);
         Hex player1CityLocation = new Hex(4, 8, -12);
         Hex player2CityLocation = new Hex(5, 10, -15);
         Unit player1Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player1CityLocation], 1);
@@ -696,8 +696,8 @@ struct GameTests
 
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
-        player1City.AddToQueue(UnitType.Slinger);
-        player2City.AddToQueue(UnitType.Slinger);
+        player1City.AddUnitToQueue(UnitType.Slinger);
+        player2City.AddUnitToQueue(UnitType.Slinger);
         int count = 0;
         while(count < 5)
         {
@@ -705,6 +705,7 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
             game.turnManager.StartNewTurn();
+            count++;
         }
         game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(5, 9, -14)], game.teamManager, false);
         count = 0;
@@ -714,16 +715,58 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
             game.turnManager.StartNewTurn();
+            count++;
         }
-        Tests.EqualHex("Slinger 1 Location", game.playerDictionary[1].unitList[0].currentGameHex.hex, new Hex(5, 9, -14));
-        Tests.EqualHex("Slinger 2 Location", game.playerDictionary[2].unitList[0].currentGameHex.hex, new Hex(5, 10, -15));
+        Tests.EqualHex("Slinger 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(5, 9, -14));
+        Tests.EqualHex("Slinger 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(5, 10, -15));
+
+        if(game.playerDictionary[1].unitList[0].abilities[0].ActivateAbility(game.playerDictionary[1].unitList[0], game.mainGameBoard.gameHexDict[new Hex(5, 10, -15)]))
+        {
+            Complain("Attacked Neutral or Ally");
+        }
+
+        game.teamManager.DecreaseRelationship(1, 2, 100);
+        game.teamManager.DecreaseRelationship(2, 1, 100);
+
+        TestPlayerRelations(game, 1, 2, 0, 0);
+
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(2);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn();
+
 
         //the way I imagine abilities will work is we iterate over the list to get each and put it into the list of buttons that will call the ability, each ability having an icon and such.
         //main concern being that abilities being in different orders mean they are in different spots on the UI which is bad, so need assigned spots depending, thinking Starcraft inspo, grid bottom rightish
         //for testing we just call it directly since references could be made via name but those also are bound to change
         //abilities use 
-        
         game.playerDictionary[1].unitList[0].abilities[0].ActivateAbility(game.playerDictionary[1].unitList[0], game.mainGameBoard.gameHexDict[new Hex(5, 10, -15)]);
+        if(game.playerDictionary[2].cityList[0].districts[0].health != 135)
+        {
+            Complain("District didn't take 15 damage");
+        }
+        if(game.playerDictionary[2].unitList[0].health != 100)
+        {
+            Complain("Unit Took damage while in district");
+        }
+
+        game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(6, 9, -15)], game.teamManager, false);
+
+
+        game.turnManager.EndCurrentTurn(1);
+        game.turnManager.EndCurrentTurn(2);
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.StartNewTurn();
+
+        game.playerDictionary[1].unitList[0].abilities[0].ActivateAbility(game.playerDictionary[1].unitList[0], game.mainGameBoard.gameHexDict[new Hex(6, 9, -15)]);
+        
+        if(game.playerDictionary[2].unitList[0].health != 85)
+        {
+            Complain("Unit didnt take correct damage");
+        }
+
+        Console.WriteLine("TestSlingerCombat Finished");
+        return game;
     }
 
 
@@ -740,13 +783,13 @@ struct GameTests
         TestSlingerCombat(); //not finished
     }
 
-    static private void TestPlayerRelations(Game game)
+    static private void TestPlayerRelations(Game game, int team1, int team2, float expected1, float expected2)
     {
-        if(game.teamManager.GetRelationship(1, 2) != 50)
+        if(game.teamManager.GetRelationship(team1, team2) != expected1)
         {
             Complain("PlayerRelations12 " + game.teamManager.GetRelationship(1, 2));
         }
-        if(game.teamManager.GetRelationship(2, 1) != 50)
+        if(game.teamManager.GetRelationship(team2, team1) != expected2)
         {
             Complain("PlayerRelations21 " + game.teamManager.GetRelationship(2, 1));
         }

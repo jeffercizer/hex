@@ -42,7 +42,7 @@ public class District
         if(isCityCenter)
         {
             maxHealth = 50.0f;
-            currentHealth = 50.0f;
+            health = 50.0f;
         }
         this.isUrban = isUrban;
         if(isUrban)
@@ -61,7 +61,7 @@ public class District
     public bool hasWalls;
     public City city;
     public List<Hex> visibleHexes = new();
-    public float currentHealth = 0.0f;
+    public float health = 0.0f;
     public float maxHealth = 0.0f;
     public int maxBuildings = 2;
     public int maxDefenses = 1;
@@ -87,11 +87,11 @@ public class District
         AddResource();
     }
 
-    public bool decreaseCurrentHealth(float amount)
+    public bool decreaseHealth(float amount)
     {
-        currentHealth -= amount;
-        currentHealth = Math.Max(0.0f, currentHealth);
-        if(currentHealth <= 0.0f)
+        health -= amount;
+        health = Math.Max(0.0f, health);
+        if(health <= 0.0f)
         {
             city.DistrictFell();
             turnsUntilHealing = 5;
@@ -130,8 +130,8 @@ public class District
     {
         if(turnsUntilHealing <= 0)
         {
-            currentHealth += healAmount;
-            currentHealth = Math.Min(currentHealth, maxHealth);
+            health += healAmount;
+            health = Math.Min(health, maxHealth);
         }
         else if(turnsUntilHealing > 0)
         {
@@ -149,10 +149,10 @@ public class District
 
     public void AddWalls(float wallStrength)
     {
-        if(currentHealth >= maxHealth)
+        if(health >= maxHealth)
         {
             maxHealth += wallStrength;
-            currentHealth += wallStrength;
+            health += wallStrength;
             hasWalls = true;
         }
     }

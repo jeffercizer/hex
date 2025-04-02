@@ -35,6 +35,7 @@ public class TeamManager
         }
 
         relationships[team1][team2] += relationshipChange;
+        relationships[team1][team2] = Math.Min(relationships[team1][team2], 100);
         //relationships[team2][team1] = relationship; //for symmetric relationships
     }
 
@@ -46,6 +47,7 @@ public class TeamManager
         }
 
         relationships[team1][team2] -= relationshipChange;
+        relationships[team1][team2] = Math.Max(relationships[team1][team2], 0);
         //relationships[team2][team1] = relationship; //for symmetric relationships
     }
 

@@ -197,6 +197,16 @@ public class City
         return count;
     }
 
+    public bool AddUnitToQueue(UnitType unitType)
+    {
+        return AddToQueue(UnitLoader.unitNames[unitType], BuildingType.None, unitType, gameHex, UnitLoader.unitsDict[unitType].ProductionCost);
+    }
+
+    public bool AddBuildingToQueue(BuildingType buildingType, GameHex targetGameHex)
+    { 
+        return AddToQueue(BuildingLoader.buildingNames[buildingType], buildingType, UnitType.None, targetGameHex, BuildingLoader.buildingsDict[buildingType].ProductionCost);
+    }
+
     public bool AddToQueue(String name, BuildingType buildingType, UnitType unitType, GameHex targetGameHex, float productionCost)
     {
         int count = 0;
@@ -297,7 +307,7 @@ public class City
                     if(!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
                     {
                         tempUnit.name = "Ghost Man";
-                        tempUnit.decreaseCurrentHealth(99999.9f);
+                        tempUnit.decreaseHealth(99999.9f);
                     }
                 }
                 productionQueue.RemoveAt(0);
@@ -323,11 +333,11 @@ public class City
         bool cityCenterOccupied = false;
         foreach(District district in districts)
         {
-            if(district.currentHealth > 0.0f)
+            if(district.health > 0.0f)
             {
                 allDistrictsFell = false;
             }
-            if(district.isCityCenter && district.currentHealth <= 0.0f)
+            if(district.isCityCenter && district.health <= 0.0f)
             {
                 if (district.gameHex.unitsList.Any())
                 {

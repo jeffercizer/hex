@@ -200,7 +200,7 @@ public class BuildingEffect
         if(!building.district.hasWalls)
         {
             building.district.maxHealth = 50.0f;
-            building.district.currentHealth = 50.0f;
+            building.district.health = 50.0f;
             building.district.hasWalls = true;
         }
     }

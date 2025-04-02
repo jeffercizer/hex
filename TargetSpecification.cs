@@ -11,9 +11,9 @@ public class TargetSpecification
     public bool AllowsAnyUnit { get; set; } = false;
     public bool AllowsAnyBuilding { get; set; } = false;
     public bool AllowsAnyTerrain { get; set; } = true;
-    public bool AllowAlly { get; set; };
-    public bool AllowEnemy { get; set; };
-    public bool AllowNeutral { get; set; };
+    public bool AllowsAlly { get; set; }
+    public bool AllowsEnemy { get; set; }
+    public bool AllowsNeutral { get; set; }
     public HashSet<UnitType> ValidUnitTypes { get; set; } = new HashSet<UnitType>();
     public UnitClass AllowedUnitClasses { get; set; } = UnitClass.None;
     public HashSet<BuildingType> ValidBuildingTypes { get; set; } = new HashSet<BuildingType>();
@@ -21,13 +21,13 @@ public class TargetSpecification
 
     public bool IsValidTarget(UnitType? unitType, UnitClass? unitClass, BuildingType? buildingType, TerrainType? terrainType, bool isEnemy = false, bool isAlly = false)
     {
-        if (isAlly && !AllowAlly)
+        if (isAlly && !AllowsAlly)
             return false;
 
-        if (isEnemy && !AllowEnemy)
+        if (isEnemy && !AllowsEnemy)
             return false;
 
-        if (!isEnemy && !isAlly && !AllowNeutral)
+        if (!isEnemy && !isAlly && !AllowsNeutral)
             return false;
     
         if (terrainType.HasValue && unitType.HasValue)
