@@ -49,7 +49,7 @@ public static class ResearchLoader
     
     static ResearchLoader()
     {
-        string xmlPath = "Researches.xml";
+        string xmlPath = "hex/Researches.xml";
         researchesDict = LoadResearchData(xmlPath);
     }
         

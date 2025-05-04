@@ -230,6 +230,7 @@ public struct FractionalHex
     }
 
 
+
     public FractionalHex HexLerp(FractionalHex b, double t)
     {
         return new FractionalHex(q * (1.0 - t) + b.q * t, r * (1.0 - t) + b.r * t, s * (1.0 - t) + b.s * t);
@@ -400,6 +401,14 @@ public struct Layout
     static public Orientation flat = new Orientation(3.0 / 2.0, 0.0, Math.Sqrt(3.0) / 2.0, Math.Sqrt(3.0), 2.0 / 3.0, 0.0, -1.0 / 3.0, Math.Sqrt(3.0) / 3.0, 0.0);
 
     public Point HexToPixel(Hex h)
+    {
+        Orientation M = orientation;
+        double x = (M.f0 * h.q + M.f1 * h.r) * size.x;
+        double y = (M.f2 * h.q + M.f3 * h.r) * size.y;
+        return new Point(x + origin.x, y + origin.y);
+    }
+
+    public Point FractionalHexToPixel(FractionalHex h)
     {
         Orientation M = orientation;
         double x = (M.f0 * h.q + M.f1 * h.r) * size.x;

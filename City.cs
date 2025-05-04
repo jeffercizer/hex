@@ -299,7 +299,7 @@ public class City
                 }
                 else if(productionQueue[0].unitType > (UnitType)0)
                 {
-                    Unit tempUnit = new Unit(Enum.Parse<UnitType>(productionQueue[0].name), productionQueue[0].targetGameHex, teamNum);
+                    Unit tempUnit = new Unit(Enum.Parse<UnitType>(productionQueue[0].name), gameHex.gameBoard.game.GetUniqueID(), productionQueue[0].targetGameHex, teamNum);
                     if(tempUnit.baseCombatStrength > gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt)
                     {
                         gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt = tempUnit.baseCombatStrength;

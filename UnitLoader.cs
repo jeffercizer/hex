@@ -63,7 +63,7 @@ public static class UnitLoader
     
     static UnitLoader()
     {
-        string xmlPath = "Units.xml";
+        string xmlPath = "hex/Units.xml";
         unitsDict = LoadUnitData(xmlPath);
     }
     public static Dictionary<UnitType, UnitInfo> LoadUnitData(string xmlPath)

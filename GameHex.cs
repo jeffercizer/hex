@@ -46,6 +46,7 @@ public class GameHex
         this.unitsList = unitsList;
         this.district = district;
         this.ownedBy = -1;
+        RecalculateYields();
     }
 
     public Hex hex;
@@ -54,7 +55,7 @@ public class GameHex
     public TerrainTemperature terrainTemp;
     public ResourceType resourceType;
     public int ownedBy;
-    public City owningCity;
+    public City? owningCity;
     public HashSet<FeatureType> featureSet = new();
     public List<Unit> unitsList = new();
     public District? district;
@@ -65,7 +66,7 @@ public class GameHex
     {
         yields = new();
         //if the district is urban the buildings will set our yields
-        if (district == null || !district.isUrban)
+        if ((owningCity != null && district == null) || (district != null && !district.isUrban))
         {
             //calculate the rural value
             if(terrainType == TerrainType.Flat)

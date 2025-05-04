@@ -47,7 +47,7 @@ public static class BuildingLoader
     
     static BuildingLoader()
     {
-        string xmlPath = "Buildings.xml";
+        string xmlPath = "hex/Buildings.xml";
         buildingsDict = LoadBuildingData(xmlPath);
     }
     

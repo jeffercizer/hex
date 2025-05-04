@@ -7,25 +7,10 @@ using System.Data;
 [Serializable]
 public class GameBoard
 {
-    public GameBoard(Game game, int top, int bottom, int left, int right)
+    public GameBoard(Game game, int id, int bottom, int right)
     {
         this.game = game;
-        this.top = top;
-        this.bottom = bottom;
-        this.left = left;
-        this.right = right;
-        gameHexDict = new();
-        Random rnd = new Random();
-        for (int r = top; r <= bottom; r++){
-            for (int q = left; q <= right; q++){
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, (ResourceType)0, new HashSet<FeatureType>(), new List<Unit>(), null));
-            }
-        }
-    }
-
-    public GameBoard(Game game, int bottom, int right)
-    {
-        this.game = game;
+        this.id = id;
         this.top = 0;
         this.bottom = bottom;
         this.left = 0;
@@ -37,19 +22,11 @@ public class GameBoard
                 gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, (ResourceType)0, new HashSet<FeatureType>(), new List<Unit>(), null));
             }
         }
-    }
-
-    public GameBoard(Game game, Dictionary<Hex, GameHex> gameHexDict, int top, int bottom, int left, int right)
-    {
-        this.game = game;
-        this.gameHexDict = gameHexDict;
-        this.top = top;
-        this.bottom = bottom;
-        this.left = left;
-        this.right = right;
+        if (game.TryGetGraphicManager(out GraphicManager manager)) manager.NewGameBoard(this);
     }
 
     public Game game;
+    public int id;
     public Dictionary<Hex, GameHex> gameHexDict;
     public int top;
     public int bottom;

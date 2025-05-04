@@ -93,7 +93,7 @@ public static class ResourceLoader
             { ResourceType.Gold, ApplyGoldEffect },
             { ResourceType.Camels, ApplyCamelsEffect }
         };
-        string xmlPath = "Resources.xml";
+        string xmlPath = "hex/Resources.xml";
         resources = LoadResourceData(xmlPath);
         //if (resources.TryGetValue(resource, out ResourceInfo info))
         //ExecuteResourceEffect(resource);

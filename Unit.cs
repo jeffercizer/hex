@@ -23,8 +23,9 @@ public enum TerrainMoveType
 public class Unit
 {
 
-    public Unit(UnitType unitType, GameHex gameHex, int teamNum)
+    public Unit(UnitType unitType, int id, GameHex gameHex, int teamNum)
     {
+        this.id = id;
         this.name = UnitLoader.unitNames[unitType];
         this.gameHex = gameHex;
         this.teamNum = teamNum;
@@ -92,6 +93,7 @@ public class Unit
     }
 
     public String name;
+    public int id;
     public Dictionary<TerrainMoveType, float> baseMovementCosts;
     public Dictionary<TerrainMoveType, float> movementCosts;
     public Dictionary<TerrainMoveType, float> baseSightCosts;

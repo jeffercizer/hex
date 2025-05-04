@@ -12,18 +12,16 @@ public class Game
     public HashSet<BuildingType> builtWonders;
     public TeamManager? teamManager;
     public TurnManager turnManager;
+    public GraphicManager graphicManager;
     int currentID = 0;
 
-    
     public Game(String mapName)
     {
-        int top = 0;
-        int left = 0;
         this.playerDictionary = new();
         this.turnManager = new TurnManager();
         this.teamManager = new TeamManager();
         turnManager.game = this;
-        GameBoard mainBoard = new GameBoard(this, 0, 0);
+        GameBoard mainBoard = new GameBoard(this, GetUniqueID(), 0, 0);
         Dictionary<Hex, GameHex> gameHexDict = new();
         String mapData = System.IO.File.ReadAllText(mapName+".map");
         List<String> lines = mapData.Split('\n').ToList();
@@ -111,96 +109,15 @@ public class Game
         mainGameBoard = mainBoard;
         builtWonders = new();
     }
-    public Game(int boardHeight, int boardWidth)
+
+    public bool TryGetGraphicManager(out GraphicManager manager)
     {
-        int top = 0;
-        int bottom = boardHeight;
-        int left = 0;
-        int right = boardWidth;
-        this.playerDictionary = new();
-        this.turnManager = new TurnManager();
-        this.teamManager = new TeamManager();
-        turnManager.game = this;
-        GameBoard mainBoard = new GameBoard(this, bottom, right);
-        this.mainGameBoard = mainBoard;
-        Dictionary<Hex, GameHex> gameHexDict = new();
-        Random rand = new();
-        for (int r = top; r <= bottom; r++){
-            for (int q = left; q <= right; q++){
-                TerrainTemperature terrainTemp = TerrainTemperature.Arctic;
-                HashSet<FeatureType> features = new HashSet<FeatureType>();
-                float interval = bottom/6;
-                if((r >= bottom - interval & r <= bottom) | (r >= top & r <= top + interval))
-                {
-                    terrainTemp = TerrainTemperature.Arctic;
-                }
-                if((r >= bottom - 2 * interval & r <= bottom - interval) | (r >= top + interval & r <= top + 2 * interval))
-                {
-                    terrainTemp = TerrainTemperature.Tundra;
-                }
-                if((r >= bottom - 3 * interval & r <= bottom - 2 * interval) | (r >= top + 2 * interval & r <= top + 3 * interval))
-                {
-                    terrainTemp = TerrainTemperature.Grassland;
-                }
-                if((r >= bottom - 4 * interval & r <= bottom - 3 * interval) | (r >= top + 3 * interval & r <= top + 4 * interval))
-                {
-                    terrainTemp = TerrainTemperature.Plains;
-                }
-                if((r >= bottom - 5 * interval & r <= bottom - 4 * interval) | (r >= top + 3 * interval & r <= top + 4 * interval))
-                {
-                    terrainTemp = TerrainTemperature.Desert;
-                }
-
-                if(r == bottom - 2 | r == 2 & (r != 0 | r != bottom | q != right | q != 0))
-                {
-                    features.Add(FeatureType.Road);
-                }
-                if(r < bottom - 2 & q > 2 & r > bottom/2 & q < right - 2 & (r != 0 | r != bottom | q != right | q != 0))
-                {
-                    features.Add(FeatureType.Forest);
-                }
-                if(q == right/2 & (r != 0 | r != bottom | q != right | q != 0))
-                {
-                    features.Add(FeatureType.River);
-                }
-                if(r == bottom/2 |q == right/2)
-                {
-
-                }
-
-                TerrainType terrainType = TerrainType.Ocean;
-                if(r == bottom/2 && q > left + 2 && q < right - 2 & (r != 0 | r != bottom | q != right | q != 0))
-                {
-                    terrainType = TerrainType.Mountain;
-                }
-                else if(r%2 == 0 | q%2 == 0 & (r != 0 | r != bottom | q != right | q != 0))
-                {
-                    terrainType = TerrainType.Flat;
-                }
-                else if(r != 0 | r != bottom | q != right | q != 0)
-                {
-                    terrainType = TerrainType.Rough;
-                }
-                else
-                {
-                    terrainType = TerrainType.Coast;
-                }
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemp, (ResourceType)0, features, new List<Unit>(), null));
-            }
+        if (graphicManager != null) {
+            manager = graphicManager;
+            return true;
         }
-        mainBoard.gameHexDict = gameHexDict;
-    }
-
-    public Game(TeamManager teamManager)
-    {
-        this.teamManager = teamManager;
-        playerDictionary = new();
-    }
-    public Game(Dictionary<int, Player> playerDictionary, TurnManager turnManager, TeamManager teamManager)
-    {
-        this.playerDictionary = playerDictionary;
-        this.turnManager = turnManager;
-        this.teamManager = teamManager;
+        manager = null;
+        return false;
     }
 
     public void AssignGameBoard(GameBoard mainGameBoard)
@@ -232,7 +149,7 @@ struct GameTests
 {
     static public Game MapLoadTest()
     {
-        Game game = new Game("sample");
+        Game game = new Game("hex/sample");
         //test that hexes have features and such
         if(game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType != TerrainType.Flat)
         {
@@ -248,8 +165,8 @@ struct GameTests
         TestPlayerRelations(game, 1, 2, 50, 50);
         Hex player1CityLocation = new Hex(4, 3, -7);
         Hex player2CityLocation = new Hex(0, 10, -10);
-        Unit player1Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player1CityLocation], 1);
-        Unit player2Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player2CityLocation], 2);
+        Unit player1Settler = new Unit(UnitType.Founder, game.GetUniqueID(), game.mainGameBoard.gameHexDict[player1CityLocation], 1);
+        Unit player2Settler = new Unit(UnitType.Founder, game.GetUniqueID(), game.mainGameBoard.gameHexDict[player2CityLocation], 2);
 
         player1Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility").ActivateAbility(player1Settler);
         
@@ -687,8 +604,8 @@ struct GameTests
         TestPlayerRelations(game, 1, 2, 50, 50);
         Hex player1CityLocation = new Hex(4, 8, -12);
         Hex player2CityLocation = new Hex(5, 10, -15);
-        Unit player1Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player1CityLocation], 1);
-        Unit player2Settler = new Unit(UnitType.Founder, game.mainGameBoard.gameHexDict[player2CityLocation], 2);
+        Unit player1Settler = new Unit(UnitType.Founder, game.GetUniqueID(), game.mainGameBoard.gameHexDict[player1CityLocation], 1);
+        Unit player2Settler = new Unit(UnitType.Founder, game.GetUniqueID(), game.mainGameBoard.gameHexDict[player2CityLocation], 2);
 
         player1Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility").ActivateAbility(player1Settler);
         
