@@ -32,10 +32,26 @@ public class TurnManager
     }
     public void EndCurrentTurn(int teamNum)
     {
-        game.playerDictionary[teamNum].OnTurnEnded(currentTurn);
-        if(game.mainGameBoard != null & teamNum == 0)
+        if (!game.playerDictionary[teamNum].turnFinished)
         {
-            game.mainGameBoard.OnTurnEnded(currentTurn);
-        }    
+            game.playerDictionary[teamNum].OnTurnEnded(currentTurn);
+            if (game.mainGameBoard != null & teamNum == 0)
+            {
+                game.mainGameBoard.OnTurnEnded(currentTurn);
+            }
+        }
+    }
+
+    public List<int> CheckTurnStatus()
+    {
+        List<int> waitingForPlayers = new List<int>();
+        foreach (Player player in game.playerDictionary.Values)
+        {
+            if(!player.turnFinished)
+            {
+                waitingForPlayers.Add(player.teamNum);
+            }
+        }
+        return waitingForPlayers;
     }
 }

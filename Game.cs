@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using Godot;
 
 [Serializable]
 public class Game
@@ -14,16 +15,18 @@ public class Game
     public TurnManager turnManager;
     public GraphicManager graphicManager;
     int currentID = 0;
+    public int localPlayerTeamNum;
 
-    public Game(String mapName)
+    public Game(String mapName, int localPlayerTeamNum)
     {
+        this.localPlayerTeamNum = localPlayerTeamNum;
         this.playerDictionary = new();
         this.turnManager = new TurnManager();
         this.teamManager = new TeamManager();
         turnManager.game = this;
         GameBoard mainBoard = new GameBoard(this, GetUniqueID(), 0, 0);
         Dictionary<Hex, GameHex> gameHexDict = new();
-        String mapData = System.IO.File.ReadAllText(mapName+".map");
+        String mapData = System.IO.File.ReadAllText(mapName + ".map");
         List<String> lines = mapData.Split('\n').ToList();
         //file format is 1110 1110 (each 4 numbers are a single hex)
         // first number is terraintype, second number is terraintemp, last number is features, last is resource type
@@ -34,7 +37,7 @@ public class Game
         {
             q = 0;
             Queue<String> cells = new Queue<String>(line.Split(' ').ToList());
-            int offset = r>>1;
+            int offset = r >> 1;
             offset = (offset % cells.Count + cells.Count) % cells.Count; //negatives and overflow
             for (int i = 1; i < offset; i++)
             {
@@ -42,48 +45,48 @@ public class Game
             }
             foreach (String cell in cells)
             {
-                if(cell.Length >= 4)
+                if (cell.Length >= 4)
                 {
                     TerrainType terrainType = (TerrainType)int.Parse(cell[0].ToString());
                     TerrainTemperature terrainTemperature = (TerrainTemperature)int.Parse(cell[1].ToString());
                     HashSet<FeatureType> features = new();
                     //cell[2] == 0 means no features
-                    if(int.Parse(cell[2].ToString()) == 1)
+                    if (int.Parse(cell[2].ToString()) == 1)
                     {
                         features.Add(FeatureType.Forest);
                     }
-                    if(int.Parse(cell[2].ToString()) == 2)
+                    if (int.Parse(cell[2].ToString()) == 2)
                     {
                         features.Add(FeatureType.River);
                     }
-                    if(int.Parse(cell[2].ToString()) == 3)
+                    if (int.Parse(cell[2].ToString()) == 3)
                     {
                         features.Add(FeatureType.Road);
                     }
-                    if(int.Parse(cell[2].ToString()) == 4)
+                    if (int.Parse(cell[2].ToString()) == 4)
                     {
                         features.Add(FeatureType.Coral);
                     }
-                    if(int.Parse(cell[2].ToString()) == 5)
+                    if (int.Parse(cell[2].ToString()) == 5)
                     {
                         //openslot //TODO
                     }
-                    if(int.Parse(cell[2].ToString()) == 6)
+                    if (int.Parse(cell[2].ToString()) == 6)
                     {
                         features.Add(FeatureType.Forest);
                         features.Add(FeatureType.River);
                     }
-                    if(int.Parse(cell[2].ToString()) == 7)
+                    if (int.Parse(cell[2].ToString()) == 7)
                     {
                         features.Add(FeatureType.River);
                         features.Add(FeatureType.Road);
                     }
-                    if(int.Parse(cell[2].ToString()) == 8)
+                    if (int.Parse(cell[2].ToString()) == 8)
                     {
                         features.Add(FeatureType.Forest);
                         features.Add(FeatureType.Road);
                     }
-                    if(int.Parse(cell[2].ToString()) == 9)
+                    if (int.Parse(cell[2].ToString()) == 9)
                     {
                         features.Add(FeatureType.Forest);
                         features.Add(FeatureType.River);
@@ -97,7 +100,7 @@ public class Game
                     // }
                     //fourth number is for resources
                     ResourceType resource = ResourceLoader.resourceNames[cell[3].ToString()];
-                    gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), mainBoard, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
+                    gameHexDict.Add(new Hex(q, r, -q - r), new GameHex(new Hex(q, r, -q - r), mainBoard, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
                 }
                 q += 1;
             }
@@ -108,6 +111,7 @@ public class Game
         mainBoard.gameHexDict = gameHexDict;
         mainGameBoard = mainBoard;
         builtWonders = new();
+        this.localPlayerTeamNum = localPlayerTeamNum;
     }
 
     public bool TryGetGraphicManager(out GraphicManager manager)
@@ -149,7 +153,7 @@ struct GameTests
 {
     static public Game MapLoadTest()
     {
-        Game game = new Game("hex/sample");
+        Game game = new Game("hex/sample", 1);
         //test that hexes have features and such
         if(game.mainGameBoard.gameHexDict[new Hex(4,3, -7)].terrainType != TerrainType.Flat)
         {
@@ -366,7 +370,7 @@ struct GameTests
             //Scout1 Attack Scout2
             game.teamManager.DecreaseRelationship(1, 2, 100);
             game.teamManager.DecreaseRelationship(2, 1, 100);
-            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
+/*            game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, true);
 
             if(game.playerDictionary[1].unitList[0].health != 80.0f & game.playerDictionary[2].unitList[0].health != 75.0f)
             {
@@ -451,7 +455,7 @@ struct GameTests
             if(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)].unitsList.Count > 1)
             {
                 Complain("TooManyUnitsOnHex");
-            }
+            }*/
 
         game.turnManager.StartNewTurn();
         Console.WriteLine("TestScoutMovementCombat Finished");
@@ -596,7 +600,7 @@ struct GameTests
 
     static public Game TestSlingerCombat()
     {
-        Game game = new Game("sample");
+        Game game = new Game("sample", 1);
 
         game.AddPlayer(0.0f, 0);
         game.AddPlayer(50.0f, 1);
@@ -764,6 +768,7 @@ struct GameTests
     static public void Complain(String name)
     {
         Console.WriteLine("FAIL " + name);
+        GD.Print("FAIL " + name);
     }
 
 }

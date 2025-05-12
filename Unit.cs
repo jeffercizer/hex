@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using System.Formats.Asn1;
+using Godot;
 public enum TerrainMoveType
 {
     Flat,
@@ -29,6 +30,7 @@ public class Unit
         this.name = UnitLoader.unitNames[unitType];
         this.gameHex = gameHex;
         this.teamNum = teamNum;
+        this.unitType = unitType;
     
         if (UnitLoader.unitsDict.TryGetValue(unitType, out UnitInfo unitInfo))
         {
@@ -68,32 +70,13 @@ public class Unit
         }
         
         gameHex.gameBoard.game.playerDictionary[teamNum].unitList.Add(this);
-        AddVision();
-    }
-
-    public Unit(String name, Dictionary<TerrainMoveType, float> movementCosts, Dictionary<TerrainMoveType, float> sightCosts, GameHex gameHex, float sightRange, float movementSpeed, float combatStrength, float maintenanceCost, int teamNum)
-    {
-        this.name = name;
-        this.baseMovementCosts = movementCosts;
-        this.movementCosts = movementCosts;
-        this.baseSightCosts = sightCosts;
-        this.sightCosts = sightCosts;
-        this.gameHex = gameHex;
-        this.baseSightRange = sightRange;
-        this.sightRange = sightRange;
-        this.baseMovementSpeed = movementSpeed;
-        this.movementSpeed = movementSpeed;
-        this.teamNum = teamNum;
-        this.baseCombatStrength = combatStrength;
-        this.combatStrength = combatStrength;
-        this.baseMaintenanceCost = maintenanceCost;
-        this.maintenanceCost = maintenanceCost;
-        gameHex.gameBoard.game.playerDictionary[teamNum].unitList.Add(this);
-        AddVision();
+        AddVision(true);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewUnit(this);
     }
 
     public String name;
     public int id;
+    public UnitType unitType;
     public Dictionary<TerrainMoveType, float> baseMovementCosts;
     public Dictionary<TerrainMoveType, float> movementCosts;
     public Dictionary<TerrainMoveType, float> baseSightCosts;
@@ -133,11 +116,11 @@ public class Unit
     public void OnTurnEnded(int turnNumber)
     {
         gameHex.gameBoard.game.playerDictionary[teamNum].AddGold(maintenanceCost);
-        if(remainingMovement > 0.0f & currentPath.Any())
+        if(remainingMovement > 0.0f && currentPath.Any() && !isTargetEnemy)
         {
-            MoveTowards(gameHex.gameBoard.gameHexDict[currentPath.Last()], gameHex.gameBoard.game.teamManager ,isTargetEnemy);
+            MoveTowards(gameHex.gameBoard.gameHexDict[currentPath.Last()], gameHex.gameBoard.game.teamManager, isTargetEnemy);
         }
-        if(remainingMovement >= movementSpeed & attacksLeft == maxAttackCount)
+        if(remainingMovement >= movementSpeed && attacksLeft == maxAttackCount)
         {
             increaseHealth(healingFactor);
         }
@@ -277,6 +260,7 @@ public class Unit
     {
         health += amount;
         health = Math.Min(health, 100.0f);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
     }
 
     public bool decreaseHealth(float amount)
@@ -289,6 +273,7 @@ public class Unit
         }
         else
         {
+            if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
             return false;
         }
     }
@@ -297,16 +282,18 @@ public class Unit
     {
         gameHex.unitsList.Remove(this);
         gameHex.gameBoard.game.playerDictionary[teamNum].unitList.Remove(this);
-        RemoveVision();
+        RemoveVision(true);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Remove);
     }
 
     public void UpdateVision()
     {
-        RemoveVision();
-        AddVision();
+        RemoveVision(false);
+        AddVision(false);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
     }
 
-    public void RemoveVision()
+    public void RemoveVision(bool updateGraphic)
     {
         foreach (Hex hex in visibleHexes)
         {            
@@ -324,9 +311,10 @@ public class Unit
             }
         }
         visibleHexes.Clear();
+        if (updateGraphic && gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
     }
 
-    public void AddVision()
+    public void AddVision(bool updateGraphic)
     {
         visibleHexes = CalculateVision().Keys.ToList();
         foreach (Hex hex in visibleHexes)
@@ -342,6 +330,8 @@ public class Unit
                 gameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
             }
         }
+        if (updateGraphic && gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
+
     }
 
     public Dictionary<Hex, float> CalculateVision()
@@ -417,19 +407,21 @@ public class Unit
         Dictionary<Hex, float> reached = new();
         reached.Add(gameHex.hex, 0.0f);
 
+        Dictionary<Hex, float> tempreached = new();
+
         while (frontier.Count > 0)
         {
             Hex current = frontier.Dequeue();
 
-            foreach (Hex next in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
             {
-                float movementLeft = movementSpeed - reached[current];
-                float moveCost = TravelCost(current, next, gameHex.gameBoard.game.teamManager, true, movementCosts, movementSpeed, reached[current]); 
+                float movementLeft = remainingMovement - reached[current];
+                float moveCost = TravelCost(current, next, gameHex.gameBoard.game.teamManager, true, movementCosts, remainingMovement, reached[current], false); 
                 if (moveCost <= movementLeft)
                 {
                     if (!reached.Keys.Contains(next))
                     {
-                        if(reached[current]+moveCost < movementSpeed)
+                        if(reached[current]+moveCost < remainingMovement)
                         {
                             frontier.Enqueue(next);
                         }
@@ -440,8 +432,31 @@ public class Unit
                         reached[next] = reached[current]+moveCost;
                     }
                 }
+                //DISABLE HOPPING FOR THE TIME BEING BECAUSE PATHFIND DOESNT SUPPORT IT AND IDK HOW TO STORE IT
+/*                if(moveCost == 555555)
+                {
+                    moveCost = TravelCost(current, next, gameHex.gameBoard.game.teamManager, true, movementCosts, remainingMovement, reached[current], true);
+                    if (!reached.Keys.Contains(next))
+                    {
+                        if (reached[current] + moveCost < remainingMovement)
+                        {
+                            frontier.Enqueue(next);
+                        }
+                        reached.Add(next, reached[current] + moveCost);
+                        tempreached.Add(next, reached[current] + moveCost);
+                    }
+                    else if (reached[next] > reached[current] + moveCost)
+                    {
+                        reached[next] = reached[current] + moveCost;
+                    }
+                }*/
             }
         }
+        foreach(Hex tempHex in  tempreached.Keys)
+        {
+            reached.Remove(tempHex);
+        }
+        
         return reached;
     }
     
@@ -449,6 +464,7 @@ public class Unit
     public bool SetGameHex(GameHex newGameHex)
     {
         gameHex = newGameHex;
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
         return true;
     }
 
@@ -458,18 +474,22 @@ public class Unit
         {
             return false;
         }
-        float moveCost = TravelCost(gameHex.hex, targetGameHex.hex, teamManager, isTargetEnemy, movementCosts, movementSpeed, movementSpeed-remainingMovement);
+        float moveCost = TravelCost(gameHex.hex, targetGameHex.hex, teamManager, isTargetEnemy, movementCosts, movementSpeed, movementSpeed-remainingMovement, false);
         if(moveCost <= remainingMovement)
         {
-            if(isTargetEnemy & targetGameHex.hex.Equals(currentPath.Last()) & attacksLeft > 0)
+            if(isTargetEnemy & targetGameHex.hex.Equals(currentPath.Last()))
             {
-                if(AttackTarget(targetGameHex, moveCost, teamManager))
+                if(attacksLeft > 0)
                 {
-                    UpdateVision();
-                    gameHex.unitsList.Remove(this);
-                    gameHex = targetGameHex;
-                    gameHex.unitsList.Add(this);
-                    return true;
+                    if (AttackTarget(targetGameHex, moveCost, teamManager))
+                    {
+                        UpdateVision();
+                        gameHex.unitsList.Remove(this);
+                        gameHex = targetGameHex;
+                        gameHex.unitsList.Add(this);
+                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
+                        return true;
+                    }
                 }
             }
             else if(!targetGameHex.unitsList.Any())
@@ -479,6 +499,7 @@ public class Unit
                 gameHex.unitsList.Remove(this);
                 gameHex = targetGameHex;
                 gameHex.unitsList.Add(this);
+                if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
                 return true;
             }
         }
@@ -491,12 +512,14 @@ public class Unit
         gameHex.unitsList.Remove(this);
         gameHex = targetGameHex;
         gameHex.unitsList.Add(this);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
         return true;
     }
 
     public bool MoveTowards(GameHex targetGameHex, TeamManager teamManager, bool isTargetEnemy)
     {
         this.isTargetEnemy = isTargetEnemy;
+        
         currentPath = PathFind(gameHex.hex, targetGameHex.hex, gameHex.gameBoard.game.teamManager, movementCosts, movementSpeed);
         currentPath.Remove(gameHex.hex);
         while (currentPath.Count > 0)
@@ -511,7 +534,7 @@ public class Unit
         return true;
     }
     
-    public float TravelCost(Hex first, Hex second, TeamManager teamManager, bool isTargetEnemy, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar)
+    public float TravelCost(Hex first, Hex second, TeamManager teamManager, bool isTargetEnemy, Dictionary<TerrainMoveType, float> movementCosts, float unitMovementSpeed, float costSoFar, bool ignoreUnits)
     {
         //cost for river, embark, disembark are custom (0 = end turn to enter, 1/2/3/4 = normal cost)\\
         GameHex firstHex;
@@ -576,11 +599,11 @@ public class Unit
             if (secondHex.terrainType == TerrainType.Coast || secondHex.terrainType == TerrainType.Ocean) //second hex is on water
             {
                 //embark costs all remaining movement and requires at least 1 so costSoFar % unitMovementSpeed = cost or if == 0 then = unitMovementSpeed
-                if(movementCosts[TerrainMoveType.Embark] < 0) //we CANT disembark
+                if (movementCosts[TerrainMoveType.Embark] < 0) //we CANT embark
                 {
                     moveCost = 666666;
                 }
-                if (movementCosts[TerrainMoveType.Embark] == 0)
+                else if (movementCosts[TerrainMoveType.Embark] == 0)
                 {
                     moveCost = (costSoFar % unitMovementSpeed == 0) ? unitMovementSpeed : costSoFar % unitMovementSpeed;
                 }
@@ -618,15 +641,27 @@ public class Unit
                 }
             }
         }
-        foreach (Unit unit in secondHex.unitsList)
+        //check for units
+        if(!ignoreUnits)
         {
-            if(isTargetEnemy & teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+            foreach (Unit unit in secondHex.unitsList)
             {
-                break;
+                if (isTargetEnemy && teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                {
+                    break;
+                }
+                else
+                {
+                    moveCost = 555555;
+                }
             }
-            else
+        }
+        //check for districts, your districts OK, all others are a no no, unless attacking enemy
+        if(secondHex.district != null && secondHex.district.city.teamNum != teamNum)
+        {
+            if(!(isTargetEnemy && teamManager.GetEnemies(teamNum).Contains(secondHex.district.city.teamNum)))
             {
-                moveCost += 555555;
+                moveCost += 12121212;
             }
         }
         return moveCost;
@@ -669,7 +704,7 @@ public class Unit
     
             foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
             {
-                float new_cost = cost_so_far[current] + TravelCost(current, next, teamManager, isTargetEnemy, movementCosts, unitMovementSpeed, cost_so_far[current]);
+                float new_cost = cost_so_far[current] + TravelCost(current, next, teamManager, isTargetEnemy, movementCosts, unitMovementSpeed, cost_so_far[current], false);
                 //if cost_so_far doesn't have next as a key yet or the new cost is lower than the lowest cost of this node previously
                 if (!cost_so_far.ContainsKey(next) || new_cost < cost_so_far[next])
                 {

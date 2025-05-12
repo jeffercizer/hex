@@ -210,6 +210,27 @@ public class GameHex
         return false;
     }
 
+    public bool IsEnemyPresent(int yourTeamNum)
+    {
+        bool isEnemy = false;
+        foreach (Unit targetHexUnit in gameBoard.gameHexDict[hex].unitsList)
+        {
+            if (gameBoard.game.teamManager.GetEnemies(yourTeamNum).Contains(targetHexUnit.teamNum))
+            {
+                isEnemy = true;
+                break;
+            }
+        }
+        if (gameBoard.gameHexDict[hex].district != null && gameBoard.game.teamManager.GetEnemies(yourTeamNum).Contains(gameBoard.gameHexDict[hex].district.city.teamNum))
+        {
+            if (gameBoard.gameHexDict[hex].district.health > 0)
+            {
+                isEnemy = true;
+            }
+        }
+        return isEnemy;
+    }
+
     //if stackable is true allow multiple units to stack
     //if flexible is true look for adjacent spaces to place
     public bool SpawnUnit(Unit newUnit, bool stackable, bool flexible)

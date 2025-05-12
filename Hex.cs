@@ -93,7 +93,7 @@ public struct Hex
         }
         else
         {
-            return Add(Direction(direction));
+            return target;
         }
     }
 
@@ -113,15 +113,16 @@ public struct Hex
 
     public Hex[] WrappingNeighbors(int left, int right)
     {
-        Hex[] neighbors =
-        [
-            WrappingNeighbor(0, left, right),
-            WrappingNeighbor(1, left, right),
-            WrappingNeighbor(2, left, right),
-            WrappingNeighbor(3, left, right),
-            WrappingNeighbor(4, left, right),
-            WrappingNeighbor(5, left, right),
-        ];
+        List<Hex> neightborList = new List<Hex> ();
+        for (int i = 0; i < 6; i++)
+        {
+            Hex temp = WrappingNeighbor(i, left, right);
+            if (temp.q >= 0 && temp.r >= 0)
+            {
+                neightborList.Add(temp);
+            }
+        }
+        Hex[] neighbors = neightborList.ToArray();
         return neighbors;
     }
 

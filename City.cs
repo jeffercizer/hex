@@ -85,17 +85,15 @@ public class City
 
     private District AddCityCenter(bool isCapital)
     {
-        Building building;
-        if(isCapital)
+        District district;
+        if (isCapital)
         {
-            building = new Building(BuildingType.Palace);
+            district = new District(gameHex, BuildingType.Palace, true, true, this);
         }
         else
         {
-            building = new Building(BuildingType.CityCenter);
+            district = new District(gameHex, BuildingType.CityCenter, true, true, this);
         }
-        District district = new District(gameHex, building, true, true, this);
-        building.district = district;
         districts.Add(district);
         return district;
     }
@@ -295,7 +293,7 @@ public class City
             {
                 if(productionQueue[0].buildingType > (BuildingType)0)
                 {
-                    BuildOnHex(productionQueue[0].targetGameHex.hex, new Building(productionQueue[0].buildingType));
+                    BuildOnHex(productionQueue[0].targetGameHex.hex, productionQueue[0].buildingType);
                 }
                 else if(productionQueue[0].unitType > (UnitType)0)
                 {
@@ -308,6 +306,7 @@ public class City
                     {
                         tempUnit.name = "Ghost Man";
                         tempUnit.decreaseHealth(99999.9f);
+                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewUnit(tempUnit);
                     }
                 }
                 productionQueue.RemoveAt(0);
@@ -378,18 +377,17 @@ public class City
         }
     }
 
-    public void BuildOnHex(Hex hex, Building building)
+    public void BuildOnHex(Hex hex, BuildingType buildingType)
     {
         if(gameHex.gameBoard.gameHexDict[hex].district == null)
         {
-            District district = new District(gameHex, building, false, true, this);
-            building.district = district;
+            District district = new District(gameHex, buildingType, false, true, this);
             districts.Add(district);
         }
         else
         {
+            Building building = new Building(buildingType, gameHex.gameBoard.gameHexDict[hex].district);
             gameHex.gameBoard.gameHexDict[hex].district.AddBuilding(building);
-            building.district = gameHex.gameBoard.gameHexDict[hex].district;
             gameHex.gameBoard.gameHexDict[hex].district.isUrban = true;
         }
     }

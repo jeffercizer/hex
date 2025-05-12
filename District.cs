@@ -3,15 +3,15 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using Godot;
 
 [Serializable]
 public class District
 {
-    public District(GameHex gameHex, Building initialBuilding, bool isCityCenter, bool isUrban, City city)
+    public District(GameHex gameHex, BuildingType initialBuildingType, bool isCityCenter, bool isUrban, City city)
     {
         SetupDistrict(gameHex, isCityCenter, isUrban, city);
-        AddBuilding(initialBuilding);
-        initialBuilding.district = this;
+        AddBuilding(new Building(initialBuildingType, this));
     }
 
     public District(GameHex gameHex, bool isCityCenter, bool isUrban, City city)
@@ -21,6 +21,7 @@ public class District
 
     private void SetupDistrict(GameHex gameHex, bool isCityCenter, bool isUrban, City city)
     {
+        id = gameHex.gameBoard.game.GetUniqueID();
         this.city = city;
         buildings = new();
         defenses = new();
@@ -51,8 +52,10 @@ public class District
         }
         city.RecalculateYields();
         AddVision();
+        if (city.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewDistrict(this);
     }
 
+    public int id;
     public List<Building> buildings;
     public List<Building> defenses;
     public GameHex gameHex;
@@ -181,9 +184,9 @@ public class District
 
     public void PrepareYieldRecalculate()
     {
-        if(buildings.Any())
+        if (buildings.Any())
         {
-            foreach(Building building in buildings)
+            foreach (Building building in buildings)
             {
                 building.PrepareYieldRecalculate();
             }

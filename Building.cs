@@ -3,13 +3,15 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using Godot;
 
 [Serializable]
 public class Building
 {
     public String name;
+    public int id;
     public BuildingType buildingType;
-    public District? district;
+    public District district;
     public List<BuildingEffect> buildingEffects;
     public float baseProductionCost;
     public float productionCost;
@@ -20,8 +22,9 @@ public class Building
     public Yields baseYields;
     public Yields yields;
 
-    public Building(BuildingType buildingType)
+    public Building(BuildingType buildingType, District district)
     {
+        this.district = district;
         this.buildingType = buildingType;
         this.name = BuildingLoader.buildingNames[buildingType];
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
@@ -49,6 +52,8 @@ public class Building
         {
             district.gameHex.gameBoard.game.builtWonders.Add(buildingType);
         }
+        id = district.city.gameHex.gameBoard.game.GetUniqueID();
+        if (district.city.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewBuilding(this);
     }
 
     public void SwitchTeams()
