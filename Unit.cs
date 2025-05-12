@@ -109,8 +109,8 @@ public class Unit
         {
             ability.ResetAbilityUses();
         }
-        remainingMovement = movementSpeed;
-        attacksLeft = maxAttackCount;
+        SetRemainingMovement(movementSpeed);
+        SetAttacksLeft(maxAttackCount);
     }
 
     public void OnTurnEnded(int turnNumber)
@@ -125,7 +125,19 @@ public class Unit
             increaseHealth(healingFactor);
         }
     }
-    
+
+    public void SetAttacksLeft(int attacksLeft)
+    {
+        this.attacksLeft = attacksLeft;
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+    }
+
+    public void SetRemainingMovement(float remainingMovement)
+    {
+        this.remainingMovement = remainingMovement;
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+    }
+
     public void RecalculateEffects()
     {
         //must reset all to base and recalculate
@@ -195,10 +207,11 @@ public class Unit
 
     public bool AttackTarget(GameHex targetGameHex, float moveCost, TeamManager teamManager)
     {
-        remainingMovement -= moveCost;
+        SetRemainingMovement(remainingMovement - moveCost);
         if (targetGameHex.district != null && teamManager.GetEnemies(teamNum).Contains(targetGameHex.district.city.teamNum) && targetGameHex.district.health > 0.0f)
         {
-            attacksLeft -= 1;
+            SetAttacksLeft(attacksLeft - 1);
+            GD.Print("ATTACK DISTRICT");
             return DistrictCombat(targetGameHex);;
         }
         if (targetGameHex.unitsList.Any())
@@ -208,7 +221,8 @@ public class Unit
             {
                 //combat math TODO
                 //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
-                attacksLeft -= 1;
+                SetAttacksLeft(attacksLeft - 1);
+                GD.Print("ATTACK UNIT");
                 return UnitCombat(targetGameHex, unit);
             }
             return false;
@@ -234,7 +248,7 @@ public class Unit
         //remainingMovement -= moveCost;
         if (targetGameHex.district != null && teamManager.GetEnemies(teamNum).Contains(targetGameHex.district.city.teamNum) && targetGameHex.district.health > 0.0f)
         {
-            attacksLeft -= 1;
+            SetAttacksLeft(attacksLeft - 1);
             return RangedDistrictCombat(targetGameHex, rangedPower);
         }
         if (targetGameHex.unitsList.Any())
@@ -245,7 +259,7 @@ public class Unit
             {
                 //combat math TODO
                 //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
-                attacksLeft -= 1;
+                SetAttacksLeft(attacksLeft - 1);
                 return RangedUnitCombat(targetGameHex, unit, rangedPower);
             }
             return false;
@@ -494,7 +508,7 @@ public class Unit
             }
             else if(!targetGameHex.unitsList.Any())
             {
-                remainingMovement -= moveCost;
+                SetRemainingMovement(remainingMovement - moveCost);
                 UpdateVision();
                 gameHex.unitsList.Remove(this);
                 gameHex = targetGameHex;
@@ -646,7 +660,7 @@ public class Unit
         {
             foreach (Unit unit in secondHex.unitsList)
             {
-                if (isTargetEnemy && teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                if (isTargetEnemy && teamManager.GetEnemies(teamNum).Contains(unit.teamNum) && attacksLeft > 0)
                 {
                     break;
                 }
@@ -659,7 +673,7 @@ public class Unit
         //check for districts, your districts OK, all others are a no no, unless attacking enemy
         if(secondHex.district != null && secondHex.district.city.teamNum != teamNum)
         {
-            if(!(isTargetEnemy && teamManager.GetEnemies(teamNum).Contains(secondHex.district.city.teamNum)))
+            if(!(isTargetEnemy && teamManager.GetEnemies(teamNum).Contains(secondHex.district.city.teamNum) && attacksLeft > 0))
             {
                 moveCost += 12121212;
             }
