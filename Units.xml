@@ -1,5 +1,5 @@
 <Units>
-  <Unit Name="Founder" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="4.0" CombatPower="10.0" HealingFactor="0">
+  <Unit Name="Founder" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="4.0" CombatPower="10.0" HealingFactor="20" IconPath="graphics/ui/icons/star.png" ModelPath="graphics/models/baseperson_settler.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -25,10 +25,17 @@
       <TerrainMoveType Name="Road" Value="0.5" />
     </SightCosts>
     <Abilities>
-      <Ability Name="SettleCapitalAbility" UsageCount="1" />
+      <Ability Name="SettleCapitalAbility" UsageCount="1" IconPath="graphics/ui/icons/house.png">
+        <TargetSpecification TargetSelf="true" AllowsAnyFeature="true" AllowsAnyResource="true">
+          <ValidTerrainTypes>
+            <TerrainType Name = "Flat" />
+            <TerrainType Name = "Rough" />
+          </ValidTerrainTypes>
+        </TargetSpecification>
+      </Ability>
     </Abilities>
   </Unit>
-  <Unit Name="Scout" Class="Combat, Land, Recon" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="15" MaintenanceCost="1">
+  <Unit Name="Settler" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="15" MaintenanceCost="1" IconPath="graphics/ui/icons/star.png" ModelPath="graphics/models/baseperson_settler.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -54,10 +61,17 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="ScoutVisionAbility" UsageCount="1" />
+      <Ability Name="SettleCityAbility" UsageCount="1" IconPath="graphics/ui/icons/house.png">
+        <TargetSpecification TargetSelf="true" AllowsAnyFeature="true" AllowsAnyResource="true">
+          <ValidTerrainTypes>
+            <TerrainType Name = "Flat" />
+            <TerrainType Name = "Rough" />
+          </ValidTerrainTypes>
+        </TargetSpecification>
+      </Ability>
     </Abilities>
   </Unit>
-  <Unit Name="Warrior" Class="Combat, Land, Infantry" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="2.0" CombatPower="20.0" HealingFactor="15" MaintenanceCost="1">
+  <Unit Name="Scout" Class="Combat, Land, Recon" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="15" MaintenanceCost="1" IconPath="graphics/ui/icons/shoe.png" ModelPath="graphics/models/baseperson_remesh3.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -83,10 +97,18 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="Fortify" UsageCount="1" />
+      <Ability Name="ScoutVisionAbility" UsageCount="1" IconPath="graphics/ui/icons/shoe.png">
+        <TargetSpecification TargetSelf="true" AllowsAnyBuilding="true">
+          <ValidTerrainTypes>
+            <TerrainType Name = "Flat" />
+            <TerrainType Name = "Rough" />
+            <TerrainType Name = "Mountain" />
+          </ValidTerrainTypes>
+        </TargetSpecification>
+      </Ability>
     </Abilities>
   </Unit>
-  <Unit Name="Settler" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0">
+  <Unit Name="Warrior" Class="Combat, Land, Infantry" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="2.0" CombatPower="20.0" HealingFactor="15" MaintenanceCost="1" >
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -112,7 +134,15 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="SettleCityAbility" UsageCount="1" />
+      <Ability Name="Fortify" UsageCount="1">
+        <TargetSpecification TargetSelf="true" AllowsAnyBuilding="true" AllowsAnyTerrain="true">
+          <ValidTerrainTypes>
+            <TerrainType Name = "Flat" />
+            <TerrainType Name = "Rough" />
+            <TerrainType Name = "Mountain" />
+          </ValidTerrainTypes>
+        </TargetSpecification>
+      </Ability>
     </Abilities>
   </Unit>
   <Unit Name="Galley" Class="Combat, Naval" ProductionCost="75" GoldCost="300" MovementSpeed="3.0" SightRange="3.0" CombatPower="15.0" HealingFactor="5">
@@ -141,7 +171,7 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
   </Unit>
-  <Unit Name="Slinger" Class="Combat, Land, Randged" ProductionCost="50" GoldCost="200" MovementSpeed="2.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1">
+  <Unit Name="Slinger" Class="Combat, Land, Ranged" ProductionCost="50" GoldCost="200" MovementSpeed="2.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1" IconPath="graphics/models/baseperson_remesh3_manface_pix.png" ModelPath="graphics/models/baseperson_remesh3.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -167,8 +197,17 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="RangedAttack" CombatPower="15.0" UsageCount="1" Range="1">
-        <TargetSpecification AllowsAnyUnit="true" AllowsAnyBuilding="true" />
+      <Ability Name="RangedAttack" CombatPower="15.0" UsageCount="1" Range="1" IconPath="graphics/ui/rangeattack.png">
+        <TargetSpecification TargetUnits="true" TargetUrbanBuildings="true" AllowsEnemy="true" AllowsAnyUnit="true" AllowsAnyBuilding="true" AllowsAnyTerrain="true" AllowsAnyFeature="true" AllowsAnyResource="true"/>
+      </Ability>
+      <Ability Name="Fortify" UsageCount="1" IconPath="graphics/ui/fortify.png">
+        <TargetSpecification TargetSelf="true" AllowsAnyUnit="true" AllowsAnyBuilding="true" AllowsAnyFeature="true" AllowsAnyResource="true">
+          <ValidTerrainTypes>
+            <TerrainType Name = "Flat" />
+            <TerrainType Name = "Rough" />
+            <TerrainType Name = "Mountain" />
+          </ValidTerrainTypes>
+        </TargetSpecification>
       </Ability>
     </Abilities>
   </Unit>

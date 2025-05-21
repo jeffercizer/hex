@@ -47,22 +47,146 @@ public class Player
     public bool turnFinished;
     public Dictionary<Hex, int> visibleGameHexDict;
     public Dictionary<Hex, bool> seenGameHexDict;
+    public Dictionary<int, int> cityGrowthDictionary;
     public List<ResearchQueueType> queuedResearch;
     public Dictionary<ResearchType, ResearchQueueType> partialResearchDictionary;
     public ResearchType currentResearch;
     public List<Unit> unitList;
     public List<City> cityList;
     public List<(UnitEffect, UnitClass)> unitResearchEffects;
-    public List<(BuildingEffect, BuildingType)> buildingResearchEffects;
-    public HashSet<BuildingType> allowedBuildings;
+    public List<(BuildingEffect, String)> buildingResearchEffects;
+    public HashSet<String> allowedBuildings;
     public HashSet<UnitType> allowedUnits;
     public Dictionary<Hex, ResourceType> unassignedResources;
-    public float scienceTotal;
-    public float cultureTotal;
-    public float goldTotal;
-    public float happinessTotal;
     public float strongestUnitBuilt = 0.0f;
-    
+
+    private float goldTotal;
+    private float scienceTotal;
+    private float cultureTotal;
+    private float happinessTotal;
+    private float influenceTotal;
+
+
+    public void SetGoldTotal(float goldTotal)
+    {
+        this.goldTotal = goldTotal;
+        if(teamNum == game.localPlayerTeamNum)
+        {
+            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.gold);
+        }
+    }
+
+    public float GetGoldTotal()
+    {
+        return goldTotal;
+    }
+
+    public void SetScienceTotal(float scienceTotal)
+    {
+        this.scienceTotal = scienceTotal;
+        if (teamNum == game.localPlayerTeamNum)
+        {
+            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.science);
+        }
+    }
+
+    public float GetScienceTotal()
+    {
+        return scienceTotal;
+    }
+
+    public void SetCultureTotal(float cultureTotal)
+    {
+        this.cultureTotal = cultureTotal;
+        if (teamNum == game.localPlayerTeamNum)
+        {
+            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.culture);
+        }
+    }
+
+    public float GetCultureTotal()
+    {
+        return cultureTotal;
+    }
+
+    public void SetHappinessTotal(float happinessTotal)
+    {
+        this.happinessTotal = happinessTotal;
+        if (teamNum == game.localPlayerTeamNum)
+        {
+            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.happiness);
+        }
+    }
+
+    public float GetHappinessTotal()
+    {
+        return happinessTotal;
+    }
+
+    public void SetInfluenceTotal(float influenceTotal)
+    {
+        this.influenceTotal = influenceTotal;
+        if (teamNum == game.localPlayerTeamNum)
+        {
+            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.influence);
+        }
+    }
+
+    public float GetInfluenceTotal()
+    {
+        return influenceTotal;
+    }
+
+    public float GetGoldPerTurn()
+    {
+        float goldPerTurn = 0.0f;
+        foreach (City city in cityList)
+        {
+            goldPerTurn += city.yields.gold;
+        }
+        return goldPerTurn;
+    }
+
+    public float GetSciencePerTurn()
+    {
+        float sciencePerTurn = 0.0f;
+        foreach(City city in cityList)
+        {
+            sciencePerTurn += city.yields.science;
+        }
+        return sciencePerTurn;
+    }
+
+    public float GetCulturePerTurn()
+    {
+        float culturePerTurn = 0.0f;
+        foreach (City city in cityList)
+        {
+            culturePerTurn += city.yields.culture;
+        }
+        return culturePerTurn;
+    }
+
+    public float GetHappinessPerTurn()
+    {
+        float happinessPerTurn = 0.0f;
+        foreach (City city in cityList)
+        {
+            happinessPerTurn += city.yields.happiness;
+        }
+        return happinessPerTurn;
+    }
+
+    public float GetInfluencePerTurn()
+    {
+        float influencePerTurn = 0.0f;
+        foreach (City city in cityList)
+        {
+            influencePerTurn += city.yields.influence;
+        }
+        return influencePerTurn;
+    }
+
     public void OnTurnStarted(int turnNumber)
     {
         turnFinished = false;
@@ -85,6 +209,12 @@ public class Player
                 OnResearchComplete(queuedResearch[0].researchType);
                 queuedResearch.RemoveAt(0);
             }
+        }
+        if (game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.Update2DUI(UIElement.gold);
+            manager.Update2DUI(UIElement.happiness);
+            manager.Update2DUI(UIElement.influence);
         }
     }
 
@@ -143,7 +273,7 @@ public class Player
         {
             allowedUnits.Add(unitType);
         }
-        foreach(BuildingType buildingType in ResearchLoader.researchesDict[researchType].BuildingUnlocks)
+        foreach(String buildingType in ResearchLoader.researchesDict[researchType].BuildingUnlocks)
         {
             allowedBuildings.Add(buildingType);
         }
@@ -196,19 +326,23 @@ public class Player
 
     public void AddGold(float gold)
     {
-        goldTotal += gold;
+        SetGoldTotal(GetGoldTotal() + gold);
     }
     public void AddScience(float science)
     {
-        scienceTotal += science;
+        SetScienceTotal(GetScienceTotal() + science);
     }
     public void AddCulture(float culture)
     {
-        cultureTotal += culture;
+        SetCultureTotal(GetCultureTotal() + culture);
     }
     public void AddHappiness(float happiness)
     {
-        happinessTotal += happiness;
+        SetHappinessTotal(GetHappinessTotal() + happiness);
+    }
+    public void AddInfluence(float influence)
+    {
+        SetInfluenceTotal(GetInfluenceTotal() + influence);
     }
 
 }

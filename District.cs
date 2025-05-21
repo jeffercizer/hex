@@ -8,10 +8,10 @@ using Godot;
 [Serializable]
 public class District
 {
-    public District(GameHex gameHex, BuildingType initialBuildingType, bool isCityCenter, bool isUrban, City city)
+    public District(GameHex gameHex, String initialString, bool isCityCenter, bool isUrban, City city)
     {
         SetupDistrict(gameHex, isCityCenter, isUrban, city);
-        AddBuilding(new Building(initialBuildingType, this));
+        AddBuilding(new Building(initialString, this));
     }
 
     public District(GameHex gameHex, bool isCityCenter, bool isUrban, City city)
@@ -52,7 +52,11 @@ public class District
         }
         city.RecalculateYields();
         AddVision();
-        if (city.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewDistrict(this);
+        if (city.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.NewDistrict(this);
+        }
+
     }
 
     public int id;
@@ -138,9 +142,9 @@ public class District
         }
         else if(turnsUntilHealing > 0)
         {
-            if (gameHex.unitsList.Any())
+            if (gameHex.units.Any())
             {
-                Unit unit = gameHex.unitsList[0];
+                Unit unit = gameHex.units[0];
                 if (gameHex.gameBoard.game.teamManager.GetEnemies(city.teamNum).Contains(unit.teamNum))
                 {
                     turnsUntilHealing += 1;
@@ -160,7 +164,7 @@ public class District
         }
     }
 
-    public int CountBuildingType(BuildingType buildingType)
+    public int CountString(String buildingType)
     {
         int count = 0;
         foreach(Building building in buildings)

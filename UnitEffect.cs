@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using Godot;
 
 public enum UnitEffectType
 {
@@ -148,7 +149,7 @@ public class UnitEffect
     {
         if(functionString == "SettleCapitalAbility")
         {
-            return SettleCapitalAbility(unit, "SettleCapitalAbility");
+            return SettleCapitalAbility(unit, "CapitalCityName");
         }
         else if(functionString == "SettleCityAbility")
         {
@@ -162,7 +163,7 @@ public class UnitEffect
         }
         else if(functionString == "RangedAttack")
         {
-            if(abilityTarget != null)
+            if (abilityTarget != null)
             {
                 return RangedAttack(unit, combatPower, abilityTarget);
             }
@@ -176,7 +177,12 @@ public class UnitEffect
             EnableEmbarkDisembark(unit);
             return true;
         }
-        return false;
+        else if(functionString == "Fortify")
+        {
+            Fortify(unit);
+            return true;
+        }
+        throw new NotImplementedException("The Effect Function: " + functionString + " does not exist, implement it in UnitEffect");
     }
     public bool SettleCapitalAbility(Unit unit, String cityName)
     {
@@ -204,5 +210,9 @@ public class UnitEffect
     public bool RangedAttack(Unit unit, float combatPower, GameHex target)
     {
         return unit.RangedAttackTarget(target, combatPower, unit.gameHex.gameBoard.game.teamManager);
+    }
+    public bool Fortify(Unit unit)
+    {
+        throw new NotImplementedException("Fortify Means a lot of work :)");
     }
 }

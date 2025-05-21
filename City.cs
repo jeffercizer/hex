@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using Godot;
 
 public enum ProductionType
 {
@@ -13,7 +14,7 @@ public enum ProductionType
 public class ProductionQueueType
 {
 
-    public ProductionQueueType(String name, BuildingType buildingType, UnitType unitType, GameHex targetGameHex, float productionCost, float productionLeft)
+    public ProductionQueueType(String name, String buildingType, UnitType unitType, GameHex targetGameHex, float productionCost, float productionLeft)
     {
         this.name = name;
         this.targetGameHex = targetGameHex;
@@ -21,13 +22,25 @@ public class ProductionQueueType
         this.productionLeft = productionLeft;
         this.buildingType = buildingType;
         this.unitType = unitType;
+        if(unitType != UnitType.None)
+        {
+            this.productionIcon = new TextureRect();
+            this.productionIcon.Texture = Godot.ResourceLoader.Load<Texture2D>("res://" + UnitLoader.unitsDict[unitType].IconPath);
+        }
+        else if (buildingType != "")
+        {
+            this.productionIcon = new TextureRect();
+            this.productionIcon.Texture = Godot.ResourceLoader.Load<Texture2D>("res://" + BuildingLoader.buildingsDict[buildingType].IconPath);
+        }
+
     }
     public String name;
-    public BuildingType buildingType;
+    public String buildingType;
     public UnitType unitType;
     public GameHex targetGameHex;
     public float productionLeft;
     public float productionCost;
+    public TextureRect productionIcon;
 }
 
 
@@ -37,6 +50,7 @@ public class City
     public City(int id, int teamNum, String name, bool isCapital, GameHex gameHex)
     {
         this.id = id;
+        originalCapitalTeamID = id;
         this.teamNum = teamNum;
         this.name = name;
         this.gameHex = gameHex;
@@ -46,22 +60,29 @@ public class City
         heldHexes = new();
         gameHex.gameBoard.game.playerDictionary[teamNum].cityList.Add(this);
         districts = new();
-        AddCityCenter(isCapital);
-
-        
         citySize = 0;
+        naturalPopulation = 0;
         readyToExpand = 0;
-        foodToGrow = 10.0f;
+        foodToGrow = GetFoodToGrowCost();
+
+        AddCityCenter(isCapital);
+        this.isCapital = isCapital;
+        this.wasCapital = isCapital;
+
         RecalculateYields();
         SetBaseHexYields();
     }
     public int id;
     public int teamNum;
     public String name;
+    public bool isCapital;
+    public bool wasCapital;
+    public int originalCapitalTeamID;
     public List<District> districts;
     public GameHex gameHex;
     public Yields yields;
     public int citySize;
+    public int naturalPopulation;
     public float foodToGrow;
     public float foodStockpile;
     public float productionOverflow;
@@ -88,11 +109,11 @@ public class City
         District district;
         if (isCapital)
         {
-            district = new District(gameHex, BuildingType.Palace, true, true, this);
+            district = new District(gameHex, "Palace", true, true, this);
         }
         else
         {
-            district = new District(gameHex, BuildingType.CityCenter, true, true, this);
+            district = new District(gameHex, "CityCenter", true, true, this);
         }
         districts.Add(district);
         return district;
@@ -124,16 +145,16 @@ public class City
         //arcticYields
     }
 
-    public (List<BuildingType>, List<UnitType>) GetProducables()
+    public (List<String>, List<UnitType>) GetProducables()
     {
-        List<BuildingType> buildings = new();
+        List<String> buildings = new();
         List<UnitType> units = new();
-        foreach(BuildingType buildingType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedBuildings)
+        foreach(String buildingType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedBuildings)
         {
             int count = 0;
-            if(buildingType != 0 & BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
+            if(buildingType != "" & BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
             {
-                count = CountBuildingType(buildingType);
+                count = CountString(buildingType);
             }
             foreach(ProductionQueueType queueItem in productionQueue)
             {
@@ -185,32 +206,32 @@ public class City
         return false;
     }
 
-    public int CountBuildingType(BuildingType buildingType)
+    public int CountString(String buildingType)
     {
         int count = 0;
         foreach(District district in districts)
         {
-            count += district.CountBuildingType(buildingType);
+            count += district.CountString(buildingType);
         }
         return count;
     }
 
     public bool AddUnitToQueue(UnitType unitType)
     {
-        return AddToQueue(UnitLoader.unitNames[unitType], BuildingType.None, unitType, gameHex, UnitLoader.unitsDict[unitType].ProductionCost);
+        return AddToQueue(UnitLoader.unitNames[unitType], "", unitType, gameHex, UnitLoader.unitsDict[unitType].ProductionCost);
     }
 
-    public bool AddBuildingToQueue(BuildingType buildingType, GameHex targetGameHex)
+    public bool AddBuildingToQueue(String buildingType, GameHex targetGameHex)
     { 
-        return AddToQueue(BuildingLoader.buildingNames[buildingType], buildingType, UnitType.None, targetGameHex, BuildingLoader.buildingsDict[buildingType].ProductionCost);
+        return AddToQueue(buildingType, buildingType, UnitType.None, targetGameHex, BuildingLoader.buildingsDict[buildingType].ProductionCost);
     }
 
-    public bool AddToQueue(String name, BuildingType buildingType, UnitType unitType, GameHex targetGameHex, float productionCost)
+    public bool AddToQueue(String name, String buildingType, UnitType unitType, GameHex targetGameHex, float productionCost)
     {
         int count = 0;
-        if(buildingType != BuildingType.None && BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
+        if(buildingType != "" && BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
         {
-            count = CountBuildingType(buildingType);
+            count = CountString(buildingType);
         }
         foreach(ProductionQueueType queueItem in productionQueue)
         {
@@ -219,7 +240,7 @@ public class City
                 count += 1;
             }
         }
-        if(buildingType != BuildingType.None && count >= BuildingLoader.buildingsDict[buildingType].PerCity)
+        if(buildingType != "" && count >= BuildingLoader.buildingsDict[buildingType].PerCity)
         {
             return false;
         }
@@ -262,6 +283,7 @@ public class City
     public void ChangeName(String name)
     {
         this.name = name;
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
     }
 
     public void OnTurnStarted(int turnNumber)
@@ -276,8 +298,9 @@ public class City
         gameHex.gameBoard.game.playerDictionary[teamNum].AddScience(yields.science);
         gameHex.gameBoard.game.playerDictionary[teamNum].AddCulture(yields.culture);
         gameHex.gameBoard.game.playerDictionary[teamNum].AddHappiness(yields.happiness);
-        
-        foreach(ProductionQueueType queueItem in productionQueue)
+        gameHex.gameBoard.game.playerDictionary[teamNum].AddInfluence(yields.influence);
+
+        foreach (ProductionQueueType queueItem in productionQueue)
         {
             if(gameHex.gameBoard.game.builtWonders.Contains(queueItem.buildingType))
             {
@@ -291,22 +314,25 @@ public class City
             Math.Max(productionOverflow - productionQueue[0].productionLeft, 0);
             if(productionQueue[0].productionLeft <= 0)
             {
-                if(productionQueue[0].buildingType > (BuildingType)0)
+                if(productionQueue[0].buildingType != "")
                 {
                     BuildOnHex(productionQueue[0].targetGameHex.hex, productionQueue[0].buildingType);
                 }
                 else if(productionQueue[0].unitType > (UnitType)0)
                 {
                     Unit tempUnit = new Unit(Enum.Parse<UnitType>(productionQueue[0].name), gameHex.gameBoard.game.GetUniqueID(), productionQueue[0].targetGameHex, teamNum);
-                    if(tempUnit.baseCombatStrength > gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt)
+                    if (UnitLoader.unitsDict.TryGetValue(tempUnit.unitType, out UnitInfo unitInfo))
                     {
-                        gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt = tempUnit.baseCombatStrength;
+                        if (unitInfo.CombatPower > gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt)
+                        {
+                            gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt = unitInfo.CombatPower;
+                        }
                     }
                     if(!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
                     {
                         tempUnit.name = "Ghost Man";
                         tempUnit.decreaseHealth(99999.9f);
-                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewUnit(tempUnit);
+                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager1)) manager1.NewUnit(tempUnit);
                     }
                 }
                 productionQueue.RemoveAt(0);
@@ -316,9 +342,17 @@ public class City
         foodStockpile += yields.food;
         if (foodToGrow <= foodStockpile)
         {
+            naturalPopulation += 1; //we increase naturalPopulation only here, and city size is increased for every building we have, rural or urban
             readyToExpand += 1;
             foodStockpile = Math.Max(0.0f, foodStockpile - foodToGrow);
+            foodToGrow = GetFoodToGrowCost(); //30 + (n-1) x 3 + (n-1) ^ 3.0 we use naturalPopulation so we dont punish the placement of urban buildings
         }
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+    }
+
+    public float GetFoodToGrowCost()
+    {
+        return (float)(30 + (naturalPopulation - 1) * 3 + Math.Pow((naturalPopulation - 1), 3));
     }
 
     public void OnTurnEnded(int turnNumber)
@@ -338,9 +372,9 @@ public class City
             }
             if(district.isCityCenter && district.health <= 0.0f)
             {
-                if (district.gameHex.unitsList.Any())
+                if (district.gameHex.units.Any())
                 {
-                    Unit unit = district.gameHex.unitsList[0];
+                    Unit unit = district.gameHex.units[0];
                     if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                     {
                         cityCenterOccupied = true;
@@ -350,7 +384,7 @@ public class City
         }
         if(allDistrictsFell && cityCenterOccupied)
         {
-            ChangeTeam(gameHex.unitsList[0].teamNum);
+            ChangeTeam(gameHex.units[0].teamNum);
         }
     }
 
@@ -375,9 +409,19 @@ public class City
             district.RecalculateYields();
             yields += district.gameHex.yields;
         }
+        yields.food -= naturalPopulation+1;
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.Update2DUI(UIElement.goldPerTurn);
+            manager.Update2DUI(UIElement.sciencePerTurn);
+            manager.Update2DUI(UIElement.culturePerTurn);
+            manager.Update2DUI(UIElement.happinessPerTurn);
+            manager.Update2DUI(UIElement.influencePerTurn);
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
     }
 
-    public void BuildOnHex(Hex hex, BuildingType buildingType)
+    public void BuildOnHex(Hex hex, String buildingType)
     {
         if(gameHex.gameBoard.gameHexDict[hex].district == null)
         {
@@ -432,7 +476,7 @@ public class City
                     {
                         //hex has only allies unit
                         bool valid = true;
-                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
+                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
                         {
                             if(!gameHex.gameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
                             {
@@ -476,7 +520,7 @@ public class City
                     {
                         //hex doesnt have a enemy unit
                         bool noEnemyUnit = true;
-                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
+                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
                         {
                             if(gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                             {
@@ -520,7 +564,7 @@ public class City
                     {
                         //hex doesnt have a non-friendly unit
                         bool valid = true;
-                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].unitsList)
+                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
                         {
                             if(!gameHex.gameBoard.game.teamManager.GetAllies(teamNum).Contains(unit.teamNum))
                             {

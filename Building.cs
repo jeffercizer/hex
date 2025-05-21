@@ -10,7 +10,7 @@ public class Building
 {
     public String name;
     public int id;
-    public BuildingType buildingType;
+    public String buildingType;
     public District district;
     public List<BuildingEffect> buildingEffects;
     public float baseProductionCost;
@@ -22,11 +22,11 @@ public class Building
     public Yields baseYields;
     public Yields yields;
 
-    public Building(BuildingType buildingType, District district)
+    public Building(String buildingType, District district)
     {
         this.district = district;
         this.buildingType = buildingType;
-        this.name = BuildingLoader.buildingNames[buildingType];
+        this.name = buildingType;
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
         if (BuildingLoader.buildingsDict.TryGetValue(buildingType, out BuildingInfo buildingInfo))
         {

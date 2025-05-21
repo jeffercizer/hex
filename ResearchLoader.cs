@@ -23,7 +23,7 @@ public struct ResearchInfo
 {
     public int Tier;
     public List<ResearchType> Requirements;
-    public List<BuildingType> BuildingUnlocks;
+    public List<String> BuildingUnlocks;
     public List<UnitType> UnitUnlocks;
     public List<String> Effects;
 }
@@ -69,10 +69,9 @@ public static class ResearchLoader
                         .Select(e => Enum.TryParse<ResearchType>(e.Value, out var result) ? result : default)
                         .Where(e => e != default)
                         .ToList() ?? new List<ResearchType>(),
-                    BuildingUnlocks = r.Element("BuildingUnlocks")?.Elements("BuildingType")
-                        .Select(e => Enum.TryParse<BuildingType>(e.Value, out var result) ? result : default)
-                        .Where(e => e != default)
-                        .ToList() ?? new List<BuildingType>(),
+                    BuildingUnlocks = r.Element("BuildingUnlocks")?.Elements("String")
+                        .Select(e => e.Value ?? throw new Exception("Invalid String"))
+                        .ToList() ?? new List<string>(),
                     UnitUnlocks = r.Element("UnitUnlocks")?.Elements("UnitType")
                         .Select(e => Enum.TryParse<UnitType>(e.Value, out var result) ? result : default)
                         .Where(e => e != default)

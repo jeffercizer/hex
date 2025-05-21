@@ -3,21 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-public enum BuildingType
-{
-    None,
-    Palace,
-    CityCenter,
-    AncientWalls,
-    Granary,
-    StoneCutter,
-    Market,
-    Dock,
-    Garden,
-    Library,
-    Stonehenge,
-}
-
 public struct BuildingInfo
 {
     public int ProductionCost;
@@ -27,6 +12,8 @@ public struct BuildingInfo
     public int PerCity;
     public int PerPlayer;
     public bool Wonder;
+    public String IconPath;
+    public String ModelPath;
     public List<String> Effects;
     public List<TerrainType> TerrainTypes;
 }
@@ -34,16 +21,7 @@ public struct BuildingInfo
 public static class BuildingLoader
 {
 
-    public static Dictionary<BuildingType, string> buildingNames = new Dictionary<BuildingType, string>
-    {
-        { BuildingType.Palace, "Palace" },
-        { BuildingType.CityCenter, "City Center" },
-        { BuildingType.AncientWalls, "AncientWalls"},
-        { BuildingType.Granary, "Granary" },
-        { BuildingType.StoneCutter, "Stone Cutter" },
-        { BuildingType.Market, "Market" },
-    };
-    public static Dictionary<BuildingType, BuildingInfo> buildingsDict;
+    public static Dictionary<String, BuildingInfo> buildingsDict;
     
     static BuildingLoader()
     {
@@ -51,12 +29,12 @@ public static class BuildingLoader
         buildingsDict = LoadBuildingData(xmlPath);
     }
     
-    public static Dictionary<BuildingType, BuildingInfo> LoadBuildingData(string xmlPath)
+    public static Dictionary<String, BuildingInfo> LoadBuildingData(string xmlPath)
     {
         XDocument xmlDoc = XDocument.Load(xmlPath);
         var BuildingData = xmlDoc.Descendants("Building")
             .ToDictionary(
-                r => Enum.Parse<BuildingType>(r.Attribute("Name").Value),
+                r => r.Attribute("Name").Value,
                 r => new BuildingInfo
                 {
                     ProductionCost = int.Parse(r.Attribute("ProductionCost").Value),
@@ -69,11 +47,14 @@ public static class BuildingLoader
                         science = float.Parse(r.Attribute("ScienceYield").Value),
                         culture = float.Parse(r.Attribute("CultureYield").Value),
                         happiness = float.Parse(r.Attribute("HappinessYield").Value),
+                        influence = float.Parse(r.Attribute("InfluenceYield").Value)
                     },
                     MaintenanceCost = float.Parse(r.Attribute("MaintenanceCost").Value),
                     PerCity = int.Parse(r.Attribute("PerCity").Value),
                     PerPlayer = int.Parse(r.Attribute("PerPlayer").Value),
                     Wonder = bool.Parse(r.Attribute("Wonder").Value),
+                    IconPath = r.Attribute("IconPath")?.Value ?? "",
+                    ModelPath = r.Attribute("ModelPath")?.Value ?? "",
                     Effects = r.Element("Effects").Elements("Effect").Select(e => e.Attribute("Name").Value).ToList(),
                     TerrainTypes = r.Element("TerrainTypes").Elements("TerrainType").Select(t => Enum.Parse<TerrainType>(t.Value)).ToList(),
                 }

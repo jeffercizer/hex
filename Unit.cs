@@ -36,9 +36,7 @@ public class Unit
         {
             this.unitClass = unitInfo.Class;
             this.movementCosts = unitInfo.MovementCosts;
-            this.baseMovementCosts = unitInfo.MovementCosts;
             this.sightCosts = unitInfo.SightCosts;
-            this.baseSightCosts = unitInfo.SightCosts;
     
             this.movementSpeed = unitInfo.MovementSpeed;
             this.sightRange = unitInfo.SightRange;
@@ -68,7 +66,7 @@ public class Unit
                 AddEffect(effect.Item1);
             }
         }
-        
+        //gameHex.units.Add(this);
         gameHex.gameBoard.game.playerDictionary[teamNum].unitList.Add(this);
         AddVision(true);
         if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewUnit(this);
@@ -77,20 +75,14 @@ public class Unit
     public String name;
     public int id;
     public UnitType unitType;
-    public Dictionary<TerrainMoveType, float> baseMovementCosts;
     public Dictionary<TerrainMoveType, float> movementCosts;
-    public Dictionary<TerrainMoveType, float> baseSightCosts;
     public Dictionary<TerrainMoveType, float> sightCosts;
     public GameHex gameHex;
-    public float baseMovementSpeed = 2.0f;
     public float movementSpeed = 2.0f;
     public float remainingMovement = 2.0f;
-    public float baseSightRange = 3.0f;
     public float sightRange = 3.0f;
     public float health = 100.0f;
-    public float baseCombatStrength = 10.0f;
     public float combatStrength = 10.0f;
-    public float baseMaintenanceCost = 1.0f;
     public float maintenanceCost = 1.0f;
     public int maxAttackCount = 1;
     public int attacksLeft = 1;
@@ -115,7 +107,7 @@ public class Unit
 
     public void OnTurnEnded(int turnNumber)
     {
-        gameHex.gameBoard.game.playerDictionary[teamNum].AddGold(maintenanceCost);
+        gameHex.gameBoard.game.playerDictionary[teamNum].AddGold(-maintenanceCost);
         if(remainingMovement > 0.0f && currentPath.Any() && !isTargetEnemy)
         {
             MoveTowards(gameHex.gameBoard.gameHexDict[currentPath.Last()], gameHex.gameBoard.game.teamManager, isTargetEnemy);
@@ -129,7 +121,18 @@ public class Unit
     public void SetAttacksLeft(int attacksLeft)
     {
         this.attacksLeft = attacksLeft;
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        foreach (UnitAbility ability in abilities)
+        {
+            if (ability.name.EndsWith("Attack"))
+            {
+                ability.currentCharges = attacksLeft;
+            }
+        }
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.Update2DUI(UIElement.unitDisplay);
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
     }
 
     public void SetRemainingMovement(float remainingMovement)
@@ -141,12 +144,15 @@ public class Unit
     public void RecalculateEffects()
     {
         //must reset all to base and recalculate
-        movementCosts = baseMovementCosts;
-        sightCosts = baseSightCosts;
-        movementSpeed = baseMovementSpeed;
-        sightRange = baseSightRange;
-        combatStrength = baseCombatStrength;
-        maintenanceCost = baseMaintenanceCost;
+        if (UnitLoader.unitsDict.TryGetValue(unitType, out UnitInfo unitInfo))
+        {
+            movementCosts = unitInfo.MovementCosts;
+            sightCosts = unitInfo.SightCosts;
+            movementSpeed = unitInfo.MovementSpeed;
+            sightRange = unitInfo.SightRange;
+            combatStrength = unitInfo.CombatPower;
+            maintenanceCost = unitInfo.MaintenanceCost;
+        }
         //also order all effects, multiply/divide after add/subtract priority
         //0 means it is applied first 100 means it is applied "last" (highest number last)
         //so multiply/divide effects should be 20 and add/subtract will be 10 to give wiggle room
@@ -178,7 +184,7 @@ public class Unit
 
     public void AddAbility(string abilityName, UnitInfo unitInfo)
     {
-        abilities.Add(new UnitAbility(new UnitEffect(abilityName), unitInfo.Abilities[abilityName].Item1, unitInfo.Abilities[abilityName].Item2, unitInfo.Abilities[abilityName].Item3, unitInfo.Abilities[abilityName].Item4));
+        abilities.Add(new UnitAbility(this, new UnitEffect(abilityName), unitInfo.Abilities[abilityName].Item1, unitInfo.Abilities[abilityName].Item2, unitInfo.Abilities[abilityName].Item3, unitInfo.Abilities[abilityName].Item4, unitInfo.Abilities[abilityName].Item5));
     }
 
     public void UseAbilities()
@@ -214,9 +220,9 @@ public class Unit
             GD.Print("ATTACK DISTRICT");
             return DistrictCombat(targetGameHex);;
         }
-        if (targetGameHex.unitsList.Any())
+        if (targetGameHex.units.Any())
         {
-            Unit unit = targetGameHex.unitsList[0];
+            Unit unit = targetGameHex.units[0];
             if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
             {
                 //combat math TODO
@@ -251,10 +257,10 @@ public class Unit
             SetAttacksLeft(attacksLeft - 1);
             return RangedDistrictCombat(targetGameHex, rangedPower);
         }
-        if (targetGameHex.unitsList.Any())
+        if (targetGameHex.units.Any())
         {
             
-            Unit unit = targetGameHex.unitsList[0];
+            Unit unit = targetGameHex.units[0];
             if (teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
             {
                 //combat math TODO
@@ -274,12 +280,17 @@ public class Unit
     {
         health += amount;
         health = Math.Min(health, 100.0f);
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.Update2DUI(UIElement.unitDisplay);
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
     }
 
     public bool decreaseHealth(float amount)
     {
         health -= amount;
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.unitDisplay);
         if (health <= 0.0f)
         {
             onDeathEffects();
@@ -287,14 +298,14 @@ public class Unit
         }
         else
         {
-            if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+            if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager2)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
             return false;
         }
     }
 
     public void onDeathEffects()
     {
-        gameHex.unitsList.Remove(this);
+        gameHex.units.Remove(this);
         gameHex.gameBoard.game.playerDictionary[teamNum].unitList.Remove(this);
         RemoveVision(true);
         if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Remove);
@@ -484,7 +495,7 @@ public class Unit
 
     public bool TryMoveToGameHex(GameHex targetGameHex, TeamManager teamManager)
     {
-        if(targetGameHex.unitsList.Any() & !isTargetEnemy)
+        if(targetGameHex.units.Any() & !isTargetEnemy)
         {
             return false;
         }
@@ -498,21 +509,21 @@ public class Unit
                     if (AttackTarget(targetGameHex, moveCost, teamManager))
                     {
                         UpdateVision();
-                        gameHex.unitsList.Remove(this);
+                        gameHex.units.Remove(this);
                         gameHex = targetGameHex;
-                        gameHex.unitsList.Add(this);
+                        gameHex.units.Add(this);
                         if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
                         return true;
                     }
                 }
             }
-            else if(!targetGameHex.unitsList.Any())
+            else if(!targetGameHex.units.Any())
             {
                 SetRemainingMovement(remainingMovement - moveCost);
                 UpdateVision();
-                gameHex.unitsList.Remove(this);
+                gameHex.units.Remove(this);
                 gameHex = targetGameHex;
-                gameHex.unitsList.Add(this);
+                gameHex.units.Add(this);
                 if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
                 return true;
             }
@@ -523,9 +534,9 @@ public class Unit
     public bool MoveToGameHex(GameHex targetGameHex)
     {
         UpdateVision();
-        gameHex.unitsList.Remove(this);
+        gameHex.units.Remove(this);
         gameHex = targetGameHex;
-        gameHex.unitsList.Add(this);
+        gameHex.units.Add(this);
         if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
         return true;
     }
@@ -658,7 +669,7 @@ public class Unit
         //check for units
         if(!ignoreUnits)
         {
-            foreach (Unit unit in secondHex.unitsList)
+            foreach (Unit unit in secondHex.units)
             {
                 if (isTargetEnemy && teamManager.GetEnemies(teamNum).Contains(unit.teamNum) && attacksLeft > 0)
                 {

@@ -12,6 +12,7 @@ public struct Yields
     public float science;
     public float culture;
     public float happiness;
+    public float influence;
     
     // Overload the + operator
     public static Yields operator +(Yields a, Yields b)
@@ -23,7 +24,8 @@ public struct Yields
             gold = a.gold + b.gold,
             science = a.science + b.science,
             culture = a.culture + b.culture,
-            happiness = a.happiness + b.happiness
+            happiness = a.happiness + b.happiness,
+            influence = a.influence + b.influence
         };
     }
 }

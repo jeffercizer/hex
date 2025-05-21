@@ -29,13 +29,14 @@ public enum FeatureType
     Road,
     Coral,
     Wetland,
-    Fortification
+    Fortification,
+    None
 }
 
 [Serializable]
 public class GameHex
 {
-    public GameHex(Hex hex, GameBoard gameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, ResourceType resourceType, HashSet<FeatureType> featureSet, List<Unit> unitsList, District district)
+    public GameHex(Hex hex, GameBoard gameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, ResourceType resourceType, HashSet<FeatureType> featureSet, List<Unit> units, District district)
     {
         this.hex = hex;
         this.gameBoard = gameBoard;
@@ -43,7 +44,7 @@ public class GameHex
         this.terrainTemp = terrainTemp;
         this.featureSet = featureSet;
         this.resourceType = resourceType;
-        this.unitsList = unitsList;
+        this.units = units;
         this.district = district;
         this.ownedBy = -1;
         RecalculateYields();
@@ -57,7 +58,7 @@ public class GameHex
     public int ownedBy;
     public City? owningCity;
     public HashSet<FeatureType> featureSet = new();
-    public List<Unit> unitsList = new();
+    public List<Unit> units = new();
     public District? district;
 
     public Yields yields;
@@ -213,7 +214,7 @@ public class GameHex
     public bool IsEnemyPresent(int yourTeamNum)
     {
         bool isEnemy = false;
-        foreach (Unit targetHexUnit in gameBoard.gameHexDict[hex].unitsList)
+        foreach (Unit targetHexUnit in gameBoard.gameHexDict[hex].units)
         {
             if (gameBoard.game.teamManager.GetEnemies(yourTeamNum).Contains(targetHexUnit.teamNum))
             {
@@ -235,7 +236,7 @@ public class GameHex
     //if flexible is true look for adjacent spaces to place
     public bool SpawnUnit(Unit newUnit, bool stackable, bool flexible)
     {
-        if((!stackable & unitsList.Any()) | newUnit.movementCosts[(TerrainMoveType)terrainType] > 100) //if they cant stack and their are units or the hex is invalid for this unit
+        if((!stackable & units.Any()) | newUnit.movementCosts[(TerrainMoveType)terrainType] > 100) //if they cant stack and their are units or the hex is invalid for this unit
         {
             if (flexible)
             {
@@ -252,7 +253,7 @@ public class GameHex
         }
         else if(newUnit.movementCosts[(TerrainMoveType)terrainType] < 100)//if they cant stack and there aren't units or they can stack and units are/aren't there and the hex is valid for this unit
         {
-            unitsList.Add(newUnit);
+            units.Add(newUnit);
             newUnit.SetGameHex(this);
             return true;
         }

@@ -21,6 +21,11 @@ public class TurnManager
     public void StartNewTurn()
     {
         currentTurn++;
+        if (game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.Update2DUI(UIElement.turnNumber);
+            manager.Update2DUI(UIElement.unitDisplay);
+        }
         foreach (Player player in game.playerDictionary.Values)
         {
             player.OnTurnStarted(currentTurn);

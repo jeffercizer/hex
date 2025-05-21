@@ -1,0 +1,1 @@
+All abilities whose charges should be effected by number of attacks left should end with the word Attack, so RangedAttack, StrongAttack, IDontcarewhatyoucallitAttack. All will respect the max attack count of the unit, ie when the unit attacks the charges on the ability will 
