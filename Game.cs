@@ -685,6 +685,10 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
 
+        player1City.AddUnitToQueue(UnitType.Slinger);
+        player1City.AddUnitToQueue(UnitType.Warrior);
+
+
         /* 
         //the way I imagine abilities will work is we iterate over the list to get each and put it into the list of buttons that will call the ability, each ability having an icon and such.
         //main concern being that abilities being in different orders mean they are in different spots on the UI which is bad, so need assigned spots depending, thinking Starcraft inspo, grid bottom rightish

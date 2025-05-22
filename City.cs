@@ -25,6 +25,7 @@ public class ProductionQueueType
         if(unitType != UnitType.None)
         {
             this.productionIcon = new TextureRect();
+            GD.Print(UnitLoader.unitsDict[unitType].IconPath);
             this.productionIcon.Texture = Godot.ResourceLoader.Load<Texture2D>("res://" + UnitLoader.unitsDict[unitType].IconPath);
         }
         else if (buildingType != "")
