@@ -19,18 +19,6 @@ public enum UnitClass
     Recon = 1 << 9,
 }
 
-
-public enum UnitType
-{
-    None,
-    Founder,
-    Scout,
-    Settler,
-    Galley,
-    Slinger,
-    Warrior
-}
-
 public struct UnitInfo
 {
     public UnitClass Class { get; set; }
@@ -51,29 +39,19 @@ public struct UnitInfo
 
 public static class UnitLoader
 {
-    public static Dictionary<UnitType, UnitInfo> unitsDict;
-
-    public static Dictionary<UnitType, string> unitNames = new Dictionary<UnitType, string>
-    {
-        { UnitType.Founder, "Founder"},
-        { UnitType.Scout, "Scout" },
-        { UnitType.Settler, "Settler" },
-        { UnitType.Galley, "Galley" },
-        { UnitType.Slinger, "Slinger" },
-        { UnitType.Warrior, "Warrior" },
-    };
+    public static Dictionary<String, UnitInfo> unitsDict;
     
     static UnitLoader()
     {
         string xmlPath = "hex/Units.xml";
         unitsDict = LoadUnitData(xmlPath);
     }
-    public static Dictionary<UnitType, UnitInfo> LoadUnitData(string xmlPath)
+    public static Dictionary<String, UnitInfo> LoadUnitData(string xmlPath)
     {
         XDocument xmlDoc = XDocument.Load(xmlPath);
         var UnitData = xmlDoc.Descendants("Unit")
             .ToDictionary(
-                r => (UnitType)Enum.Parse(typeof(UnitType), r.Attribute("Name").Value),
+                r => r.Attribute("Name").Value,
                 r => new UnitInfo
                 {
                     Class = Enum.TryParse<UnitClass>(r.Attribute("Class")?.Value, out var unitClass) ? unitClass : UnitClass.None,
@@ -137,9 +115,9 @@ public static class UnitLoader
         };
     
         targetSpecification.ValidUnitTypes = targetSpecElement.Element("ValidUnitTypes")?.Elements("UnitType")
-            .Select(u => Enum.TryParse<UnitType>(u.Attribute("Name")?.Value, out var unitType) ? unitType : throw new Exception("Invalid UnitType"))
-            .ToHashSet() ?? new HashSet<UnitType>();
-    
+            .Select(b => b.Attribute("Name")?.Value ?? throw new Exception("Invalid String"))
+            .ToHashSet() ?? new HashSet<String>();
+
         targetSpecification.AllowedUnitClasses = targetSpecElement.Element("AllowedUnitClasses")?.Value
             .Split(", ", StringSplitOptions.RemoveEmptyEntries)
             .Aggregate(UnitClass.None, (current, className) =>

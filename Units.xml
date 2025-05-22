@@ -27,6 +27,9 @@
     <Abilities>
       <Ability Name="SettleCapitalAbility" UsageCount="1" IconPath="graphics/ui/icons/house.png">
         <TargetSpecification TargetSelf="true" AllowsAnyFeature="true" AllowsAnyResource="true">
+          <ValidBuildingTypes>
+            <BuildingType Name = "" />
+          </ValidBuildingTypes>
           <ValidTerrainTypes>
             <TerrainType Name = "Flat" />
             <TerrainType Name = "Rough" />
@@ -98,7 +101,7 @@
     </SightCosts>
     <Abilities>
       <Ability Name="ScoutVisionAbility" UsageCount="1" IconPath="graphics/ui/icons/shoe.png">
-        <TargetSpecification TargetSelf="true" AllowsAnyBuilding="true">
+        <TargetSpecification TargetSelf="true" AllowsAnyBuilding="true" AllowsAnyUnit="true" AllowsAnyResource="true" AllowsAnyFeature="true">
           <ValidTerrainTypes>
             <TerrainType Name = "Flat" />
             <TerrainType Name = "Rough" />
@@ -108,7 +111,7 @@
       </Ability>
     </Abilities>
   </Unit>
-  <Unit Name="Warrior" Class="Combat, Land, Infantry" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="2.0" CombatPower="20.0" HealingFactor="15" MaintenanceCost="1" >
+  <Unit Name="Warrior" Class="Combat, Land, Infantry" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="2.0" CombatPower="20.0" HealingFactor="15" MaintenanceCost="1" IconPath="graphics/ui/icons/sword.png" ModelPath="graphics/models/baseperson_remesh3.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -134,8 +137,8 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
     <Abilities>
-      <Ability Name="Fortify" UsageCount="1">
-        <TargetSpecification TargetSelf="true" AllowsAnyBuilding="true" AllowsAnyTerrain="true">
+      <Ability Name="Fortify" UsageCount="1" IconPath="graphics/ui/fortify.png">
+        <TargetSpecification TargetSelf="true" AllowsAnyUnit="true" AllowsAnyBuilding="true" AllowsAnyFeature="true" AllowsAnyResource="true">
           <ValidTerrainTypes>
             <TerrainType Name = "Flat" />
             <TerrainType Name = "Rough" />

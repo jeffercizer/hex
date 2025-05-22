@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using Godot;
 
 [Serializable]
 public class Player
@@ -22,8 +23,10 @@ public class Player
         this.unitResearchEffects = new();
         this.buildingResearchEffects = new();
         this.queuedResearch = new();
+        this.partialResearchDictionary = new();
+        //SelectResearch(String.Agriculture);
         game.teamManager.AddTeam(teamNum, 50);
-        OnResearchComplete(ResearchType.Agriculture);
+        OnResearchComplete("Agriculture");
     }
     public Player(Game game, int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
     {
@@ -49,14 +52,13 @@ public class Player
     public Dictionary<Hex, bool> seenGameHexDict;
     public Dictionary<int, int> cityGrowthDictionary;
     public List<ResearchQueueType> queuedResearch;
-    public Dictionary<ResearchType, ResearchQueueType> partialResearchDictionary;
-    public ResearchType currentResearch;
+    public Dictionary<String, ResearchQueueType> partialResearchDictionary;
     public List<Unit> unitList;
     public List<City> cityList;
     public List<(UnitEffect, UnitClass)> unitResearchEffects;
     public List<(BuildingEffect, String)> buildingResearchEffects;
     public HashSet<String> allowedBuildings;
-    public HashSet<UnitType> allowedUnits;
+    public HashSet<String> allowedUnits;
     public Dictionary<Hex, ResourceType> unassignedResources;
     public float strongestUnitBuilt = 0.0f;
 
@@ -231,15 +233,15 @@ public class Player
         turnFinished = true;
     }
 
-    public List<ResearchQueueType> SelectResearch(ResearchType researchType)
+    public List<ResearchQueueType> SelectResearch(String researchType)
     {
-        HashSet<ResearchType> visited = new();
+        HashSet<String> visited = new();
         List<ResearchQueueType> queue = new();
         if(queuedResearch.Any())
         {
             partialResearchDictionary[researchType] = queuedResearch[0];
         }
-        void TopologicalSort(ResearchType researchType)
+        void TopologicalSort(String researchType)
         {
             if (visited.Contains(researchType))
                 return; 
@@ -248,7 +250,7 @@ public class Player
 
             if (ResearchLoader.researchesDict.ContainsKey(researchType))
             {
-                foreach (ResearchType requirement in ResearchLoader.researchesDict[researchType].Requirements)
+                foreach (String requirement in ResearchLoader.researchesDict[researchType].Requirements)
                 {
                     TopologicalSort(requirement);
                 }
@@ -267,9 +269,9 @@ public class Player
         return queue;
     }
 
-    public void OnResearchComplete(ResearchType researchType)
+    public void OnResearchComplete(String researchType)
     {
-        foreach(UnitType unitType in ResearchLoader.researchesDict[researchType].UnitUnlocks)
+        foreach (String unitType in ResearchLoader.researchesDict[researchType].UnitUnlocks)
         {
             allowedUnits.Add(unitType);
         }
@@ -350,13 +352,13 @@ public class Player
 public class ResearchQueueType
 {
 
-    public ResearchQueueType(ResearchType researchType, float researchCost, float researchLeft)
+    public ResearchQueueType(String researchType, float researchCost, float researchLeft)
     {
         this.researchType = researchType;
         this.researchCost = researchCost;
         this.researchLeft = researchLeft;
     }
-    public ResearchType researchType;
+    public String researchType;
     public float researchCost;
     public float researchLeft;
 }

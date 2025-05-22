@@ -3,49 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-public enum ResearchType
-{
-    None,
-    Agriculture,
-    Sailing,
-    Pottery,
-    AnimalHusbandry,
-    Irrigation,
-    Writing,
-    Masonry,
-    Wheel,
-    BronzeWorking,
-    Archery,
-    Currency,
-}
-
 public struct ResearchInfo
 {
     public int Tier;
-    public List<ResearchType> Requirements;
+    public List<String> Requirements;
     public List<String> BuildingUnlocks;
-    public List<UnitType> UnitUnlocks;
+    public List<String> UnitUnlocks;
     public List<String> Effects;
 }
 
 public static class ResearchLoader
 {
-
-    public static Dictionary<ResearchType, string> researchNames = new Dictionary<ResearchType, string>
-    {
-        { ResearchType.Agriculture, "Agriculture" },
-        { ResearchType.Sailing, "Sailing" },
-        { ResearchType.Pottery, "Pottery"},
-        { ResearchType.AnimalHusbandry, "Animal Husbandry" },
-        { ResearchType.Irrigation, "Irrigation" },
-        { ResearchType.Writing, "Writing" },
-        { ResearchType.Masonry, "Masonry" },
-        { ResearchType.Wheel, "Wheel" },
-        { ResearchType.BronzeWorking, "Bronze Working"},
-        { ResearchType.Archery, "Archery" },
-        { ResearchType.Currency, "Currency" },
-    };
-    public static Dictionary<ResearchType, ResearchInfo> researchesDict;
+    public static Dictionary<String, ResearchInfo> researchesDict;
     
     static ResearchLoader()
     {
@@ -53,7 +22,7 @@ public static class ResearchLoader
         researchesDict = LoadResearchData(xmlPath);
     }
         
-    public static Dictionary<ResearchType, ResearchInfo> LoadResearchData(string xmlPath)
+    public static Dictionary<String, ResearchInfo> LoadResearchData(string xmlPath)
     {
         // Load the XML file
         XDocument xmlDoc = XDocument.Load(xmlPath);
@@ -61,21 +30,20 @@ public static class ResearchLoader
         // Parse the research data into a dictionary, allowing for nulls
         var ResearchData = xmlDoc.Descendants("Research")
             .ToDictionary(
-                r => Enum.Parse<ResearchType>(r.Attribute("Name")?.Value ?? throw new InvalidOperationException("Missing 'Name' attribute")),
+                r => r.Attribute("Name")?.Value ?? throw new InvalidOperationException("Missing 'Name' attribute"),
                 r => new ResearchInfo
                 {
                     Tier = int.Parse(r.Attribute("Tier")?.Value ?? "0"),
                     Requirements = r.Element("Requirements")?.Elements("ResearchType")
-                        .Select(e => Enum.TryParse<ResearchType>(e.Value, out var result) ? result : default)
-                        .Where(e => e != default)
-                        .ToList() ?? new List<ResearchType>(),
-                    BuildingUnlocks = r.Element("BuildingUnlocks")?.Elements("String")
-                        .Select(e => e.Value ?? throw new Exception("Invalid String"))
+                        .Select(e => e.Value ?? throw new Exception("Invalid Stringy"))
+                        .ToList() ?? new List<String>(),
+                    BuildingUnlocks = r.Element("BuildingUnlocks")?.Elements("BulidingType")
+                        .Select(e => e.Attribute("Name")?.Value ?? throw new Exception("Invalid BuildingUnlock"))
                         .ToList() ?? new List<string>(),
                     UnitUnlocks = r.Element("UnitUnlocks")?.Elements("UnitType")
-                        .Select(e => Enum.TryParse<UnitType>(e.Value, out var result) ? result : default)
-                        .Where(e => e != default)
-                        .ToList() ?? new List<UnitType>(),
+                        .Select(e => e.Attribute("Name")?.Value ?? throw new Exception("Invalid UnitUnlock"))
+                        .ToList() ?? new List<string>(),
+
                     Effects = r.Element("Effects")?.Elements("Effect")
                         .Select(e => e.Value)
                         .Where(e => !string.IsNullOrWhiteSpace(e))

@@ -14,7 +14,7 @@ public enum ProductionType
 public class ProductionQueueType
 {
 
-    public ProductionQueueType(String name, String buildingType, UnitType unitType, GameHex targetGameHex, float productionCost, float productionLeft)
+    public ProductionQueueType(String name, String buildingType, String unitType, GameHex targetGameHex, float productionCost, float productionLeft)
     {
         this.name = name;
         this.targetGameHex = targetGameHex;
@@ -22,26 +22,23 @@ public class ProductionQueueType
         this.productionLeft = productionLeft;
         this.buildingType = buildingType;
         this.unitType = unitType;
-        if(unitType != UnitType.None)
+        if(unitType != "")
         {
-            this.productionIcon = new TextureRect();
-            GD.Print(UnitLoader.unitsDict[unitType].IconPath);
-            this.productionIcon.Texture = Godot.ResourceLoader.Load<Texture2D>("res://" + UnitLoader.unitsDict[unitType].IconPath);
+            this.productionIconPath = UnitLoader.unitsDict[unitType].IconPath;
         }
         else if (buildingType != "")
         {
-            this.productionIcon = new TextureRect();
-            this.productionIcon.Texture = Godot.ResourceLoader.Load<Texture2D>("res://" + BuildingLoader.buildingsDict[buildingType].IconPath);
+            this.productionIconPath = UnitLoader.unitsDict[buildingType].IconPath;
         }
 
     }
     public String name;
     public String buildingType;
-    public UnitType unitType;
+    public String unitType;
     public GameHex targetGameHex;
     public float productionLeft;
     public float productionCost;
-    public TextureRect productionIcon;
+    public String productionIconPath;
 }
 
 
@@ -66,12 +63,18 @@ public class City
         readyToExpand = 0;
         foodToGrow = GetFoodToGrowCost();
 
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.NewCity(this);
+        }
+
         AddCityCenter(isCapital);
         this.isCapital = isCapital;
         this.wasCapital = isCapital;
 
         RecalculateYields();
         SetBaseHexYields();
+
     }
     public int id;
     public int teamNum;
@@ -146,10 +149,10 @@ public class City
         //arcticYields
     }
 
-    public (List<String>, List<UnitType>) GetProducables()
+    public (List<String>, List<String>) GetProducables()
     {
         List<String> buildings = new();
-        List<UnitType> units = new();
+        List<String> units = new();
         foreach(String buildingType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedBuildings)
         {
             int count = 0;
@@ -173,7 +176,7 @@ public class City
             }
         }
 
-        foreach(UnitType unitType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedUnits)
+        foreach(String unitType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedUnits)
         {
             units.Add(unitType);
         }
@@ -202,6 +205,11 @@ public class City
                 }
             }
             productionQueue.RemoveAt(index);
+            if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+            {
+                manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+                manager.UpdateGraphic(id, GraphicUpdateType.Update);
+            }
             return true;
         }
         return false;
@@ -217,17 +225,17 @@ public class City
         return count;
     }
 
-    public bool AddUnitToQueue(UnitType unitType)
+    public bool AddUnitToQueue(String unitType)
     {
-        return AddToQueue(UnitLoader.unitNames[unitType], "", unitType, gameHex, UnitLoader.unitsDict[unitType].ProductionCost);
+        return AddToQueue(unitType, "", unitType, gameHex, UnitLoader.unitsDict[unitType].ProductionCost);
     }
 
     public bool AddBuildingToQueue(String buildingType, GameHex targetGameHex)
     { 
-        return AddToQueue(buildingType, buildingType, UnitType.None, targetGameHex, BuildingLoader.buildingsDict[buildingType].ProductionCost);
+        return AddToQueue(buildingType, buildingType, "", targetGameHex, BuildingLoader.buildingsDict[buildingType].ProductionCost);
     }
 
-    public bool AddToQueue(String name, String buildingType, UnitType unitType, GameHex targetGameHex, float productionCost)
+    public bool AddToQueue(String name, String buildingType, String unitType, GameHex targetGameHex, float productionCost)
     {
         int count = 0;
         if(buildingType != "" && BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
@@ -260,6 +268,11 @@ public class City
         {
             productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, productionCost, productionCost));
         }
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
         return true;
     }
 
@@ -278,13 +291,25 @@ public class City
         RecalculateYields();
         productionQueue = new();
         partialProductionDictionary = new();
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            if(manager.selectedObjectID == id)
+            {
+                manager.UnselectObject();
+            }
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
         return true;
     }
 
     public void ChangeName(String name)
     {
         this.name = name;
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
     }
 
     public void OnTurnStarted(int turnNumber)
@@ -312,16 +337,22 @@ public class City
         if(productionQueue.Any())
         {
             productionQueue[0].productionLeft -= productionOverflow;
-            Math.Max(productionOverflow - productionQueue[0].productionLeft, 0);
+            productionOverflow = Math.Max(productionOverflow - productionQueue[0].productionLeft, 0);
             if(productionQueue[0].productionLeft <= 0)
             {
                 if(productionQueue[0].buildingType != "")
                 {
                     BuildOnHex(productionQueue[0].targetGameHex.hex, productionQueue[0].buildingType);
                 }
-                else if(productionQueue[0].unitType > (UnitType)0)
+                else if(productionQueue[0].unitType != "")
                 {
-                    Unit tempUnit = new Unit(Enum.Parse<UnitType>(productionQueue[0].name), gameHex.gameBoard.game.GetUniqueID(), productionQueue[0].targetGameHex, teamNum);
+                    Unit tempUnit = new Unit(productionQueue[0].name, gameHex.gameBoard.game.GetUniqueID(), teamNum);
+                    if (!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
+                    {
+                        tempUnit.name = "Ghost Man";
+                        tempUnit.decreaseHealth(99999.9f);
+                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager1)) manager1.NewUnit(tempUnit);
+                    }
                     if (UnitLoader.unitsDict.TryGetValue(tempUnit.unitType, out UnitInfo unitInfo))
                     {
                         if (unitInfo.CombatPower > gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt)
@@ -329,12 +360,7 @@ public class City
                             gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt = unitInfo.CombatPower;
                         }
                     }
-                    if(!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
-                    {
-                        tempUnit.name = "Ghost Man";
-                        tempUnit.decreaseHealth(99999.9f);
-                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager1)) manager1.NewUnit(tempUnit);
-                    }
+                    
                 }
                 productionQueue.RemoveAt(0);
             }
@@ -419,6 +445,7 @@ public class City
             manager.Update2DUI(UIElement.happinessPerTurn);
             manager.Update2DUI(UIElement.influencePerTurn);
             manager.UpdateGraphic(id, GraphicUpdateType.Update);
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
         }
     }
 

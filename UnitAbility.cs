@@ -56,7 +56,6 @@ public class UnitAbility
             }
             if (abilityTarget != null)
             {
-                GD.Print("Activate Ability");
                 return effect.Apply(usingUnit, combatPower, abilityTarget);
             }
             else
