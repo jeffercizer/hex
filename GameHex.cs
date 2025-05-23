@@ -240,7 +240,7 @@ public class GameHex
         {
             if (flexible)
             {
-                foreach(Hex rangeHex in hex.WrappingRange(3, gameBoard.left, gameBoard.right, gameBoard.top, gameBoard.bottom))
+                foreach(Hex rangeHex in hex.WrappingRange(3, gameBoard.left, gameBoard.right, gameBoard.top, gameBoard.bottom).OrderBy(h => hex.Distance(h)))
                 {
                     if(gameBoard.gameHexDict[rangeHex].SpawnUnit(newUnit, stackable, false))
                     {
@@ -254,7 +254,7 @@ public class GameHex
         else if(newUnit.movementCosts[(TerrainMoveType)terrainType] < 100)//if they cant stack and there aren't units or they can stack and units are/aren't there and the hex is valid for this unit
         {
             units.Add(newUnit);
-            newUnit.SetGameHex(this);
+            newUnit.SpawnSetup(this);
             return true;
         }
         return false;

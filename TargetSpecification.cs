@@ -14,7 +14,7 @@ public class TargetSpecification
     public bool TargetTiles { get; set; } = false;
     public bool TargetSelf { get; set; } = false;
 
-    public HashSet<UnitType> ValidUnitTypes { get; set; } = new HashSet<UnitType>();
+    public HashSet<String> ValidUnitTypes { get; set; } = new HashSet<String>();
     public UnitClass AllowedUnitClasses { get; set; } = UnitClass.None;
     public bool AllowsAnyUnit { get; set; } = false;
 
@@ -120,12 +120,16 @@ public class TargetSpecification
             bool validBuilding = false;
             if (gameHex.district != null)
             {
-                foreach (String buildingType in ValidBuildingTypes)
+                foreach (String allowedBuildingType in ValidBuildingTypes)
                 {
-                    if(buildingType == "" && gameHex.district.buildings.Count == 0)
+                    if (allowedBuildingType == "" && gameHex.district.buildings.Count == 0)
+                    {
+                        //probably a bugged edge case?
+                        return true;
+                    }
                     foreach (Building building in gameHex.district.buildings)
                     {
-                        if (buildingType == building.buildingType)
+                        if (allowedBuildingType == building.buildingType)
                         {
                             validBuilding = true;
                             break;
@@ -139,7 +143,14 @@ public class TargetSpecification
             }
             else
             {
-                return false;
+                foreach (String allowedBuildingType in ValidBuildingTypes)
+                {
+                    if (allowedBuildingType == "")
+                    {
+                        return true;
+                    }
+                }
+               return false;
             }
         }
 
@@ -150,7 +161,7 @@ public class TargetSpecification
                 throw new Exception("Must define ValidUnitTypes (none is an option) or set AllowsAnyUnit to true for import: " + castingUnit.name);
             }
             bool validUnit = false;
-            foreach (UnitType unitType in ValidUnitTypes)
+            foreach (String unitType in ValidUnitTypes)
             {
                 foreach (Unit unit in gameHex.units)
                 {

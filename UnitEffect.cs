@@ -213,6 +213,7 @@ public class UnitEffect
     }
     public bool Fortify(Unit unit)
     {
-        throw new NotImplementedException("Fortify Means a lot of work :)");
+        GD.PushWarning("Fortify Not Implemented");
+        return false;
     }
 }

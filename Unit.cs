@@ -24,11 +24,10 @@ public enum TerrainMoveType
 public class Unit
 {
 
-    public Unit(UnitType unitType, int id, GameHex gameHex, int teamNum)
+    public Unit(String unitType, int id, int teamNum)
     {
         this.id = id;
-        this.name = UnitLoader.unitNames[unitType];
-        this.gameHex = gameHex;
+        this.name = unitType;
         this.teamNum = teamNum;
         this.unitType = unitType;
     
@@ -37,7 +36,6 @@ public class Unit
             this.unitClass = unitInfo.Class;
             this.movementCosts = unitInfo.MovementCosts;
             this.sightCosts = unitInfo.SightCosts;
-    
             this.movementSpeed = unitInfo.MovementSpeed;
             this.sightRange = unitInfo.SightRange;
             this.healingFactor = unitInfo.HealingFactor;
@@ -59,9 +57,14 @@ public class Unit
             throw new ArgumentException($"Unit type '{name}' not found in unit data.");
         }
 
-        foreach((UnitEffect, UnitClass) effect in gameHex.gameBoard.game.playerDictionary[teamNum].unitResearchEffects)
+    }
+
+    public void SpawnSetup(GameHex targetGameHex)
+    {
+        gameHex = targetGameHex;
+        foreach ((UnitEffect, UnitClass) effect in gameHex.gameBoard.game.playerDictionary[teamNum].unitResearchEffects)
         {
-            if(unitClass.HasFlag(effect.Item2))
+            if (unitClass.HasFlag(effect.Item2))
             {
                 AddEffect(effect.Item1);
             }
@@ -74,7 +77,7 @@ public class Unit
 
     public String name;
     public int id;
-    public UnitType unitType;
+    public String unitType;
     public Dictionary<TerrainMoveType, float> movementCosts;
     public Dictionary<TerrainMoveType, float> sightCosts;
     public GameHex gameHex;
@@ -217,7 +220,6 @@ public class Unit
         if (targetGameHex.district != null && teamManager.GetEnemies(teamNum).Contains(targetGameHex.district.city.teamNum) && targetGameHex.district.health > 0.0f)
         {
             SetAttacksLeft(attacksLeft - 1);
-            GD.Print("ATTACK DISTRICT");
             return DistrictCombat(targetGameHex);;
         }
         if (targetGameHex.units.Any())
@@ -228,7 +230,6 @@ public class Unit
                 //combat math TODO
                 //if we didn't die and the enemy has died we can move in otherwise atleast one of us should poof
                 SetAttacksLeft(attacksLeft - 1);
-                GD.Print("ATTACK UNIT");
                 return UnitCombat(targetGameHex, unit);
             }
             return false;

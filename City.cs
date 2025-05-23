@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using Godot;
+using System.Reflection;
 
 public enum ProductionType
 {
@@ -14,7 +15,7 @@ public enum ProductionType
 public class ProductionQueueType
 {
 
-    public ProductionQueueType(String name, String buildingType, UnitType unitType, GameHex targetGameHex, float productionCost, float productionLeft)
+    public ProductionQueueType(String name, String buildingType, String unitType, GameHex targetGameHex, float productionCost, float productionLeft)
     {
         this.name = name;
         this.targetGameHex = targetGameHex;
@@ -22,25 +23,23 @@ public class ProductionQueueType
         this.productionLeft = productionLeft;
         this.buildingType = buildingType;
         this.unitType = unitType;
-        if(unitType != UnitType.None)
+        if(unitType != "")
         {
-            this.productionIcon = new TextureRect();
-            this.productionIcon.Texture = Godot.ResourceLoader.Load<Texture2D>("res://" + UnitLoader.unitsDict[unitType].IconPath);
+            this.productionIconPath = UnitLoader.unitsDict[unitType].IconPath;
         }
         else if (buildingType != "")
         {
-            this.productionIcon = new TextureRect();
-            this.productionIcon.Texture = Godot.ResourceLoader.Load<Texture2D>("res://" + BuildingLoader.buildingsDict[buildingType].IconPath);
+            this.productionIconPath = UnitLoader.unitsDict[buildingType].IconPath;
         }
 
     }
     public String name;
     public String buildingType;
-    public UnitType unitType;
+    public String unitType;
     public GameHex targetGameHex;
     public float productionLeft;
     public float productionCost;
-    public TextureRect productionIcon;
+    public String productionIconPath;
 }
 
 
@@ -63,7 +62,13 @@ public class City
         citySize = 0;
         naturalPopulation = 0;
         readyToExpand = 0;
+        maxDistrictSize = 2;
         foodToGrow = GetFoodToGrowCost();
+
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.NewCity(this);
+        }
 
         AddCityCenter(isCapital);
         this.isCapital = isCapital;
@@ -71,6 +76,7 @@ public class City
 
         RecalculateYields();
         SetBaseHexYields();
+
     }
     public int id;
     public int teamNum;
@@ -78,6 +84,7 @@ public class City
     public bool isCapital;
     public bool wasCapital;
     public int originalCapitalTeamID;
+    public int maxDistrictSize;
     public List<District> districts;
     public GameHex gameHex;
     public Yields yields;
@@ -145,10 +152,10 @@ public class City
         //arcticYields
     }
 
-    public (List<String>, List<UnitType>) GetProducables()
+    public (List<String>, List<String>) GetProducables()
     {
         List<String> buildings = new();
-        List<UnitType> units = new();
+        List<String> units = new();
         foreach(String buildingType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedBuildings)
         {
             int count = 0;
@@ -172,7 +179,7 @@ public class City
             }
         }
 
-        foreach(UnitType unitType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedUnits)
+        foreach(String unitType in gameHex.gameBoard.game.playerDictionary[teamNum].allowedUnits)
         {
             units.Add(unitType);
         }
@@ -201,9 +208,49 @@ public class City
                 }
             }
             productionQueue.RemoveAt(index);
+
+            if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+            {
+                manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+                manager.UpdateGraphic(id, GraphicUpdateType.Update);
+            }
             return true;
         }
         return false;
+    }
+
+    public bool MoveToFrontOfProductionQueue(int indexToMove)
+    {
+        if (indexToMove < 0 || indexToMove >= productionQueue.Count)
+        {
+            GD.PushWarning("Index out of bounds");
+            return false;
+        }
+        ProductionQueueType item = productionQueue[indexToMove];
+        int frontalItemIndex = indexToMove;
+        for (int i = 0; i < productionQueue.Count; i++)
+        {
+            if (productionQueue[i].name == productionQueue[indexToMove].name & productionQueue[i].productionLeft < productionQueue[indexToMove].productionLeft)
+            {
+                frontalItemIndex = i;
+            }
+        }
+
+        //now we have frontalItemIndex, the index of the most finished item of our type and the index of the item we want to move, so we move our target item to the most finished item slot and move the most finished to the front
+        //store bestItem, replace it with target, remove target, insert bestItem
+        ProductionQueueType bestItem = productionQueue[frontalItemIndex];
+        productionQueue[frontalItemIndex] = item;
+        productionQueue.RemoveAt(indexToMove);
+        productionQueue.Insert(0, bestItem);
+
+        //RemoveFromQueue(indexToMove);
+        //AddToFrontOfQueue(item.name, item.buildingType, item.unitType, item.targetGameHex, item.productionCost);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
+        return true;
     }
 
     public int CountString(String buildingType)
@@ -216,17 +263,17 @@ public class City
         return count;
     }
 
-    public bool AddUnitToQueue(UnitType unitType)
+    public bool AddUnitToQueue(String unitType)
     {
-        return AddToQueue(UnitLoader.unitNames[unitType], "", unitType, gameHex, UnitLoader.unitsDict[unitType].ProductionCost);
+        return AddToQueue(unitType, "", unitType, gameHex, UnitLoader.unitsDict[unitType].ProductionCost);
     }
 
     public bool AddBuildingToQueue(String buildingType, GameHex targetGameHex)
     { 
-        return AddToQueue(buildingType, buildingType, UnitType.None, targetGameHex, BuildingLoader.buildingsDict[buildingType].ProductionCost);
+        return AddToQueue(buildingType, buildingType, "", targetGameHex, BuildingLoader.buildingsDict[buildingType].ProductionCost);
     }
 
-    public bool AddToQueue(String name, String buildingType, UnitType unitType, GameHex targetGameHex, float productionCost)
+    public bool AddToQueue(String name, String buildingType, String unitType, GameHex targetGameHex, float productionCost)
     {
         int count = 0;
         if(buildingType != "" && BuildingLoader.buildingsDict[buildingType].PerCity != 0 )
@@ -248,19 +295,64 @@ public class City
         {
             return false;
         }
-        
         ProductionQueueType queueItem1;
         if(partialProductionDictionary.TryGetValue(name, out queueItem1))
         {
             partialProductionDictionary.Remove(name);
-            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost));
+            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, queueItem1.productionCost, queueItem1.productionLeft));
         }
         else
         {
             productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, productionCost, productionCost));
         }
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
         return true;
     }
+
+    public bool AddToFrontOfQueue(String name, String buildingType, String unitType, GameHex targetGameHex, float productionCost)
+    {
+        int count = 0;
+        if (buildingType != "" && BuildingLoader.buildingsDict[buildingType].PerCity != 0)
+        {
+            count = CountString(buildingType);
+        }
+        foreach (ProductionQueueType queueItem in productionQueue)
+        {
+            if (queueItem.buildingType == buildingType)
+            {
+                count += 1;
+            }
+        }
+        if (buildingType != "" && count >= BuildingLoader.buildingsDict[buildingType].PerCity)
+        {
+            return false;
+        }
+        if (gameHex.gameBoard.game.builtWonders.Contains(buildingType))
+        {
+            return false;
+        }
+        ProductionQueueType queueItem1;
+        if (partialProductionDictionary.TryGetValue(name, out queueItem1))
+        {
+            partialProductionDictionary.Remove(name);
+            productionQueue.Insert(0, new ProductionQueueType(name, buildingType, unitType, targetGameHex, queueItem1.productionCost, queueItem1.productionLeft));
+        }
+        else
+        {
+            productionQueue.Insert(0, new ProductionQueueType(name, buildingType, unitType, targetGameHex, productionCost, productionCost));
+        }
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
+        return true;
+    }
+
 
     public bool ChangeTeam(int newTeamNum)
     {
@@ -277,13 +369,25 @@ public class City
         RecalculateYields();
         productionQueue = new();
         partialProductionDictionary = new();
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            if(manager.selectedObjectID == id)
+            {
+                manager.UnselectObject();
+            }
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
         return true;
     }
 
     public void ChangeName(String name)
     {
         this.name = name;
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
     }
 
     public void OnTurnStarted(int turnNumber)
@@ -310,17 +414,24 @@ public class City
         }
         if(productionQueue.Any())
         {
+            float productionLeftTemp = productionQueue[0].productionLeft;
             productionQueue[0].productionLeft -= productionOverflow;
-            Math.Max(productionOverflow - productionQueue[0].productionLeft, 0);
+            productionOverflow = Math.Max(productionOverflow - productionLeftTemp, 0);
             if(productionQueue[0].productionLeft <= 0)
             {
                 if(productionQueue[0].buildingType != "")
                 {
                     BuildOnHex(productionQueue[0].targetGameHex.hex, productionQueue[0].buildingType);
                 }
-                else if(productionQueue[0].unitType > (UnitType)0)
+                else if(productionQueue[0].unitType != "")
                 {
-                    Unit tempUnit = new Unit(Enum.Parse<UnitType>(productionQueue[0].name), gameHex.gameBoard.game.GetUniqueID(), productionQueue[0].targetGameHex, teamNum);
+                    Unit tempUnit = new Unit(productionQueue[0].name, gameHex.gameBoard.game.GetUniqueID(), teamNum);
+                    if (!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
+                    {
+                        tempUnit.name = "Ghost Man";
+                        tempUnit.decreaseHealth(99999.9f);
+                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager1)) manager1.NewUnit(tempUnit);
+                    }
                     if (UnitLoader.unitsDict.TryGetValue(tempUnit.unitType, out UnitInfo unitInfo))
                     {
                         if (unitInfo.CombatPower > gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt)
@@ -328,12 +439,7 @@ public class City
                             gameHex.gameBoard.game.playerDictionary[teamNum].strongestUnitBuilt = unitInfo.CombatPower;
                         }
                     }
-                    if(!productionQueue[0].targetGameHex.SpawnUnit(tempUnit, false, true))
-                    {
-                        tempUnit.name = "Ghost Man";
-                        tempUnit.decreaseHealth(99999.9f);
-                        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager1)) manager1.NewUnit(tempUnit);
-                    }
+                    
                 }
                 productionQueue.RemoveAt(0);
             }
@@ -418,6 +524,7 @@ public class City
             manager.Update2DUI(UIElement.happinessPerTurn);
             manager.Update2DUI(UIElement.influencePerTurn);
             manager.UpdateGraphic(id, GraphicUpdateType.Update);
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
         }
     }
 
@@ -452,23 +559,27 @@ public class City
             District district = new District(gameHex, false, false, this);
             districts.Add(district);
             readyToExpand -= 1;
+            if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+            {
+                manager.ClearWaitForTarget();
+            }
         }
         else
         {
-            Console.WriteLine("tried to expand without readyToExpand > 0");
+            GD.PushWarning("tried to expand without readyToExpand > 0");
         }
     }
 
     //valid hexes for a rural district
-    public List<Hex> ValidExpandHexes(List<TerrainType> validTerrain)
+    public List<Hex> ValidExpandHexes(List<TerrainType> validTerrain, int range = 3)
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
+        foreach(Hex hex in gameHex.hex.WrappingRange(range, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
         {
-            if(validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
+            if(validTerrain.Count == 0 || validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
             {
-                //hex is unowned or owned by us so continue
+                //hex is owned by us so continue
                 if(gameHex.gameBoard.gameHexDict[hex].ownedBy == -1 | gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex does not have a district
@@ -503,41 +614,136 @@ public class City
         return validHexes;
     }
     
-    //valid hexes to build a district or build a new building on one
-    public List<Hex> ValidUrbanBuildHexes(List<TerrainType> validTerrain)
+    //valid hexes to build a building
+    public List<Hex> ValidUrbanBuildHexes(List<TerrainType> validTerrain, int range=3)
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
+        foreach(Hex hex in gameHex.hex.WrappingRange(range, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
         {
-            if(validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
+            if(validTerrain.Count == 0 || validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
             {
-                //hex is unowned or owned by us so continue
-                if(gameHex.gameBoard.gameHexDict[hex].ownedBy == -1 | gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
+                //hex is owned by us so continue
+                if(gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
-                    //hex does not have a district or it is not urban or has less than the max buildings TODO
-                    if (gameHex.gameBoard.gameHexDict[hex].district == null || !gameHex.gameBoard.gameHexDict[hex].district.isUrban | gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
+                    //hex has less than the max buildings
+                    if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
                     {
                         //hex doesnt have a enemy unit
                         bool noEnemyUnit = true;
-                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
                         {
-                            if(gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                             {
                                 noEnemyUnit = false;
                                 break;
                             }
                         }
-                        bool adjacentUrbanDistrict = false;
-                        foreach(Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        if(noEnemyUnit)
                         {
-                            if(gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
+                            validHexes.Add(hex);
+                        }
+                    }
+                }
+            }
+        }
+        return validHexes;
+    }
+
+    //valid hex to build an urban district or expand one
+    public List<Hex> ValidUrbanExpandHexes(List<TerrainType> validTerrain, int range=3)
+    {
+        List<Hex> validHexes = new();
+        //gather valid targets
+        foreach (Hex hex in gameHex.hex.WrappingRange(range, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
+        {
+            if (validTerrain.Count == 0 || validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
+            {
+                //hex is owned by us so continue
+                if (gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
+                {
+                    //hex does not have a district
+                    var district = gameHex.gameBoard.gameHexDict[hex].district;
+
+                    if (gameHex.gameBoard.gameHexDict[hex].district == null || !gameHex.gameBoard.gameHexDict[hex].district.isUrban )
+                    {
+                        //hex doesnt have a enemy unit
+                        bool noEnemyUnit = true;
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        {
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            {
+                                noEnemyUnit = false;
+                                break;
+                            }
+                        }
+                        //have an adjacent urban district
+                        bool adjacentUrbanDistrict = false;
+                        foreach (Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if (gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
                             {
                                 adjacentUrbanDistrict = true;
                                 break;
                             }
                         }
-                        if(noEnemyUnit && adjacentUrbanDistrict)
+                        if (noEnemyUnit && adjacentUrbanDistrict)
+                        {
+                            validHexes.Add(hex);
+                        }
+                    }
+                    //hex does have a rural district
+                    else if (gameHex.gameBoard.gameHexDict[hex].district != null && !gameHex.gameBoard.gameHexDict[hex].district.isUrban)
+                    {
+                        //hex doesnt have a enemy unit
+                        bool noEnemyUnit = true;
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        {
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            {
+                                noEnemyUnit = false;
+                                break;
+                            }
+                        }
+                        //have an adjacent urban district
+                        bool adjacentUrbanDistrict = false;
+                        foreach (Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if (gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
+                            {
+                                adjacentUrbanDistrict = true;
+                                break;
+                            }
+                        }
+                        if (noEnemyUnit && adjacentUrbanDistrict)
+                        {
+                            validHexes.Add(hex);
+                        }
+                    }
+                    //hex has a urban district with space to expand
+                    else if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban && gameHex.gameBoard.gameHexDict[hex].district.maxBuildings < maxDistrictSize)
+                    {
+                        //hex doesnt have a enemy unit
+                        bool noEnemyUnit = true;
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        {
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            {
+                                noEnemyUnit = false;
+                                break;
+                            }
+                        }
+                        //have an adjacent urban district
+                        bool adjacentUrbanDistrict = false;
+                        foreach (Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if (gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
+                            {
+                                adjacentUrbanDistrict = true;
+                                break;
+                            }
+                        }
+                        if (noEnemyUnit && adjacentUrbanDistrict)
                         {
                             validHexes.Add(hex);
                         }
