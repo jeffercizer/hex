@@ -240,7 +240,7 @@ public class GameHex
         {
             if (flexible)
             {
-                foreach(Hex rangeHex in hex.WrappingRange(3, gameBoard.left, gameBoard.right, gameBoard.top, gameBoard.bottom))
+                foreach(Hex rangeHex in hex.WrappingRange(3, gameBoard.left, gameBoard.right, gameBoard.top, gameBoard.bottom).OrderBy(h => hex.Distance(h)))
                 {
                     if(gameBoard.gameHexDict[rangeHex].SpawnUnit(newUnit, stackable, false))
                     {

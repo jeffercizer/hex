@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using Godot;
+using System.Reflection;
 
 public enum ProductionType
 {
@@ -205,6 +206,7 @@ public class City
                 }
             }
             productionQueue.RemoveAt(index);
+
             if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
             {
                 manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
@@ -217,8 +219,36 @@ public class City
 
     public bool MoveToFrontOfProductionQueue(int indexToMove)
     {
-        GD.PushWarning("NOT IMPLEMENTED");
-        return false;
+        if (indexToMove < 0 || indexToMove >= productionQueue.Count)
+        {
+            GD.PushWarning("Index out of bounds");
+            return false;
+        }
+        ProductionQueueType item = productionQueue[indexToMove];
+        int frontalItemIndex = indexToMove;
+        for (int i = 0; i < productionQueue.Count; i++)
+        {
+            if (productionQueue[i].name == productionQueue[indexToMove].name & productionQueue[i].productionLeft < productionQueue[indexToMove].productionLeft)
+            {
+                frontalItemIndex = i;
+            }
+        }
+
+        //now we have frontalItemIndex, the index of the most finished item of our type and the index of the item we want to move, so we move our target item to the most finished item slot and move the most finished to the front
+        //store bestItem, replace it with target, remove target, insert bestItem
+        ProductionQueueType bestItem = productionQueue[frontalItemIndex];
+        productionQueue[frontalItemIndex] = item;
+        productionQueue.RemoveAt(indexToMove);
+        productionQueue.Insert(0, bestItem);
+
+        //RemoveFromQueue(indexToMove);
+        //AddToFrontOfQueue(item.name, item.buildingType, item.unitType, item.targetGameHex, item.productionCost);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
+        return true;
     }
 
     public int CountString(String buildingType)
@@ -263,12 +293,11 @@ public class City
         {
             return false;
         }
-        
         ProductionQueueType queueItem1;
         if(partialProductionDictionary.TryGetValue(name, out queueItem1))
         {
             partialProductionDictionary.Remove(name);
-            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, queueItem1.productionLeft, queueItem1.productionCost));
+            productionQueue.Add(new ProductionQueueType(name, buildingType, unitType, targetGameHex, queueItem1.productionCost, queueItem1.productionLeft));
         }
         else
         {
@@ -281,6 +310,47 @@ public class City
         }
         return true;
     }
+
+    public bool AddToFrontOfQueue(String name, String buildingType, String unitType, GameHex targetGameHex, float productionCost)
+    {
+        int count = 0;
+        if (buildingType != "" && BuildingLoader.buildingsDict[buildingType].PerCity != 0)
+        {
+            count = CountString(buildingType);
+        }
+        foreach (ProductionQueueType queueItem in productionQueue)
+        {
+            if (queueItem.buildingType == buildingType)
+            {
+                count += 1;
+            }
+        }
+        if (buildingType != "" && count >= BuildingLoader.buildingsDict[buildingType].PerCity)
+        {
+            return false;
+        }
+        if (gameHex.gameBoard.game.builtWonders.Contains(buildingType))
+        {
+            return false;
+        }
+        ProductionQueueType queueItem1;
+        if (partialProductionDictionary.TryGetValue(name, out queueItem1))
+        {
+            partialProductionDictionary.Remove(name);
+            productionQueue.Insert(0, new ProductionQueueType(name, buildingType, unitType, targetGameHex, queueItem1.productionCost, queueItem1.productionLeft));
+        }
+        else
+        {
+            productionQueue.Insert(0, new ProductionQueueType(name, buildingType, unitType, targetGameHex, productionCost, productionCost));
+        }
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.uiManager.cityInfoPanel.UpdateCityPanelInfo();
+            manager.UpdateGraphic(id, GraphicUpdateType.Update);
+        }
+        return true;
+    }
+
 
     public bool ChangeTeam(int newTeamNum)
     {
@@ -345,7 +415,6 @@ public class City
             float productionLeftTemp = productionQueue[0].productionLeft;
             productionQueue[0].productionLeft -= productionOverflow;
             productionOverflow = Math.Max(productionOverflow - productionLeftTemp, 0);
-
             if(productionQueue[0].productionLeft <= 0)
             {
                 if(productionQueue[0].buildingType != "")
