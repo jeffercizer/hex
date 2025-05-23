@@ -215,6 +215,12 @@ public class City
         return false;
     }
 
+    public bool MoveToFrontOfProductionQueue(int indexToMove)
+    {
+        GD.PushWarning("NOT IMPLEMENTED");
+        return false;
+    }
+
     public int CountString(String buildingType)
     {
         int count = 0;
@@ -336,8 +342,10 @@ public class City
         }
         if(productionQueue.Any())
         {
+            float productionLeftTemp = productionQueue[0].productionLeft;
             productionQueue[0].productionLeft -= productionOverflow;
-            productionOverflow = Math.Max(productionOverflow - productionQueue[0].productionLeft, 0);
+            productionOverflow = Math.Max(productionOverflow - productionLeftTemp, 0);
+
             if(productionQueue[0].productionLeft <= 0)
             {
                 if(productionQueue[0].buildingType != "")
