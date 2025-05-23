@@ -37,7 +37,7 @@ public static class ResearchLoader
                     Requirements = r.Element("Requirements")?.Elements("ResearchType")
                         .Select(e => e.Value ?? throw new Exception("Invalid Stringy"))
                         .ToList() ?? new List<String>(),
-                    BuildingUnlocks = r.Element("BuildingUnlocks")?.Elements("BulidingType")
+                    BuildingUnlocks = r.Element("BuildingUnlocks")?.Elements("BuildingType")
                         .Select(e => e.Attribute("Name")?.Value ?? throw new Exception("Invalid BuildingUnlock"))
                         .ToList() ?? new List<string>(),
                     UnitUnlocks = r.Element("UnitUnlocks")?.Elements("UnitType")

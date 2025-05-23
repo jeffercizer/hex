@@ -51,8 +51,6 @@ public class UnitAbility
             if(usingUnit.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
             {
                 manager.Update2DUI(UIElement.unitDisplay);
-                manager.SetWaitForTargeting(false);
-                manager.waitingAbility = null;
             }
             if (abilityTarget != null)
             {

@@ -62,6 +62,7 @@ public class City
         citySize = 0;
         naturalPopulation = 0;
         readyToExpand = 0;
+        maxDistrictSize = 2;
         foodToGrow = GetFoodToGrowCost();
 
         if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
@@ -83,6 +84,7 @@ public class City
     public bool isCapital;
     public bool wasCapital;
     public int originalCapitalTeamID;
+    public int maxDistrictSize;
     public List<District> districts;
     public GameHex gameHex;
     public Yields yields;
@@ -557,23 +559,27 @@ public class City
             District district = new District(gameHex, false, false, this);
             districts.Add(district);
             readyToExpand -= 1;
+            if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+            {
+                manager.ClearWaitForTarget();
+            }
         }
         else
         {
-            Console.WriteLine("tried to expand without readyToExpand > 0");
+            GD.PushWarning("tried to expand without readyToExpand > 0");
         }
     }
 
     //valid hexes for a rural district
-    public List<Hex> ValidExpandHexes(List<TerrainType> validTerrain)
+    public List<Hex> ValidExpandHexes(List<TerrainType> validTerrain, int range = 3)
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
+        foreach(Hex hex in gameHex.hex.WrappingRange(range, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
         {
-            if(validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
+            if(validTerrain.Count == 0 || validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
             {
-                //hex is unowned or owned by us so continue
+                //hex is owned by us so continue
                 if(gameHex.gameBoard.gameHexDict[hex].ownedBy == -1 | gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex does not have a district
@@ -608,41 +614,136 @@ public class City
         return validHexes;
     }
     
-    //valid hexes to build a district or build a new building on one
-    public List<Hex> ValidUrbanBuildHexes(List<TerrainType> validTerrain)
+    //valid hexes to build a building
+    public List<Hex> ValidUrbanBuildHexes(List<TerrainType> validTerrain, int range=3)
     {
         List<Hex> validHexes = new();
         //gather valid targets
-        foreach(Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
+        foreach(Hex hex in gameHex.hex.WrappingRange(range, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
         {
-            if(validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
+            if(validTerrain.Count == 0 || validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
             {
-                //hex is unowned or owned by us so continue
-                if(gameHex.gameBoard.gameHexDict[hex].ownedBy == -1 | gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
+                //hex is owned by us so continue
+                if(gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
-                    //hex does not have a district or it is not urban or has less than the max buildings TODO
-                    if (gameHex.gameBoard.gameHexDict[hex].district == null || !gameHex.gameBoard.gameHexDict[hex].district.isUrban | gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
+                    //hex has less than the max buildings
+                    if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.buildings.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxBuildings)
                     {
                         //hex doesnt have a enemy unit
                         bool noEnemyUnit = true;
-                        foreach(Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
                         {
-                            if(gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
                             {
                                 noEnemyUnit = false;
                                 break;
                             }
                         }
-                        bool adjacentUrbanDistrict = false;
-                        foreach(Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        if(noEnemyUnit)
                         {
-                            if(gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
+                            validHexes.Add(hex);
+                        }
+                    }
+                }
+            }
+        }
+        return validHexes;
+    }
+
+    //valid hex to build an urban district or expand one
+    public List<Hex> ValidUrbanExpandHexes(List<TerrainType> validTerrain, int range=3)
+    {
+        List<Hex> validHexes = new();
+        //gather valid targets
+        foreach (Hex hex in gameHex.hex.WrappingRange(range, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
+        {
+            if (validTerrain.Count == 0 || validTerrain.Contains(gameHex.gameBoard.gameHexDict[hex].terrainType))
+            {
+                //hex is owned by us so continue
+                if (gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
+                {
+                    //hex does not have a district
+                    var district = gameHex.gameBoard.gameHexDict[hex].district;
+
+                    if (gameHex.gameBoard.gameHexDict[hex].district == null || !gameHex.gameBoard.gameHexDict[hex].district.isUrban )
+                    {
+                        //hex doesnt have a enemy unit
+                        bool noEnemyUnit = true;
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        {
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            {
+                                noEnemyUnit = false;
+                                break;
+                            }
+                        }
+                        //have an adjacent urban district
+                        bool adjacentUrbanDistrict = false;
+                        foreach (Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if (gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
                             {
                                 adjacentUrbanDistrict = true;
                                 break;
                             }
                         }
-                        if(noEnemyUnit && adjacentUrbanDistrict)
+                        if (noEnemyUnit && adjacentUrbanDistrict)
+                        {
+                            validHexes.Add(hex);
+                        }
+                    }
+                    //hex does have a rural district
+                    else if (gameHex.gameBoard.gameHexDict[hex].district != null && !gameHex.gameBoard.gameHexDict[hex].district.isUrban)
+                    {
+                        //hex doesnt have a enemy unit
+                        bool noEnemyUnit = true;
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        {
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            {
+                                noEnemyUnit = false;
+                                break;
+                            }
+                        }
+                        //have an adjacent urban district
+                        bool adjacentUrbanDistrict = false;
+                        foreach (Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if (gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
+                            {
+                                adjacentUrbanDistrict = true;
+                                break;
+                            }
+                        }
+                        if (noEnemyUnit && adjacentUrbanDistrict)
+                        {
+                            validHexes.Add(hex);
+                        }
+                    }
+                    //hex has a urban district with space to expand
+                    else if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban && gameHex.gameBoard.gameHexDict[hex].district.maxBuildings < maxDistrictSize)
+                    {
+                        //hex doesnt have a enemy unit
+                        bool noEnemyUnit = true;
+                        foreach (Unit unit in gameHex.gameBoard.gameHexDict[hex].units)
+                        {
+                            if (gameHex.gameBoard.game.teamManager.GetEnemies(teamNum).Contains(unit.teamNum))
+                            {
+                                noEnemyUnit = false;
+                                break;
+                            }
+                        }
+                        //have an adjacent urban district
+                        bool adjacentUrbanDistrict = false;
+                        foreach (Hex hex2 in hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                        {
+                            if (gameHex.gameBoard.gameHexDict[hex2].district != null && gameHex.gameBoard.gameHexDict[hex2].district.isUrban)
+                            {
+                                adjacentUrbanDistrict = true;
+                                break;
+                            }
+                        }
+                        if (noEnemyUnit && adjacentUrbanDistrict)
                         {
                             validHexes.Add(hex);
                         }

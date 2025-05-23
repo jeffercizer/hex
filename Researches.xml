@@ -6,6 +6,7 @@
         <UnitUnlocks>
             <UnitType Name="Scout" />
             <UnitType Name="Warrior" />
+            <UnitType Name="Slinger" />
         </UnitUnlocks>
         <Effects>
             <Effect Name="AgricultureEffect" />

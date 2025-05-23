@@ -1,5 +1,5 @@
 <Buildings>
-  <Building Name="Palace" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="5.0" CultureYield="5.0" HappinessYield="5.0" InfluenceYield="5.0" MaintenanceCost="0.0" PerCity="1" PerPlayer="1" Wonder="False">
+  <Building Name="Palace" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="5.0" CultureYield="5.0" HappinessYield="5.0" InfluenceYield="5.0" MaintenanceCost="0.0" PerCity="1" PerPlayer="1" Wonder="False" IconPath="graphics/ui/icons/star.png" ModelPath="graphics/models/huts.glb">
     <Effects>
       <Effect Name="WaterSupplyEffect" />
       <Effect Name="AncientWallEffect" />
@@ -25,7 +25,7 @@
       <TerrainType>Ocean</TerrainType>
     </TerrainTypes>
   </Building>
-  <Building Name="Granary" ProductionCost="20" GoldCost="100" FoodYield="0.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="0.0" HappinessYield="0.0" InfluenceYield="0.0" MaintenanceCost="1.0" PerCity="1" PerPlayer="0" Wonder="False">
+  <Building Name="Granary" ProductionCost="20" GoldCost="100" FoodYield="1.0" ProductionYield="0.0" GoldYield="0.0" ScienceYield="0.0" CultureYield="0.0" HappinessYield="0.0" InfluenceYield="0.0" MaintenanceCost="1.0" PerCity="1" PerPlayer="0" Wonder="False" IconPath="graphics/ui/icons/house.png" ModelPath="graphics/models/granary.glb">
     <Effects>
       <Effect Name="GranaryWarehouseEffect" />
     </Effects>

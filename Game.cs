@@ -655,7 +655,7 @@ struct GameTests
         player1City.AddUnitToQueue("Slinger");
         player2City.AddUnitToQueue("Slinger");
         int count = 0;
-        while(count < 5)
+        while(count < 10)
         {
             game.turnManager.EndCurrentTurn(1);
             game.turnManager.EndCurrentTurn(2);
