@@ -13,7 +13,7 @@
     </TerrainTypes>
   </Building>
 
-  <Building Name="CityCenter" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="1.0" CultureYield="1.0" HappinessYield="0.0" InfluenceYield="0.0" MaintenanceCost="0.0" PerCity="1" PerPlayer="0" Wonder="False">
+  <Building Name="CityCenter" ProductionCost="0" GoldCost="0" FoodYield="5.0" ProductionYield="5.0" GoldYield="5.0" ScienceYield="1.0" CultureYield="1.0" HappinessYield="0.0" InfluenceYield="0.0" MaintenanceCost="0.0" PerCity="1" PerPlayer="0" Wonder="False" IconPath="graphics/ui/icons/house.png" ModelPath="graphics/models/huts.glb">
     <Effects>
       <Effect Name="WaterSupplyEffect" />
       <Effect Name="CityCenterWallEffect" />

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using Godot;
 
 public enum BuildingEffectType
 {
@@ -152,7 +153,8 @@ public class BuildingEffect
         if(building.district.gameHex.terrainType == TerrainType.Coast ||building.district.gameHex.featureSet.Contains(FeatureType.River) 
                 || building.district.gameHex.featureSet.Contains(FeatureType.Wetland))
         {
-            waterHappinessYield = 10.0f;
+            GD.Print("water supply effect1 " + building.district.gameHex.hex);
+            waterHappinessYield = 5.0f;
         }
         else
         {
@@ -161,7 +163,8 @@ public class BuildingEffect
                 if (building.district.gameHex.gameBoard.gameHexDict[hex].terrainType == TerrainType.Coast || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.River) 
                     || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Wetland))
                 {
-                    waterHappinessYield = 10.0f;
+                    GD.Print("water supply effect2 " + building.district.gameHex.hex);
+                    waterHappinessYield = 5.0f;
                     break;
                 }
             }

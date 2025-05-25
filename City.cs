@@ -682,7 +682,7 @@ public class City
                     bool adjacentDistrict = false;
                     foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
                     {
-                        if (gameHex.gameBoard.gameHexDict[hex].district != null)
+                        if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.city == this)
                         {
                             adjacentDistrict = true;
                             break;
@@ -722,7 +722,7 @@ public class City
             if (targetGameHex.ownedBy == teamNum)
             {
                 //hex has less than the max buildings
-                if (targetGameHex.district != null && targetGameHex.district.buildings.Count() < targetGameHex.district.maxBuildings)
+                if (targetGameHex.district != null && targetGameHex.district.buildings.Count() < targetGameHex.district.maxBuildings && targetGameHex.district.city == this)
                 {
                     //hex doesnt have a enemy unit
                     bool noEnemyUnit = true;
@@ -790,7 +790,7 @@ public class City
                     bool adjacentUrbanDistrict = false;
                     foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
                     {
-                        if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban)
+                        if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban && gameHex.gameBoard.gameHexDict[hex].district.city == this)
                         {
                             adjacentUrbanDistrict = true;
                             break;
@@ -820,7 +820,7 @@ public class City
                     bool adjacentUrbanDistrict = false;
                     foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
                     {
-                        if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban)
+                        if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban && gameHex.gameBoard.gameHexDict[hex].district.city == this)
                         {
                             adjacentUrbanDistrict = true;
                             break;
@@ -863,7 +863,7 @@ public class City
                 if(gameHex.gameBoard.gameHexDict[hex].ownedBy == teamNum)
                 {
                     //hex has a district with less than the max defenses TODO
-                    if (gameHex.gameBoard.gameHexDict[hex].district != null & gameHex.gameBoard.gameHexDict[hex].district.defenses.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxDefenses)
+                    if (gameHex.gameBoard.gameHexDict[hex].district != null & gameHex.gameBoard.gameHexDict[hex].district.defenses.Count() < gameHex.gameBoard.gameHexDict[hex].district.maxDefenses && gameHex.gameBoard.gameHexDict[hex].district.city == this)
                     {
                         //hex doesnt have a non-friendly unit
                         bool valid = true;

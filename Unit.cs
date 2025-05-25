@@ -204,14 +204,25 @@ public class Unit
         }
     }
 
+    //civ 6 formula
+    public static float CalculateDamage(float friendlyCombatStrength, float enemyCombatStrength)
+    {
+        float strengthDifference = (friendlyCombatStrength - enemyCombatStrength) / 25;
+        float randomFactor = (float)new Random().NextDouble() * 0.4f + 0.8f;
+        float x = strengthDifference * randomFactor;
+
+        return 30 * (float)Math.Exp(x); // Exponential scaling
+    }
+
     private bool DistrictCombat(GameHex targetGameHex)
     {
-        return !decreaseHealth(targetGameHex.district.GetCombatStrength()) & targetGameHex.district.decreaseHealth(combatStrength);
+
+        return !decreaseHealth(CalculateDamage(combatStrength, targetGameHex.district.GetCombatStrength())) & targetGameHex.district.decreaseHealth(CalculateDamage(targetGameHex.district.GetCombatStrength(), combatStrength));
     }
 
     private bool UnitCombat(GameHex targetGameHex, Unit unit)
     {
-        return !decreaseHealth(20.0f) & unit.decreaseHealth(25.0f);
+        return !decreaseHealth(CalculateDamage(combatStrength, unit.combatStrength)) & unit.decreaseHealth(CalculateDamage(unit.combatStrength, combatStrength));
     }
 
     public bool AttackTarget(GameHex targetGameHex, float moveCost, TeamManager teamManager)
@@ -242,12 +253,12 @@ public class Unit
 
     private bool RangedDistrictCombat(GameHex targetGameHex, float rangedPower)
     {
-        return targetGameHex.district.decreaseHealth(rangedPower);
+        return targetGameHex.district.decreaseHealth(CalculateDamage(rangedPower, targetGameHex.district.GetCombatStrength()));
     }
 
     private bool RangedUnitCombat(GameHex targetGameHex, Unit unit, float rangedPower)
     {
-        return unit.decreaseHealth(rangedPower);
+        return unit.decreaseHealth(CalculateDamage(rangedPower, unit.combatStrength));
     }
 
     public bool RangedAttackTarget(GameHex targetGameHex, float rangedPower, TeamManager teamManager)
@@ -329,6 +340,7 @@ public class Unit
                 if(count <= 1)
                 {
                     gameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict.Remove(hex);
+                    gameHex.gameBoard.game.playerDictionary[teamNum].visibilityChangedList.Add(hex);
                 }
                 else
                 {
@@ -354,6 +366,7 @@ public class Unit
             else
             {
                 gameHex.gameBoard.game.playerDictionary[teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                gameHex.gameBoard.game.playerDictionary[teamNum].visibilityChangedList.Add(hex);
             }
         }
         if (updateGraphic && gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
@@ -371,7 +384,7 @@ public class Unit
         {
             Hex current = frontier.Dequeue();
 
-            foreach (Hex next in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
             {
                 float sightLeft = sightRange - reached[current];
                 float visionCost = VisionCost(gameHex.gameBoard.gameHexDict[next], sightLeft); //vision cost is at most the cost of our remaining sight if we have atleast 1
@@ -509,10 +522,10 @@ public class Unit
                 {
                     if (AttackTarget(targetGameHex, moveCost, teamManager))
                     {
-                        UpdateVision();
                         gameHex.units.Remove(this);
                         gameHex = targetGameHex;
                         gameHex.units.Add(this);
+                        UpdateVision();
                         if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
                         return true;
                     }
@@ -521,10 +534,10 @@ public class Unit
             else if(!targetGameHex.units.Any())
             {
                 SetRemainingMovement(remainingMovement - moveCost);
-                UpdateVision();
                 gameHex.units.Remove(this);
                 gameHex = targetGameHex;
                 gameHex.units.Add(this);
+                UpdateVision();
                 if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
                 return true;
             }
@@ -534,10 +547,10 @@ public class Unit
 
     public bool MoveToGameHex(GameHex targetGameHex)
     {
-        UpdateVision();
         gameHex.units.Remove(this);
         gameHex = targetGameHex;
         gameHex.units.Add(this);
+        UpdateVision();
         if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(id, GraphicUpdateType.Move);
         return true;
     }

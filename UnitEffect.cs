@@ -186,9 +186,22 @@ public class UnitEffect
     }
     public bool SettleCapitalAbility(Unit unit, String cityName)
     {
-        new City(unit.gameHex.gameBoard.game.GetUniqueID(), unit.teamNum, cityName, true, unit.gameHex);
-        unit.decreaseHealth(99999.0f);
-        return true;
+        bool validHex = true;
+        foreach (Hex hex in unit.gameHex.hex.WrappingRange(3, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
+        {
+            if (unit.gameHex.gameBoard.gameHexDict[hex].district != null && unit.gameHex.gameBoard.gameHexDict[hex].district.isCityCenter)
+            {
+                validHex = false;
+                break;
+            }
+        }
+        if (validHex)
+        {
+            new City(unit.gameHex.gameBoard.game.GetUniqueID(), unit.teamNum, cityName, true, unit.gameHex);
+            unit.decreaseHealth(99999.0f);
+            return true;
+        }
+        return false;
     }
     public void EnableEmbarkDisembark(Unit unit)
     {
@@ -203,9 +216,22 @@ public class UnitEffect
     }
     public bool SettleCity(Unit unit, String cityName)
     {
-        new City(unit.gameHex.gameBoard.game.GetUniqueID(), 1, cityName, false, unit.gameHex);
-        unit.decreaseHealth(99999.0f);
-        return true;
+        bool validHex = true;
+        foreach (Hex hex in unit.gameHex.hex.WrappingRange(3, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
+        {
+            if (unit.gameHex.gameBoard.gameHexDict[hex].district != null && unit.gameHex.gameBoard.gameHexDict[hex].district.isCityCenter)
+            {
+                validHex = false;
+                break;
+            }
+        }
+        if (validHex)
+        {
+            new City(unit.gameHex.gameBoard.game.GetUniqueID(), 1, cityName, false, unit.gameHex);
+            unit.decreaseHealth(99999.0f);
+            return true;
+        }
+        return false;
     }
     public bool RangedAttack(Unit unit, float combatPower, GameHex target)
     {

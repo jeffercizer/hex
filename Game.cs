@@ -178,7 +178,7 @@ struct GameTests
 
         //player1Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility").ActivateAbility(player1Settler);
 
-        player2Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility").ActivateAbility(player2Settler.gameHex);
+        //player2Settler.abilities.Find(ability => ability.name == "SettleCapitalAbility").ActivateAbility(player2Settler.gameHex);
 
         return game;
     }
@@ -640,7 +640,7 @@ struct GameTests
         game.AddPlayer(50.0f, 2);
         TestPlayerRelations(game, 1, 2, 50, 50);
         Hex player1CityLocation = new Hex(4, 8, -12);
-        Hex player2CityLocation = new Hex(5, 10, -15);
+        Hex player2CityLocation = new Hex(6, 11, -17);
         Unit player1Settler = new Unit("Founder", game.GetUniqueID(), 1);
         game.mainGameBoard.gameHexDict[player1CityLocation].SpawnUnit(player1Settler, false, true);
         Unit player2Settler = new Unit("Founder", game.GetUniqueID(), 2);

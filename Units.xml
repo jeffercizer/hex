@@ -17,8 +17,8 @@
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
       <TerrainMoveType Name="Mountain" Value="9999" />
-      <TerrainMoveType Name="Coast" Value="1" />
-      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Coast" Value="0.5" />
+      <TerrainMoveType Name="Ocean" Value="0.5" />
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Coral" Value="1" />
@@ -38,7 +38,7 @@
       </Ability>
     </Abilities>
   </Unit>
-  <Unit Name="Settler" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="2.0" CombatPower="5.0" HealingFactor="15" MaintenanceCost="1" IconPath="graphics/ui/icons/star.png" ModelPath="graphics/models/baseperson_settler.glb">
+  <Unit Name="Settler" Class="Civilian, Land" ProductionCost="50" GoldCost="250" MovementSpeed="3.0" SightRange="3.0" CombatPower="5.0" HealingFactor="15" MaintenanceCost="1" IconPath="graphics/ui/icons/star.png" ModelPath="graphics/models/baseperson_settler.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -56,8 +56,8 @@
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
       <TerrainMoveType Name="Mountain" Value="9999" />
-      <TerrainMoveType Name="Coast" Value="1" />
-      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Coast" Value="0.5" />
+      <TerrainMoveType Name="Ocean" Value="0.5" />
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
@@ -70,6 +70,9 @@
             <TerrainType Name = "Flat" />
             <TerrainType Name = "Rough" />
           </ValidTerrainTypes>
+          <ValidBuildingTypes>
+            <BuildingType Name = "" />
+          </ValidBuildingTypes>
         </TargetSpecification>
       </Ability>
     </Abilities>
@@ -92,8 +95,8 @@
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
       <TerrainMoveType Name="Mountain" Value="9999" />
-      <TerrainMoveType Name="Coast" Value="1" />
-      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Coast" Value="0.5" />
+      <TerrainMoveType Name="Ocean" Value="0.5" />
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
@@ -111,7 +114,7 @@
       </Ability>
     </Abilities>
   </Unit>
-  <Unit Name="Warrior" Class="Combat, Land, Infantry" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="2.0" CombatPower="20.0" HealingFactor="15" MaintenanceCost="1" IconPath="graphics/ui/icons/sword.png" ModelPath="graphics/models/baseperson_remesh3.glb">
+  <Unit Name="Warrior" Class="Combat, Land, Infantry" ProductionCost="20" GoldCost="100" MovementSpeed="2.0" SightRange="3.0" CombatPower="20.0" HealingFactor="15" MaintenanceCost="1" IconPath="graphics/ui/icons/sword.png" ModelPath="graphics/models/baseperson_remesh3.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
@@ -129,8 +132,8 @@
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />
       <TerrainMoveType Name="Mountain" Value="9999" />
-      <TerrainMoveType Name="Coast" Value="1" />
-      <TerrainMoveType Name="Ocean" Value="1" />
+      <TerrainMoveType Name="Coast" Value="0.5" />
+      <TerrainMoveType Name="Ocean" Value="0.5" />
       <TerrainMoveType Name="Forest" Value="1" />
       <TerrainMoveType Name="River" Value="0" />
       <TerrainMoveType Name="Road" Value="0.5" />
@@ -174,7 +177,7 @@
       <TerrainMoveType Name="Coral" Value="1" />
     </SightCosts>
   </Unit>
-  <Unit Name="Slinger" Class="Combat, Land, Ranged" ProductionCost="50" GoldCost="200" MovementSpeed="2.0" SightRange="2.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1" IconPath="graphics/models/baseperson_remesh3_manface_pix.png" ModelPath="graphics/models/baseperson_remesh3.glb">
+  <Unit Name="Slinger" Class="Combat, Land, Ranged" ProductionCost="50" GoldCost="200" MovementSpeed="2.0" SightRange="3.0" CombatPower="5.0" HealingFactor="0" MaintenanceCost="1" IconPath="graphics/models/baseperson_remesh3_manface_pix.png" ModelPath="graphics/models/baseperson_remesh3.glb">
     <MovementCosts>
       <TerrainMoveType Name="Flat" Value="1" />
       <TerrainMoveType Name="Rough" Value="2" />

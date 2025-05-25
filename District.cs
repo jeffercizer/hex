@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using Godot;
+using System.Text;
 
 [Serializable]
 public class District
@@ -26,6 +27,7 @@ public class District
         buildings = new();
         defenses = new();
         this.gameHex = gameHex;
+
         
         gameHex.ClaimHex(city);
         gameHex.district = this;
@@ -264,6 +266,7 @@ public class District
     {
         RemoveVision();
         AddVision();
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
     }
 
     public void RemoveVision()
@@ -276,6 +279,7 @@ public class District
                 if(count <= 1)
                 {
                     gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.Remove(hex);
+                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibilityChangedList.Add(hex);
                 }
                 else
                 {
@@ -284,23 +288,46 @@ public class District
             }
         }
         visibleHexes.Clear();
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
     }
     public void AddVision()
     {
-        visibleHexes = gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right).ToList();
-        foreach (Hex hex in visibleHexes)
+        if (isCityCenter)
         {
-            gameHex.gameBoard.game.playerDictionary[city.teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
-            int count;
-            if(gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            foreach (Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
             {
-                gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict[hex] = count + 1;
-            }
-            else
-            {
-                gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                gameHex.gameBoard.game.playerDictionary[city.teamNum].seenGameHexDict.TryAdd(hex, true);
+                int count;
+                if (gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+                {
+                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict[hex] = count + 1;
+                }
+                else
+                {
+                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibilityChangedList.Add(hex);
+                }
             }
         }
+        else
+        {
+            visibleHexes = gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right).ToList();
+            foreach (Hex hex in visibleHexes)
+            {
+                gameHex.gameBoard.game.playerDictionary[city.teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+                int count;
+                if (gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+                {
+                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict[hex] = count + 1;
+                }
+                else
+                {
+                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibilityChangedList.Add(hex);
+                }
+            }
+        }
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
     }
 
     public void AddResource()

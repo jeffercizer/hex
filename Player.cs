@@ -15,6 +15,7 @@ public class Player
         this.goldTotal = goldTotal;
         this.visibleGameHexDict = new();
         this.seenGameHexDict = new();
+        this.visibilityChangedList = new();
         this.unitList = new();
         this.cityList = new();
         this.unassignedResources = new();
@@ -50,6 +51,7 @@ public class Player
     public bool turnFinished;
     public Dictionary<Hex, int> visibleGameHexDict;
     public Dictionary<Hex, bool> seenGameHexDict;
+    public List<Hex> visibilityChangedList;
     public Dictionary<int, int> cityGrowthDictionary;
     public List<ResearchQueueType> queuedResearch;
     public Dictionary<String, ResearchQueueType> partialResearchDictionary;
