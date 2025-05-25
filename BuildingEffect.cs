@@ -123,6 +123,10 @@ public class BuildingEffect
         Dictionary<String, Action<Building>> effectFunctions = new Dictionary<string, Action<Building>>
         {
             { "WaterSupplyEffect", WaterSupplyEffect },
+            { "FarmEffect", FarmEffect },
+            { "MineEffect", MineEffect },
+            { "LumbermillEffect", LumbermillEffect },
+            { "FishingBoatEffect", FishingBoatEffect },
             { "GranaryWarehouseEffect", GranaryWarehouseEffect },
             { "DockWarehouseEffect", DockWarehouseEffect },
             { "StoneCutterWarehouseEffect", StoneCutterWarehouseEffect },
@@ -163,6 +167,22 @@ public class BuildingEffect
             }
         }
         building.yields.happiness += waterHappinessYield;
+    }
+    void FarmEffect(Building building)
+    {
+
+    }
+    void MineEffect(Building building)
+    {
+
+    }
+    void LumbermillEffect(Building building)
+    {
+
+    }
+    void FishingBoatEffect(Building building)
+    {
+
     }
     void GranaryWarehouseEffect(Building building)
     {

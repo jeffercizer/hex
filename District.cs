@@ -40,22 +40,55 @@ public class District
         }
 
         this.isCityCenter = isCityCenter;
-        if(isCityCenter)
-        {
-            maxHealth = 50.0f;
-            health = 50.0f;
-        }
-        this.isUrban = isUrban;
-        if(isUrban)
-        {
-            gameHex.AddTerrainFeature(FeatureType.Road);
-        }
-        city.RecalculateYields();
-        AddVision();
         if (city.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
         {
             manager.NewDistrict(this);
         }
+        if (isCityCenter)
+        {
+            maxHealth = 50.0f;
+            health = 50.0f;
+        }
+        else
+        {
+            if (gameHex.featureSet.Contains(FeatureType.Forest))
+            {
+                AddBuilding(new Building("Lumbermill", this));
+            }
+            else
+            {
+                if (gameHex.terrainType == TerrainType.Flat)
+                {
+                    AddBuilding(new Building("Farm", this));
+                }
+                else if (gameHex.terrainType == TerrainType.Rough)
+                {
+                    AddBuilding(new Building("Lumbermill", this));
+                }
+                else if (gameHex.terrainType == TerrainType.Mountain)
+                {
+                    AddBuilding(new Building("Mine", this));
+                }
+                else if (gameHex.terrainType == TerrainType.Coast)
+                {
+                    AddBuilding(new Building("FishingBoat", this));
+                }
+                else if (gameHex.terrainType == TerrainType.Ocean)
+                {
+                    AddBuilding(new Building("FishingBoat", this));
+                }
+            }
+
+        }
+        this.isUrban = isUrban;
+        if(isUrban)
+        {
+            maxBuildings += 1;
+            gameHex.AddTerrainFeature(FeatureType.Road);
+        }
+
+        city.RecalculateYields();
+        AddVision();
 
     }
 
@@ -70,7 +103,7 @@ public class District
     public List<Hex> visibleHexes = new();
     public float health = 0.0f;
     public float maxHealth = 0.0f;
-    public int maxBuildings = 2;
+    public int maxBuildings = 1;
     public int maxDefenses = 1;
     public int turnsUntilHealing = 0;
 
@@ -98,7 +131,12 @@ public class District
     {
         health -= amount;
         health = Math.Max(0.0f, health);
-        if(health <= 0.0f)
+        GD.Print(city.name + " | " + city.id + " | " + health);
+        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        {
+            manager.UpdateGraphic(city.id, GraphicUpdateType.Update);
+        }
+        if (health <= 0.0f)
         {
             city.DistrictFell();
             turnsUntilHealing = 5;
@@ -162,6 +200,12 @@ public class District
             health += wallStrength;
             hasWalls = true;
         }
+    }
+
+    public void DevelopDistrict()
+    {
+        maxBuildings += 1;
+        isUrban = true;
     }
 
     public int CountString(String buildingType)
