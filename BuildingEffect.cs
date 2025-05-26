@@ -158,7 +158,7 @@ public class BuildingEffect
         }
         else
         {
-            foreach(Hex hex in building.district.gameHex.hex.WrappingNeighbors(building.district.gameHex.gameBoard.left, building.district.gameHex.gameBoard.right))
+            foreach(Hex hex in building.district.gameHex.hex.WrappingNeighbors(building.district.gameHex.gameBoard.left, building.district.gameHex.gameBoard.right, building.district.gameHex.gameBoard.bottom))
             {
                 if (building.district.gameHex.gameBoard.gameHexDict[hex].terrainType == TerrainType.Coast || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.River) 
                     || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Wetland))

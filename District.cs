@@ -31,7 +31,7 @@ public class District
         
         gameHex.ClaimHex(city);
         gameHex.district = this;
-        foreach(Hex hex in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+        foreach(Hex hex in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
         {
             gameHex.gameBoard.gameHexDict[hex].TryClaimHex(city);
         }
@@ -311,7 +311,7 @@ public class District
         }
         else
         {
-            visibleHexes = gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right).ToList();
+            visibleHexes = gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom).ToList();
             foreach (Hex hex in visibleHexes)
             {
                 gameHex.gameBoard.game.playerDictionary[city.teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out

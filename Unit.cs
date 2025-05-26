@@ -384,7 +384,7 @@ public class Unit
         {
             Hex current = frontier.Dequeue();
 
-            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
             {
                 float sightLeft = sightRange - reached[current];
                 float visionCost = VisionCost(gameHex.gameBoard.gameHexDict[next], sightLeft); //vision cost is at most the cost of our remaining sight if we have atleast 1
@@ -452,7 +452,7 @@ public class Unit
         {
             Hex current = frontier.Dequeue();
 
-            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
             {
                 float movementLeft = remainingMovement - reached[current];
                 float moveCost = TravelCost(current, next, gameHex.gameBoard.game.teamManager, true, movementCosts, remainingMovement, reached[current], false); 
@@ -741,7 +741,7 @@ public class Unit
                 return path;
             }
     
-            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+            foreach (Hex next in current.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
             {
                 float new_cost = cost_so_far[current] + TravelCost(current, next, teamManager, isTargetEnemy, movementCosts, unitMovementSpeed, cost_so_far[current], false);
                 //if cost_so_far doesn't have next as a key yet or the new cost is lower than the lowest cost of this node previously

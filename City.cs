@@ -680,7 +680,7 @@ public class City
                         }
                     }
                     bool adjacentDistrict = false;
-                    foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                    foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
                     {
                         if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.city == this)
                         {
@@ -788,7 +788,7 @@ public class City
                     }
                     //have an adjacent urban district
                     bool adjacentUrbanDistrict = false;
-                    foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                    foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
                     {
                         if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban && gameHex.gameBoard.gameHexDict[hex].district.city == this)
                         {
@@ -818,7 +818,7 @@ public class City
                     }
                     //have an adjacent urban district
                     bool adjacentUrbanDistrict = false;
-                    foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right))
+                    foreach (Hex hex in targetGameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
                     {
                         if (gameHex.gameBoard.gameHexDict[hex].district != null && gameHex.gameBoard.gameHexDict[hex].district.isUrban && gameHex.gameBoard.gameHexDict[hex].district.city == this)
                         {

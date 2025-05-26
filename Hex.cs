@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using System.Runtime;
+using Godot;
 
 public struct Point
 {
@@ -111,13 +112,13 @@ public struct Hex
         return neighbors;
     }
 
-    public Hex[] WrappingNeighbors(int left, int right)
+    public Hex[] WrappingNeighbors(int left, int right, int bottom)
     {
         List<Hex> neightborList = new List<Hex> ();
         for (int i = 0; i < 6; i++)
         {
             Hex temp = WrappingNeighbor(i, left, right);
-            if (temp.q >= 0 && temp.r >= 0)
+            if (temp.q >= 0 && temp.r >= 0 && temp.r < bottom)
             {
                 neightborList.Add(temp);
             }
