@@ -9,40 +9,56 @@ using System.Text;
 [Serializable]
 public class District
 {
-    public District(GameHex gameHex, String initialString, bool isCityCenter, bool isUrban, City city)
+
+    public int id;
+    public List<Building> buildings;
+    public List<Building> defenses;
+    public Hex hex;
+    public bool isCityCenter;
+    public bool isUrban;
+    public bool hasWalls;
+    public int cityID;
+    public List<Hex> visibleHexes = new();
+    public float health = 0.0f;
+    public float maxHealth = 0.0f;
+    public int maxBuildings = 1;
+    public int maxDefenses = 1;
+    public int turnsUntilHealing = 0;
+
+    public District(GameHex gameHex, String initialString, bool isCityCenter, bool isUrban, int cityID)
     {
-        SetupDistrict(gameHex, isCityCenter, isUrban, city);
-        AddBuilding(new Building(initialString, this));
+        SetupDistrict(gameHex, isCityCenter, isUrban, cityID);
+        AddBuilding(new Building(initialString, hex));
     }
 
-    public District(GameHex gameHex, bool isCityCenter, bool isUrban, City city)
+    public District(GameHex gameHex, bool isCityCenter, bool isUrban, int cityID)
     {
-        SetupDistrict(gameHex, isCityCenter, isUrban, city);
+        SetupDistrict(gameHex, isCityCenter, isUrban, cityID);
     }
 
-    private void SetupDistrict(GameHex gameHex, bool isCityCenter, bool isUrban, City city)
+    private void SetupDistrict(GameHex gameHex, bool isCityCenter, bool isUrban, int cityID)
     {
-        id = gameHex.gameBoard.game.GetUniqueID();
-        this.city = city;
+        id = Global.gameManager.game.GetUniqueID();
+        this.cityID = cityID;
         buildings = new();
         defenses = new();
-        this.gameHex = gameHex;
+        this.hex = gameHex.hex;
 
-        
-        gameHex.ClaimHex(city);
-        gameHex.district = this;
-        foreach(Hex hex in gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom))
+
+        Global.gameManager.game.mainGameBoard.gameHexDict[hex].ClaimHex(Global.gameManager.game.cityDictionary[cityID]);
+        Global.gameManager.game.mainGameBoard.gameHexDict[hex].district = this;
+        foreach (Hex hex in gameHex.hex.WrappingNeighbors(Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.bottom))
         {
-            gameHex.gameBoard.gameHexDict[hex].TryClaimHex(city);
+            Global.gameManager.game.mainGameBoard.gameHexDict[hex].TryClaimHex(Global.gameManager.game.cityDictionary[cityID]);
         }
         
-        if(gameHex.resourceType != ResourceType.None)
+        if(Global.gameManager.game.mainGameBoard.gameHexDict[hex].resourceType != ResourceType.None)
         {
             AddResource();
         }
 
         this.isCityCenter = isCityCenter;
-        if (city.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager))
         {
             manager.NewDistrict(this);
         }
@@ -53,31 +69,31 @@ public class District
         }
         else
         {
-            if (gameHex.featureSet.Contains(FeatureType.Forest))
+            if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Forest))
             {
-                AddBuilding(new Building("Lumbermill", this));
+                AddBuilding(new Building("Lumbermill", hex));
             }
             else
             {
-                if (gameHex.terrainType == TerrainType.Flat)
+                if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].terrainType == TerrainType.Flat)
                 {
-                    AddBuilding(new Building("Farm", this));
+                    AddBuilding(new Building("Farm", hex));
                 }
-                else if (gameHex.terrainType == TerrainType.Rough)
+                else if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].terrainType == TerrainType.Rough)
                 {
-                    AddBuilding(new Building("Lumbermill", this));
+                    AddBuilding(new Building("Lumbermill", hex));
                 }
-                else if (gameHex.terrainType == TerrainType.Mountain)
+                else if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].terrainType == TerrainType.Mountain)
                 {
-                    AddBuilding(new Building("Mine", this));
+                    AddBuilding(new Building("Mine", hex));
                 }
-                else if (gameHex.terrainType == TerrainType.Coast)
+                else if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].terrainType == TerrainType.Coast)
                 {
-                    AddBuilding(new Building("FishingBoat", this));
+                    AddBuilding(new Building("FishingBoat", hex));
                 }
-                else if (gameHex.terrainType == TerrainType.Ocean)
+                else if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].terrainType == TerrainType.Ocean)
                 {
-                    AddBuilding(new Building("FishingBoat", this));
+                    AddBuilding(new Building("FishingBoat", hex));
                 }
             }
 
@@ -86,28 +102,13 @@ public class District
         if(isUrban)
         {
             maxBuildings += 1;
-            gameHex.AddTerrainFeature(FeatureType.Road);
+            Global.gameManager.game.mainGameBoard.gameHexDict[hex].AddTerrainFeature(FeatureType.Road);
         }
 
-        city.RecalculateYields();
+        Global.gameManager.game.cityDictionary[cityID].RecalculateYields();
         AddVision();
 
     }
-
-    public int id;
-    public List<Building> buildings;
-    public List<Building> defenses;
-    public GameHex gameHex;
-    public bool isCityCenter;
-    public bool isUrban;
-    public bool hasWalls;
-    public City city;
-    public List<Hex> visibleHexes = new();
-    public float health = 0.0f;
-    public float maxHealth = 0.0f;
-    public int maxBuildings = 1;
-    public int maxDefenses = 1;
-    public int turnsUntilHealing = 0;
 
     public void BeforeSwitchTeam()
     {
@@ -133,14 +134,14 @@ public class District
     {
         health -= amount;
         health = Math.Max(0.0f, health);
-        GD.Print(city.name + " | " + city.id + " | " + health);
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+        GD.Print(Global.gameManager.game.cityDictionary[cityID].name + " | " + Global.gameManager.game.cityDictionary[cityID].id + " | " + health);
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager))
         {
-            manager.UpdateGraphic(city.id, GraphicUpdateType.Update);
+            manager.UpdateGraphic(Global.gameManager.game.cityDictionary[cityID].id, GraphicUpdateType.Update);
         }
         if (health <= 0.0f)
         {
-            city.DistrictFell();
+            Global.gameManager.game.cityDictionary[cityID].DistrictFell();
             turnsUntilHealing = 5;
             return true;
         }
@@ -149,7 +150,7 @@ public class District
 
     public float GetCombatStrength()
     {
-        float strength = gameHex.gameBoard.game.playerDictionary[city.teamNum].strongestUnitBuilt;
+        float strength = Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].strongestUnitBuilt;
         if (hasWalls)
         {
             strength += 15.0f;
@@ -161,8 +162,8 @@ public class District
     {
         RemoveVision();
         RemoveLostResource();
-        city.districts.Remove(this);
-        gameHex.district = null;
+        Global.gameManager.game.cityDictionary[cityID].districts.Remove(this);
+        Global.gameManager.game.mainGameBoard.gameHexDict[hex].district = null;
         foreach(Building building in buildings)
         {
             building.DestroyBuilding();
@@ -182,10 +183,10 @@ public class District
         }
         else if(turnsUntilHealing > 0)
         {
-            if (gameHex.units.Any())
+            if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].units.Any())
             {
-                Unit unit = gameHex.units[0];
-                if (gameHex.gameBoard.game.teamManager.GetEnemies(city.teamNum).Contains(unit.teamNum))
+                Unit unit = Global.gameManager.game.mainGameBoard.gameHexDict[hex].units[0];
+                if (Global.gameManager.game.teamManager.GetEnemies(Global.gameManager.game.cityDictionary[cityID].teamNum).Contains(unit.teamNum))
                 {
                     turnsUntilHealing += 1;
                 }
@@ -225,7 +226,7 @@ public class District
     
     public void RecalculateYields()
     {
-        gameHex.RecalculateYields();
+        Global.gameManager.game.mainGameBoard.gameHexDict[hex].RecalculateYields();
         foreach(Building building in buildings)
         {
             building.RecalculateYields();
@@ -248,8 +249,8 @@ public class District
         if(buildings.Count() < maxBuildings)
         {
             buildings.Add(building);
-            city.citySize += 1;
-            city.RecalculateYields();
+            Global.gameManager.game.cityDictionary[cityID].citySize += 1;
+            Global.gameManager.game.cityDictionary[cityID].RecalculateYields();
         }
     }
 
@@ -258,7 +259,7 @@ public class District
         if(defenses.Count() < maxDefenses)
         {
             defenses.Add(building);
-            city.RecalculateYields();
+            Global.gameManager.game.cityDictionary[cityID].RecalculateYields();
         }
     }
 
@@ -266,7 +267,7 @@ public class District
     {
         RemoveVision();
         AddVision();
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(Global.gameManager.game.mainGameBoard.id, GraphicUpdateType.Update);
     }
 
     public void RemoveVision()
@@ -274,72 +275,72 @@ public class District
         foreach (Hex hex in visibleHexes)
         {            
             int count;
-            if(gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+            if(Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict.TryGetValue(hex, out count))
             {
                 if(count <= 1)
                 {
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.Remove(hex);
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibilityChangedList.Add(hex);
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict.Remove(hex);
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibilityChangedList.Add(hex);
                 }
                 else
                 {
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict[hex] = count - 1;
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict[hex] = count - 1;
                 }
             }
         }
         visibleHexes.Clear();
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(Global.gameManager.game.mainGameBoard.id, GraphicUpdateType.Update);
     }
     public void AddVision()
     {
         if (isCityCenter)
         {
-            foreach (Hex hex in gameHex.hex.WrappingRange(3, gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.top, gameHex.gameBoard.bottom))
+            foreach (Hex hex in hex.WrappingRange(3, Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.top, Global.gameManager.game.mainGameBoard.bottom))
             {
-                gameHex.gameBoard.game.playerDictionary[city.teamNum].seenGameHexDict.TryAdd(hex, true);
+                Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].seenGameHexDict.TryAdd(hex, true);
                 int count;
-                if (gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+                if (Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict.TryGetValue(hex, out count))
                 {
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict[hex] = count + 1;
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict[hex] = count + 1;
                 }
                 else
                 {
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryAdd(hex, 1);
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibilityChangedList.Add(hex);
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibilityChangedList.Add(hex);
                 }
             }
         }
         else
         {
-            visibleHexes = gameHex.hex.WrappingNeighbors(gameHex.gameBoard.left, gameHex.gameBoard.right, gameHex.gameBoard.bottom).ToList();
+            visibleHexes = hex.WrappingNeighbors(Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.bottom).ToList();
             foreach (Hex hex in visibleHexes)
             {
-                gameHex.gameBoard.game.playerDictionary[city.teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
+                Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].seenGameHexDict.TryAdd(hex, true); //add to the seen dict no matter what since duplicates are thrown out
                 int count;
-                if (gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryGetValue(hex, out count))
+                if (Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict.TryGetValue(hex, out count))
                 {
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict[hex] = count + 1;
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict[hex] = count + 1;
                 }
                 else
                 {
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibleGameHexDict.TryAdd(hex, 1);
-                    gameHex.gameBoard.game.playerDictionary[city.teamNum].visibilityChangedList.Add(hex);
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibleGameHexDict.TryAdd(hex, 1);
+                    Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].visibilityChangedList.Add(hex);
                 }
             }
         }
-        if (gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(gameHex.gameBoard.id, GraphicUpdateType.Update);
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.UpdateGraphic(Global.gameManager.game.mainGameBoard.id, GraphicUpdateType.Update);
     }
 
     public void AddResource()
     {
-        if(gameHex.resourceType != ResourceType.None)
+        if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].resourceType != ResourceType.None)
         {
-            gameHex.gameBoard.game.playerDictionary[city.teamNum].unassignedResources.Add(gameHex.hex, gameHex.resourceType);
+            Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].unassignedResources.Add(hex, Global.gameManager.game.mainGameBoard.gameHexDict[hex].resourceType);
         }
     }
 
     public void RemoveLostResource()
     {
-        gameHex.gameBoard.game.playerDictionary[city.teamNum].RemoveLostResource(gameHex.hex);
+        Global.gameManager.game.playerDictionary[Global.gameManager.game.cityDictionary[cityID].teamNum].RemoveLostResource(hex);
     }
 }

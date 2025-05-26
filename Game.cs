@@ -6,12 +6,15 @@ using System.Data;
 using Godot;
 using System.Diagnostics.Metrics;
 using System.Threading;
+using NetworkMessages;
 
 [Serializable]
 public class Game
 {
     public GameBoard? mainGameBoard;
     public Dictionary<int, Player> playerDictionary;
+    public Dictionary<int, City> cityDictionary;
+    public Dictionary<int, Unit> unitDictionary;
     public HashSet<String> builtWonders;
     public TeamManager? teamManager;
     public TurnManager turnManager;
@@ -21,12 +24,14 @@ public class Game
 
     public Game(String mapName, int localPlayerTeamNum)
     {
+        Global.gameManager.game = this;
         this.localPlayerTeamNum = localPlayerTeamNum;
         this.playerDictionary = new();
+        this.cityDictionary = new();
         this.turnManager = new TurnManager();
         this.teamManager = new TeamManager();
         turnManager.game = this;
-        GameBoard mainBoard = new GameBoard(this, GetUniqueID(), 0, 0);
+        GameBoard mainBoard = new GameBoard(GetUniqueID(), 0, 0);
         Dictionary<Hex, GameHex> gameHexDict = new();
         String mapData = System.IO.File.ReadAllText(mapName + ".map");
         List<String> lines = mapData.Split('\n').ToList();
@@ -102,7 +107,7 @@ public class Game
                     // }
                     //fourth number is for resources
                     ResourceType resource = ResourceLoader.resourceNames[cell[3].ToString()];
-                    gameHexDict.Add(new Hex(q, r, -q - r), new GameHex(new Hex(q, r, -q - r), mainBoard, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
+                    gameHexDict.Add(new Hex(q, r, -q - r), new GameHex(new Hex(q, r, -q - r), mainBoard.id, terrainType, terrainTemperature, resource, features, new List<Unit>(), null));
                 }
                 q += 1;
             }
@@ -138,7 +143,7 @@ public class Game
 
     public void AddPlayer(float startGold, int teamNum)
     {
-        Player newPlayer = new Player(this, startGold, teamNum);
+        Player newPlayer = new Player(startGold, teamNum);
         playerDictionary.Add(teamNum, newPlayer);
     }
 
@@ -218,13 +223,13 @@ struct GameTests
         TestCityYields(player2City, 5, 5, 5, 5, 5, 5);
 
         //City Locations from player
-        Tests.EqualHex("player1CityLocation", player1CityLocation, game.playerDictionary[1].cityList[0].gameHex.hex);
-        Tests.EqualHex("player2CityLocation", player2CityLocation, game.playerDictionary[2].cityList[0].gameHex.hex);
+        Tests.EqualHex("player1CityLocation", player1CityLocation, game.playerDictionary[1].cityList[0].hex);
+        Tests.EqualHex("player2CityLocation", player2CityLocation, game.playerDictionary[2].cityList[0].hex);
 
         //Gamehex with city has District with 'City Center'
-        if(game.playerDictionary[1].cityList[0].gameHex.district != null)
+        if(Global.gameManager.game.mainGameBoard.gameHexDict[game.playerDictionary[1].cityList[0].hex].district != null)
         {
-            District? tempDistrict = game.playerDictionary[1].cityList[0].gameHex.district;
+            District? tempDistrict = Global.gameManager.game.mainGameBoard.gameHexDict[game.playerDictionary[1].cityList[0].hex].district;
             if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1)
             {
                 Complain("player1CityDistrictInvalid");
@@ -241,9 +246,9 @@ struct GameTests
             }
         }
 
-        if(game.playerDictionary[2].cityList[0].gameHex.district != null)
+        if(Global.gameManager.game.mainGameBoard.gameHexDict[game.playerDictionary[2].cityList[0].hex].district != null)
         {
-            District tempDistrict = game.playerDictionary[2].cityList[0].gameHex.district;
+            District tempDistrict = Global.gameManager.game.mainGameBoard.gameHexDict[game.playerDictionary[2].cityList[0].hex].district;
             if(!tempDistrict.isCityCenter | !tempDistrict.isUrban | tempDistrict.buildings.Count != 1)
             {
                 Complain("player2CityDistrictInvalid");
@@ -261,8 +266,8 @@ struct GameTests
     {
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 10);
-        player2City.AddToQueue("Scout", "", "Scout", player2City.gameHex, 10);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 10);
+        player2City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player2City.hex], 10);
 
         if(player1City.productionQueue.Any())
         {
@@ -295,7 +300,7 @@ struct GameTests
                 Complain("player2CityQueueEmpty");
             }
 
-            player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 10);
+            player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 10);
             player1City.RemoveFromQueue(0); 
 
             if(player1City.productionQueue.Any())
@@ -318,16 +323,16 @@ struct GameTests
 
 
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(4,3,-7));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(0, 10, -10));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(4,3,-7));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(0, 10, -10));
             game.playerDictionary[1].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(10, 10, -20)], game.teamManager, false);
 
             game.playerDictionary[2].unitList[0].MoveTowards(game.mainGameBoard.gameHexDict[new Hex(11, 10, -21)], game.teamManager, false);
 
 
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(5,3,-8));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(21, 9, -30));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(5,3,-8));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(21, 9, -30));
 
 
             game.turnManager.EndCurrentTurn(1);
@@ -339,8 +344,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(6,4,-10));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(19, 9, -28));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(6,4,-10));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(19, 9, -28));
 
         game.turnManager.StartNewTurn();
 
@@ -348,8 +353,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(6,6,-12));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(17, 10, -27));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(6,6,-12));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(17, 10, -27));
 
         game.turnManager.StartNewTurn();
         
@@ -357,8 +362,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(7,7,-14));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(15, 10, -25));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(7,7,-14));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(15, 10, -25));
 
         game.turnManager.StartNewTurn();
 
@@ -366,8 +371,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(7,9,-16));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(13, 10, -23));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(7,9,-16));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(13, 10, -23));
 
         game.turnManager.StartNewTurn();
 
@@ -375,8 +380,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(8, 10, -18));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(8, 10, -18));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(11, 10, -21));
 
         game.turnManager.StartNewTurn();
 
@@ -384,8 +389,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(2);
             game.turnManager.EndCurrentTurn(0);
 
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(9, 10, -19));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(9, 10, -19));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(11, 10, -21));
 
 
         game.turnManager.StartNewTurn();
@@ -395,8 +400,8 @@ struct GameTests
             game.turnManager.EndCurrentTurn(0);
 
             
-            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(10, 10, -20));
-            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(11, 10, -21));
+            Tests.EqualHex("Scout 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(10, 10, -20));
+            Tests.EqualHex("Scout 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(11, 10, -21));
 
         game.turnManager.StartNewTurn();
 
@@ -499,31 +504,31 @@ struct GameTests
     {
         City player1City = game.playerDictionary[1].cityList[0];
         City player2City = game.playerDictionary[2].cityList[0];
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 2);
         int targetTurn = 30;
         for(int i = 0; i < targetTurn; i++)
         {
@@ -546,7 +551,7 @@ struct GameTests
     static public Game TestOverflowProduction(Game game)
     {
         City player1City = game.playerDictionary[1].cityList[0];
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 1);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 1);
 
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
@@ -561,7 +566,7 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
 
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 3);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 3);
 
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
@@ -576,7 +581,7 @@ struct GameTests
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
 
-        player1City.AddToQueue("Scout", "", "Scout", player1City.gameHex, 4);
+        player1City.AddToQueue("Scout", "", "Scout", Global.gameManager.game.mainGameBoard.gameHexDict[player1City.hex], 4);
         game.turnManager.EndCurrentTurn(1);
         game.turnManager.EndCurrentTurn(0);
         game.turnManager.StartNewTurn();
@@ -673,8 +678,8 @@ struct GameTests
             game.turnManager.StartNewTurn();
             count++;
         }
-        Tests.EqualHex("Slinger 1 Location", game.playerDictionary[1].unitList[0].gameHex.hex, new Hex(5, 9, -14));
-        Tests.EqualHex("Slinger 2 Location", game.playerDictionary[2].unitList[0].gameHex.hex, new Hex(5, 10, -15));
+        Tests.EqualHex("Slinger 1 Location", game.playerDictionary[1].unitList[0].hex, new Hex(5, 9, -14));
+        Tests.EqualHex("Slinger 2 Location", game.playerDictionary[2].unitList[0].hex, new Hex(5, 10, -15));
 
         if(game.playerDictionary[1].unitList[0].abilities[0].ActivateAbility(game.mainGameBoard.gameHexDict[new Hex(5, 10, -15)]))
         {

@@ -150,20 +150,21 @@ public class BuildingEffect
     void WaterSupplyEffect(Building building)
     {
         float waterHappinessYield = 0.0f;
-        if(building.district.gameHex.terrainType == TerrainType.Coast ||building.district.gameHex.featureSet.Contains(FeatureType.River) 
-                || building.district.gameHex.featureSet.Contains(FeatureType.Wetland))
+        
+        if(Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].terrainType == TerrainType.Coast ||Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].featureSet.Contains(FeatureType.River) 
+                || Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].featureSet.Contains(FeatureType.Wetland))
         {
-            GD.Print("water supply effect1 " + building.district.gameHex.hex);
+            GD.Print("water supply effect1 " + Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].hex);
             waterHappinessYield = 5.0f;
         }
         else
         {
-            foreach(Hex hex in building.district.gameHex.hex.WrappingNeighbors(building.district.gameHex.gameBoard.left, building.district.gameHex.gameBoard.right, building.district.gameHex.gameBoard.bottom))
+            foreach(Hex hex in building.districtHex.WrappingNeighbors(Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.bottom))
             {
-                if (building.district.gameHex.gameBoard.gameHexDict[hex].terrainType == TerrainType.Coast || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.River) 
-                    || building.district.gameHex.gameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Wetland))
+                if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].terrainType == TerrainType.Coast || Global.gameManager.game.mainGameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.River) 
+                    || Global.gameManager.game.mainGameBoard.gameHexDict[hex].featureSet.Contains(FeatureType.Wetland))
                 {
-                    GD.Print("water supply effect2 " + building.district.gameHex.hex);
+                    GD.Print("water supply effect2 " + Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].hex);
                     waterHappinessYield = 5.0f;
                     break;
                 }
@@ -189,15 +190,16 @@ public class BuildingEffect
     }
     void GranaryWarehouseEffect(Building building)
     {
-        building.district.city.flatYields.food += 1;
+
+        Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].flatYields.food += 1;
     }
     void DockWarehouseEffect(Building building)
     {
-        building.district.city.coastalYields.food += 1;
+        Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].coastalYields.food += 1;
     }
     void StoneCutterWarehouseEffect(Building building)
     {
-        building.district.city.roughYields.production += 1;
+        Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].roughYields.production += 1;
     }
     void GardenEffect(Building building)
     {
@@ -209,9 +211,9 @@ public class BuildingEffect
     }
     void AncientWallEffect(Building building)
     {
-        if(!building.district.hasWalls)
+        if(!Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.hasWalls)
         {
-            building.district.AddWalls(100.0f);
+            Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.AddWalls(100.0f);
         }
     }
     void StonehengeEffect(Building building)
@@ -220,11 +222,11 @@ public class BuildingEffect
     }
     void CityCenterWallEffect(Building building)
     {
-        if(!building.district.hasWalls)
+        if(!Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.hasWalls)
         {
-            building.district.maxHealth = 50.0f;
-            building.district.health = 50.0f;
-            building.district.hasWalls = true;
+            Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.maxHealth = 50.0f;
+            Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.health = 50.0f;
+            Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.hasWalls = true;
         }
     }
 }

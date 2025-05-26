@@ -37,7 +37,7 @@ public class UnitEffect
         this.effectMagnitude = effectMagnitude;
         this.priority = priority;
     }
-    public UnitEffect(Action<Unit> applyFunction, int priority)
+    public UnitEffect(Action<int> applyFunction, int priority)
     {
         this.priority = priority;
         this.applyFunction = applyFunction;
@@ -53,56 +53,56 @@ public class UnitEffect
     public TerrainMoveType terrainMoveType;
     public float effectMagnitude;
     public int priority;
-    public Action<Unit>? applyFunction;
+    public Action<int>? applyFunction;
     public String functionName = "";
     
-    public bool Apply(Unit unit, float combatPower = 0.0f, GameHex abilityTarget = null)
+    public bool Apply(int unitID, float combatPower = 0.0f, GameHex abilityTarget = null)
     {
         if (applyFunction != null)
         {
-            applyFunction(unit);
+            applyFunction(unitID);
             return true;
         }
         else if (functionName != "")
         {
             if(abilityTarget != null)
             {
-                return ProcessFunctionString(functionName, unit, combatPower, abilityTarget);
+                return ProcessFunctionString(functionName, unitID, combatPower, abilityTarget);
             }
             else
             {
-                return ProcessFunctionString(functionName, unit, combatPower);
+                return ProcessFunctionString(functionName, unitID, combatPower);
             }
         }
         else
         {
             if(effectType == UnitEffectType.MovementSpeed)
             {
-                ApplyOperation(ref unit.movementSpeed);
+                ApplyOperation(ref Global.gameManager.game.unitDictionary[unitID].movementSpeed);
             }
             else if(effectType == UnitEffectType.SightRange)
             {
-                ApplyOperation(ref unit.sightRange);
+                ApplyOperation(ref Global.gameManager.game.unitDictionary[unitID].sightRange);
             }
             else if(effectType == UnitEffectType.SightRange)
             {
-                ApplyOperation(ref unit.combatStrength);
+                ApplyOperation(ref Global.gameManager.game.unitDictionary[unitID].combatStrength);
             }
             else if(effectType == UnitEffectType.MovementCosts)
             {
                 switch (effectOperation)
                 {
                     case EffectOperation.Multiply:
-                        unit.movementCosts[terrainMoveType] *= effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].movementCosts[terrainMoveType] *= effectMagnitude;
                         break;
                     case EffectOperation.Divide:
-                        unit.movementCosts[terrainMoveType] /= effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].movementCosts[terrainMoveType] /= effectMagnitude;
                         break;
                     case EffectOperation.Add:
-                        unit.movementCosts[terrainMoveType] += effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].movementCosts[terrainMoveType] += effectMagnitude;
                         break;
                     case EffectOperation.Subtract:
-                        unit.movementCosts[terrainMoveType] -= effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].movementCosts[terrainMoveType] -= effectMagnitude;
                         break;
                 }
             }
@@ -111,16 +111,16 @@ public class UnitEffect
                 switch (effectOperation)
                 {
                     case EffectOperation.Multiply:
-                        unit.sightCosts[terrainMoveType] *= effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].sightCosts[terrainMoveType] *= effectMagnitude;
                         break;
                     case EffectOperation.Divide:
-                        unit.sightCosts[terrainMoveType] /= effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].sightCosts[terrainMoveType] /= effectMagnitude;
                         break;
                     case EffectOperation.Add:
-                        unit.sightCosts[terrainMoveType] += effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].sightCosts[terrainMoveType] += effectMagnitude;
                         break;
                     case EffectOperation.Subtract:
-                        unit.sightCosts[terrainMoveType] -= effectMagnitude;
+                        Global.gameManager.game.unitDictionary[unitID].sightCosts[terrainMoveType] -= effectMagnitude;
                         break;
                 }
             }
@@ -145,27 +145,27 @@ public class UnitEffect
                 break;
         }
     }
-    bool ProcessFunctionString(String functionString, Unit unit, float combatPower, GameHex abilityTarget = null)
+    bool ProcessFunctionString(String functionString, int unitID, float combatPower, GameHex abilityTarget = null)
     {
         if(functionString == "SettleCapitalAbility")
         {
-            return SettleCapitalAbility(unit, "CapitalCityName");
+            return SettleCapitalAbility(Global.gameManager.game.unitDictionary[unitID], "CapitalCityName");
         }
         else if(functionString == "SettleCityAbility")
         {
-            return SettleCity(unit, "SettledCityName");
+            return SettleCity(Global.gameManager.game.unitDictionary[unitID], "SettledCityName");
         }
         else if(functionString == "ScoutVisionAbility")
         {
-            unit.sightRange += 1;
-            unit.UpdateVision();
+            Global.gameManager.game.unitDictionary[unitID].sightRange += 1;
+            Global.gameManager.game.unitDictionary[unitID].UpdateVision();
             return true;
         }
         else if(functionString == "RangedAttack")
         {
             if (abilityTarget != null)
             {
-                return RangedAttack(unit, combatPower, abilityTarget);
+                return RangedAttack(Global.gameManager.game.unitDictionary[unitID], combatPower, abilityTarget);
             }
             else
             {
@@ -174,12 +174,12 @@ public class UnitEffect
         }
         else if(functionString == "EnableEmbarkDisembark")
         {
-            EnableEmbarkDisembark(unit);
+            EnableEmbarkDisembark(Global.gameManager.game.unitDictionary[unitID]);
             return true;
         }
         else if(functionString == "Fortify")
         {
-            Fortify(unit);
+            Fortify(Global.gameManager.game.unitDictionary[unitID]);
             return true;
         }
         throw new NotImplementedException("The Effect Function: " + functionString + " does not exist, implement it in UnitEffect");
@@ -187,9 +187,9 @@ public class UnitEffect
     public bool SettleCapitalAbility(Unit unit, String cityName)
     {
         bool validHex = true;
-        foreach (Hex hex in unit.gameHex.hex.WrappingRange(3, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
+        foreach (Hex hex in unit.hex.WrappingRange(3, Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.top, Global.gameManager.game.mainGameBoard.bottom))
         {
-            if (unit.gameHex.gameBoard.gameHexDict[hex].district != null && unit.gameHex.gameBoard.gameHexDict[hex].district.isCityCenter)
+            if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].district != null && Global.gameManager.game.mainGameBoard.gameHexDict[hex].district.isCityCenter)
             {
                 validHex = false;
                 break;
@@ -197,7 +197,7 @@ public class UnitEffect
         }
         if (validHex)
         {
-            new City(unit.gameHex.gameBoard.game.GetUniqueID(), unit.teamNum, cityName, true, unit.gameHex);
+            new City(Global.gameManager.game.GetUniqueID(), unit.teamNum, cityName, true, Global.gameManager.game.mainGameBoard.gameHexDict[unit.hex]);
             unit.decreaseHealth(99999.0f);
             return true;
         }
@@ -217,9 +217,9 @@ public class UnitEffect
     public bool SettleCity(Unit unit, String cityName)
     {
         bool validHex = true;
-        foreach (Hex hex in unit.gameHex.hex.WrappingRange(3, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
+        foreach (Hex hex in unit.hex.WrappingRange(3, Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.top, Global.gameManager.game.mainGameBoard.bottom))
         {
-            if (unit.gameHex.gameBoard.gameHexDict[hex].district != null && unit.gameHex.gameBoard.gameHexDict[hex].district.isCityCenter)
+            if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].district != null && Global.gameManager.game.mainGameBoard.gameHexDict[hex].district.isCityCenter)
             {
                 validHex = false;
                 break;
@@ -227,7 +227,7 @@ public class UnitEffect
         }
         if (validHex)
         {
-            new City(unit.gameHex.gameBoard.game.GetUniqueID(), 1, cityName, false, unit.gameHex);
+            new City(Global.gameManager.game.GetUniqueID(), 1, cityName, false, Global.gameManager.game.mainGameBoard.gameHexDict[unit.hex]);
             unit.decreaseHealth(99999.0f);
             return true;
         }
@@ -235,7 +235,7 @@ public class UnitEffect
     }
     public bool RangedAttack(Unit unit, float combatPower, GameHex target)
     {
-        return unit.RangedAttackTarget(target, combatPower, unit.gameHex.gameBoard.game.teamManager);
+        return unit.RangedAttackTarget(target, combatPower, Global.gameManager.game.teamManager);
     }
     public bool Fortify(Unit unit)
     {

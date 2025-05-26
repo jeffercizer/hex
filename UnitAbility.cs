@@ -10,7 +10,7 @@ public class UnitAbility
 {
     public String name;
     public UnitEffect effect;
-    public Unit usingUnit;
+    public int usingUnitID;
     public float combatPower;
     public int currentCharges;
     public int maxChargesPerTurn; //-1 means no reset... we use the charge then its gone I think is the idea
@@ -18,9 +18,9 @@ public class UnitAbility
     public String iconPath;
     public TargetSpecification validTargetTypes;
     
-    public UnitAbility(Unit usingUnit, UnitEffect effect, float combatPower = 0.0f, int maxChargesPerTurn = 1, int range = 0, TargetSpecification validTargetTypes = null, String iconPath = "")
+    public UnitAbility(int usingUnitID, UnitEffect effect, float combatPower = 0.0f, int maxChargesPerTurn = 1, int range = 0, TargetSpecification validTargetTypes = null, String iconPath = "")
     {
-        this.usingUnit = usingUnit;
+        this.usingUnitID = usingUnitID;
         name = effect.functionName;
         this.effect = effect;
         this.iconPath = iconPath;
@@ -48,17 +48,17 @@ public class UnitAbility
         if(currentCharges > 0)
         {
             currentCharges -= 1;
-            if(usingUnit.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager))
+            if(Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager))
             {
                 manager.Update2DUI(UIElement.unitDisplay);
             }
             if (abilityTarget != null)
             {
-                return effect.Apply(usingUnit, combatPower, abilityTarget);
+                return effect.Apply(usingUnitID, combatPower, abilityTarget);
             }
             else
             {
-                return effect.Apply(usingUnit, combatPower);
+                return effect.Apply(usingUnitID, combatPower);
             }
         }
         return false;
@@ -66,7 +66,7 @@ public class UnitAbility
 
     // public List<Hex> ValidAbilityTargets(Unit unit)
     // {
-    //     foreach(Hex hex in unit.gameHex.hex.WrappingRange(range, unit.gameHex.gameBoard.left, unit.gameHex.gameBoard.right, unit.gameHex.gameBoard.top, unit.gameHex.gameBoard.bottom))
+    //     foreach(Hex hex in unit.hex.WrappingRange(range, Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.top, Global.gameManager.game.mainGameBoard.bottom))
     //     {
     //         IsValidTarget(UnitType? unitType, UnitClass? unitClass, String? buildingType, TerrainType? terrainType, bool isEnemy = false, bool isAlly = false)
     //         //TODO

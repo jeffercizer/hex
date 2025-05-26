@@ -195,21 +195,21 @@ public class TargetSpecification
             {
                 if(AllowsAlly)
                 {
-                    if (gameHex.gameBoard.game.teamManager.GetAllies(castingUnit.teamNum).Contains(unit.teamNum))
+                    if (Global.gameManager.game.teamManager.GetAllies(castingUnit.teamNum).Contains(unit.teamNum))
                     {
                         return true;
                     }
                 }
                 if(AllowsEnemy)
                 {
-                    if (gameHex.gameBoard.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(unit.teamNum))
+                    if (Global.gameManager.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(unit.teamNum))
                     {
                         return true;
                     }
                 }
                 if(AllowsNeutral)
                 {
-                    if (!gameHex.gameBoard.game.teamManager.GetAllies(castingUnit.teamNum).Contains(unit.teamNum) && !gameHex.gameBoard.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(unit.teamNum))
+                    if (!Global.gameManager.game.teamManager.GetAllies(castingUnit.teamNum).Contains(unit.teamNum) && !Global.gameManager.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(unit.teamNum))
                     {
                         return true;
                     }
@@ -224,21 +224,21 @@ public class TargetSpecification
                 {
                     if (AllowsAlly)
                     {
-                        if (gameHex.gameBoard.game.teamManager.GetAllies(castingUnit.teamNum).Contains(building.district.city.teamNum))
+                        if (Global.gameManager.game.teamManager.GetAllies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum))
                         {
                             return true;
                         }
                     }
                     if (AllowsEnemy)
                     {
-                        if (gameHex.gameBoard.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(building.district.city.teamNum))
+                        if (Global.gameManager.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum))
                         {
                             return true;
                         }
                     }
                     if (AllowsNeutral)
                     {
-                        if (!gameHex.gameBoard.game.teamManager.GetAllies(castingUnit.teamNum).Contains(building.district.city.teamNum) && !gameHex.gameBoard.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(building.district.city.teamNum))
+                        if (!Global.gameManager.game.teamManager.GetAllies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum) && !Global.gameManager.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum))
                         {
                             return true;
                         }
@@ -254,21 +254,21 @@ public class TargetSpecification
                 {
                     if (AllowsAlly)
                     {
-                        if (gameHex.gameBoard.game.teamManager.GetAllies(castingUnit.teamNum).Contains(building.district.city.teamNum))
+                        if (Global.gameManager.game.teamManager.GetAllies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum))
                         {
                             return true;
                         }
                     }
                     if (AllowsEnemy)
                     {
-                        if (gameHex.gameBoard.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(building.district.city.teamNum))
+                        if (Global.gameManager.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum))
                         {
                             return true;
                         }
                     }
                     if (AllowsNeutral)
                     {
-                        if (!gameHex.gameBoard.game.teamManager.GetAllies(castingUnit.teamNum).Contains(building.district.city.teamNum) && !gameHex.gameBoard.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(building.district.city.teamNum))
+                        if (!Global.gameManager.game.teamManager.GetAllies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum) && !Global.gameManager.game.teamManager.GetEnemies(castingUnit.teamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[building.districtHex].district.cityID].teamNum))
                         {
                             return true;
                         }

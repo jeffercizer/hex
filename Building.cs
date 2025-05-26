@@ -11,7 +11,7 @@ public class Building
     public String name;
     public int id;
     public String buildingType;
-    public District district;
+    public Hex districtHex;
     public List<BuildingEffect> buildingEffects;
     public float baseProductionCost;
     public float productionCost;
@@ -22,9 +22,9 @@ public class Building
     public Yields baseYields;
     public Yields yields;
 
-    public Building(String buildingType, District district)
+    public Building(String buildingType, Hex districtHex)
     {
-        this.district = district;
+        this.districtHex = districtHex;
         this.buildingType = buildingType;
         this.name = buildingType;
         // 'City Center' 'Farm' 'Mine' 'Hunting Camp' 'Fishing Boat' 'Whaling Ship'
@@ -50,10 +50,10 @@ public class Building
         }
         if(BuildingLoader.buildingsDict[buildingType].Wonder)
         {
-            district.gameHex.gameBoard.game.builtWonders.Add(buildingType);
+            Global.gameManager.game.builtWonders.Add(buildingType);
         }
-        id = district.city.gameHex.gameBoard.game.GetUniqueID();
-        if (district.city.gameHex.gameBoard.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewBuilding(this);
+        id = Global.gameManager.game.GetUniqueID();
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewBuilding(this);
     }
 
     public void SwitchTeams()
@@ -63,23 +63,23 @@ public class Building
 
     public void DestroyBuilding()
     {
-        district = null;
+        districtHex = new Hex(0,0,0);
         if(BuildingLoader.buildingsDict[buildingType].Wonder)
         {
-            district.gameHex.gameBoard.game.builtWonders.Remove(buildingType);
+            Global.gameManager.game.builtWonders.Remove(buildingType);
         }
     }
 
     public void AddEffect(BuildingEffect effect)
     {
         buildingEffects.Add(effect);
-        district.city.RecalculateYields();
+        Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[districtHex].district.cityID].RecalculateYields();
     }
 
     public void RemoveEffect(BuildingEffect effect)
     {
         buildingEffects.Remove(effect);
-        district.city.RecalculateYields();
+        Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[districtHex].district.cityID].RecalculateYields();
     }
 
     public void PrepareYieldRecalculate()
@@ -100,6 +100,6 @@ public class Building
 
     public void RecalculateYields()
     {
-        district.gameHex.yields += yields;
+        Global.gameManager.game.mainGameBoard.gameHexDict[districtHex].yields += yields;
     }
 }

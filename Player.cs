@@ -8,9 +8,8 @@ using Godot;
 [Serializable]
 public class Player
 {
-    public Player(Game game, float goldTotal, int teamNum)
+    public Player(float goldTotal, int teamNum)
     {
-        this.game = game;
         this.teamNum = teamNum;
         this.goldTotal = goldTotal;
         this.visibleGameHexDict = new();
@@ -26,12 +25,11 @@ public class Player
         this.queuedResearch = new();
         this.partialResearchDictionary = new();
         //SelectResearch(String.Agriculture);
-        game.teamManager.AddTeam(teamNum, 50);
+        Global.gameManager.game.teamManager.AddTeam(teamNum, 50);
         OnResearchComplete("Agriculture");
     }
-    public Player(Game game, int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
+    public Player(int teamNum, Dictionary<Hex, int> visibleGameHexDict, Dictionary<Hex, bool> seenGameHexDict, List<Unit> unitList, List<City> cityList, float scienceTotal, float cultureTotal, float goldTotal, float happinessTotal)
     {
-        this.game = game;
         this.teamNum = teamNum;
         this.visibleGameHexDict = visibleGameHexDict;
         this.seenGameHexDict = seenGameHexDict;
@@ -44,9 +42,8 @@ public class Player
         this.unassignedResources = new();
         this.allowedBuildings = new();
         this.allowedUnits = new();
-        game.teamManager.AddTeam(teamNum, 50);
+        Global.gameManager.game.teamManager.AddTeam(teamNum, 50);
     }
-    public Game game;
     public int teamNum;
     public bool turnFinished;
     public Dictionary<Hex, int> visibleGameHexDict;
@@ -74,9 +71,9 @@ public class Player
     public void SetGoldTotal(float goldTotal)
     {
         this.goldTotal = goldTotal;
-        if(teamNum == game.localPlayerTeamNum)
+        if(teamNum == Global.gameManager.game.localPlayerTeamNum)
         {
-            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.gold);
+            if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.gold);
         }
     }
 
@@ -88,9 +85,9 @@ public class Player
     public void SetScienceTotal(float scienceTotal)
     {
         this.scienceTotal = scienceTotal;
-        if (teamNum == game.localPlayerTeamNum)
+        if (teamNum == Global.gameManager.game.localPlayerTeamNum)
         {
-            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.science);
+            if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.science);
         }
     }
 
@@ -102,9 +99,9 @@ public class Player
     public void SetCultureTotal(float cultureTotal)
     {
         this.cultureTotal = cultureTotal;
-        if (teamNum == game.localPlayerTeamNum)
+        if (teamNum == Global.gameManager.game.localPlayerTeamNum)
         {
-            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.culture);
+            if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.culture);
         }
     }
 
@@ -116,9 +113,9 @@ public class Player
     public void SetHappinessTotal(float happinessTotal)
     {
         this.happinessTotal = happinessTotal;
-        if (teamNum == game.localPlayerTeamNum)
+        if (teamNum == Global.gameManager.game.localPlayerTeamNum)
         {
-            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.happiness);
+            if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.happiness);
         }
     }
 
@@ -130,9 +127,9 @@ public class Player
     public void SetInfluenceTotal(float influenceTotal)
     {
         this.influenceTotal = influenceTotal;
-        if (teamNum == game.localPlayerTeamNum)
+        if (teamNum == Global.gameManager.game.localPlayerTeamNum)
         {
-            if (game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.influence);
+            if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.Update2DUI(UIElement.influence);
         }
     }
 
@@ -214,7 +211,7 @@ public class Player
                 queuedResearch.RemoveAt(0);
             }
         }
-        if (game.TryGetGraphicManager(out GraphicManager manager))
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager))
         {
             manager.Update2DUI(UIElement.gold);
             manager.Update2DUI(UIElement.happiness);

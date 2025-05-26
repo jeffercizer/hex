@@ -36,10 +36,10 @@ public enum FeatureType
 [Serializable]
 public class GameHex
 {
-    public GameHex(Hex hex, GameBoard gameBoard, TerrainType terrainType, TerrainTemperature terrainTemp, ResourceType resourceType, HashSet<FeatureType> featureSet, List<Unit> units, District district)
+    public GameHex(Hex hex, int gameBoardID, TerrainType terrainType, TerrainTemperature terrainTemp, ResourceType resourceType, HashSet<FeatureType> featureSet, List<Unit> units, District district)
     {
         this.hex = hex;
-        this.gameBoard = gameBoard;
+        this.gameBoardID = gameBoardID;
         this.terrainType = terrainType;
         this.terrainTemp = terrainTemp;
         this.featureSet = featureSet;
@@ -51,12 +51,12 @@ public class GameHex
     }
 
     public Hex hex;
-    public GameBoard gameBoard;
+    public int gameBoardID;
     public TerrainType terrainType;
     public TerrainTemperature terrainTemp;
     public ResourceType resourceType;
     public int ownedBy;
-    public City? owningCity;
+    public int owningCityID;
     public HashSet<FeatureType> featureSet = new();
     public List<Unit> units = new();
     public District? district;
@@ -67,49 +67,50 @@ public class GameHex
     {
         yields = new();
         //if the district is urban the buildings will set our yields
-        if ((owningCity != null && district == null) || (district != null && !district.isUrban))
+        City temp;
+        if ((Global.gameManager.game.cityDictionary.TryGetValue(owningCityID, out temp) && district == null) || (district != null && !district.isUrban))
         {
             //calculate the rural value
             if(terrainType == TerrainType.Flat)
             {
-                owningCity.AddFlatYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddFlatYields(this);
             }
             else if (terrainType == TerrainType.Rough)
             {
-                owningCity.AddRoughYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddRoughYields(this);
             }
             else if (terrainType == TerrainType.Mountain)
             {
-                owningCity.AddMountainYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddMountainYields(this);
             }
             else if (terrainType == TerrainType.Coast)
             {
-                owningCity.AddCoastYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddCoastYields(this);
             }
             else if (terrainType == TerrainType.Ocean)
             {
-                owningCity.AddOceanYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddOceanYields(this);
             }
             
             if(terrainTemp == TerrainTemperature.Desert)
             {
-                owningCity.AddDesertYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddDesertYields(this);
             }
             else if (terrainTemp == TerrainTemperature.Plains)
             {
-                owningCity.AddPlainsYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddPlainsYields(this);
             }
             else if (terrainTemp == TerrainTemperature.Grassland)
             {
-                owningCity.AddGrasslandYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddGrasslandYields(this);
             }
             else if (terrainTemp == TerrainTemperature.Tundra)
             {
-                owningCity.AddTundraYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddTundraYields(this);
             }
             else
             {
-                owningCity.AddArcticYields(this);
+                Global.gameManager.game.cityDictionary[owningCityID].AddArcticYields(this);
             }
             if(featureSet.Contains(FeatureType.Forest))
             {
@@ -195,7 +196,7 @@ public class GameHex
     public void ClaimHex(City city)
     {
         ownedBy = city.teamNum;
-        owningCity = city;
+        owningCityID = city.id;
         city.heldHexes.Add(hex);
     }
 
@@ -203,9 +204,7 @@ public class GameHex
     {
         if(ownedBy == -1)
         {
-            ownedBy = city.teamNum;
-            owningCity = city;
-            owningCity.heldHexes.Add(hex);
+            ClaimHex(city);
             return true;
         }
         return false;
@@ -214,17 +213,17 @@ public class GameHex
     public bool IsEnemyPresent(int yourTeamNum)
     {
         bool isEnemy = false;
-        foreach (Unit targetHexUnit in gameBoard.gameHexDict[hex].units)
+        foreach (Unit targetHexUnit in Global.gameManager.game.mainGameBoard.gameHexDict[hex].units)
         {
-            if (gameBoard.game.teamManager.GetEnemies(yourTeamNum).Contains(targetHexUnit.teamNum))
+            if (Global.gameManager.game.teamManager.GetEnemies(yourTeamNum).Contains(targetHexUnit.teamNum))
             {
                 isEnemy = true;
                 break;
             }
-        }
-        if (gameBoard.gameHexDict[hex].district != null && gameBoard.game.teamManager.GetEnemies(yourTeamNum).Contains(gameBoard.gameHexDict[hex].district.city.teamNum))
+        }                                                                           
+        if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].district != null && Global.gameManager.game.teamManager.GetEnemies(yourTeamNum).Contains(Global.gameManager.game.cityDictionary[Global.gameManager.game.mainGameBoard.gameHexDict[hex].district.cityID].teamNum))
         {
-            if (gameBoard.gameHexDict[hex].district.health > 0)
+            if (Global.gameManager.game.mainGameBoard.gameHexDict[hex].district.health > 0)
             {
                 isEnemy = true;
             }
@@ -240,9 +239,9 @@ public class GameHex
         {
             if (flexible)
             {
-                foreach(Hex rangeHex in hex.WrappingRange(3, gameBoard.left, gameBoard.right, gameBoard.top, gameBoard.bottom).OrderBy(h => hex.Distance(h)))
+                foreach(Hex rangeHex in hex.WrappingRange(3, Global.gameManager.game.mainGameBoard.left, Global.gameManager.game.mainGameBoard.right, Global.gameManager.game.mainGameBoard.top, Global.gameManager.game.mainGameBoard.bottom).OrderBy(h => hex.Distance(h)))
                 {
-                    if(gameBoard.gameHexDict[rangeHex].SpawnUnit(newUnit, stackable, false))
+                    if(Global.gameManager.game.mainGameBoard.gameHexDict[rangeHex].SpawnUnit(newUnit, stackable, false))
                     {
                         return true;
                     }

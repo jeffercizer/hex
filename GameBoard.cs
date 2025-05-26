@@ -7,9 +7,8 @@ using System.Data;
 [Serializable]
 public class GameBoard
 {
-    public GameBoard(Game game, int id, int bottom, int right)
+    public GameBoard(int id, int bottom, int right)
     {
-        this.game = game;
         this.id = id;
         this.top = 0;
         this.bottom = bottom;
@@ -19,13 +18,12 @@ public class GameBoard
         Random rnd = new Random();
         for (int r = 0; r <= bottom; r++){
             for (int q = 0; q <= right; q++){
-                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, (ResourceType)0, new HashSet<FeatureType>(), new List<Unit>(), null));
+                gameHexDict.Add(new Hex(q, r, -q-r), new GameHex(new Hex(q, r, -q-r), this.id, (TerrainType)rnd.Next(0,3), TerrainTemperature.Grassland, (ResourceType)0, new HashSet<FeatureType>(), new List<Unit>(), null));
             }
         }
-        if (game.TryGetGraphicManager(out GraphicManager manager)) manager.NewGameBoard(this);
+        if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewGameBoard(this);
     }
 
-    public Game game;
     public int id;
     public Dictionary<Hex, GameHex> gameHexDict;
     public int top;
