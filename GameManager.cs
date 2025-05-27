@@ -1,9 +1,11 @@
+using Godot;
 using NetworkMessages;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
-public class GameManager
+public partial class GameManager: Node
 {
     public static GameManager instance;
     public Game game;
@@ -15,8 +17,40 @@ public class GameManager
         Global.gameManager = this;
     }
 
+    public void startGame()
+    {
+        Layout pointyReal = new Layout(Layout.pointy, new Point(10, 10), new Point(0, 0));
+        Layout pointy = new Layout(Layout.pointy, new Point(-10, 10), new Point(0, 0));
+        Global.layout = pointy;
+        //game = GameTests.GameStartTest();
+        //game = GameTests.MapLoadTest();
+        game = GameTests.TestSlingerCombat();
+        Global.graphicManager = new GraphicManager(game, pointy);
+        Global.graphicManager.Name = "GraphicManager";
+        //game = GameTests.TestMassScoutBuild(game);
+        //game = GameTests.TestScoutMovementCombat(game);
+        Camera3D camera3D = GetChild<Camera3D>(0);//TODO
+        Global.camera = camera3D as Camera;
+        Global.camera.SetGame(game);
+        Global.camera.SetGraphicManager(Global.graphicManager);
+        AddSibling(Global.graphicManager);
+    }
 
-
+    public override void _PhysicsProcess(double delta)
+    {
+        game.turnManager.EndCurrentTurn(0);
+        game.turnManager.EndCurrentTurn(2);
+        List<int> waitingForPlayerList = game.turnManager.CheckTurnStatus();
+        if (!waitingForPlayerList.Any())
+        {
+            game.turnManager.StartNewTurn();
+            Global.graphicManager.StartNewTurn();
+        }
+        else
+        {
+            //push waitingForPlayerList to UI
+        }
+    }
 
     public void MoveUnit(int unitID, Hex Target, bool local = true)
     {
