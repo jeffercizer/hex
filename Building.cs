@@ -4,23 +4,24 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using Godot;
+using System.IO;
 
 [Serializable]
 public class Building
 {
-    public String name;
-    public int id;
-    public String buildingType;
-    public Hex districtHex;
-    public List<BuildingEffect> buildingEffects;
-    public float baseProductionCost;
-    public float productionCost;
-    public float baseGoldCost;
-    public float goldCost;
-    public float baseMaintenanceCost;
-    public float maintenanceCost;
-    public Yields baseYields;
-    public Yields yields;
+    public String name { get; set; }
+    public int id { get; set; }
+    public String buildingType { get; set; }
+    public Hex districtHex { get; set; }
+    public List<BuildingEffect> buildingEffects { get; set; } 
+    public float baseProductionCost { get; set; }
+    public float productionCost { get; set; }
+    public float baseGoldCost { get; set; } 
+    public float goldCost { get; set; } 
+    public float baseMaintenanceCost { get; set; }
+    public float maintenanceCost { get; set; }
+    public Yields baseYields { get; set; }
+    public Yields yields { get; set; }
 
     public Building(String buildingType, Hex districtHex)
     {
@@ -55,6 +56,20 @@ public class Building
         id = Global.gameManager.game.GetUniqueID();
         if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewBuilding(this);
     }
+    public Building()
+    {
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static Building Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<Building>(reader);
+    }
+
 
     public void SwitchTeams()
     {

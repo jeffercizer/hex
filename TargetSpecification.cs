@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Data;
 using System.Formats.Asn1;
 using Godot;
+using System.IO;
 
 public class TargetSpecification
 {
@@ -35,6 +36,7 @@ public class TargetSpecification
     public bool AllowsAlly { get; set; } = false;
     public bool AllowsEnemy { get; set; } = false;
     public bool AllowsNeutral { get; set; } = false;
+
 
     public bool IsHexValidTarget(GameHex gameHex, Unit castingUnit)
     {

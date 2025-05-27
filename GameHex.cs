@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using System.IO;
 
 public enum TerrainType
 {
@@ -50,18 +51,33 @@ public class GameHex
         RecalculateYields();
     }
 
-    public Hex hex;
-    public int gameBoardID;
-    public TerrainType terrainType;
-    public TerrainTemperature terrainTemp;
-    public ResourceType resourceType;
-    public int ownedBy;
-    public int owningCityID;
-    public HashSet<FeatureType> featureSet = new();
-    public List<Unit> units = new();
-    public District? district;
+    public Hex hex { get; set; }
+    public int gameBoardID { get; set; }
+    public TerrainType terrainType { get; set; }
+    public TerrainTemperature terrainTemp { get; set; }
+    public ResourceType resourceType { get; set; }
+    public int ownedBy { get; set; }
+    public int owningCityID { get; set; }
+    public HashSet<FeatureType> featureSet { get; set; } = new();
+    public List<Unit> units { get; set; } = new();
+    public District? district { get; set; }
 
-    public Yields yields;
+    public Yields yields { get; set; }
+
+    public GameHex()
+    {
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static GameHex Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<GameHex>(reader);
+    }
+
 
     public void RecalculateYields()
     {

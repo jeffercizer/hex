@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using Godot;
+using System.IO;
 
 public enum BuildingEffectType
 {
@@ -18,7 +19,6 @@ public enum BuildingEffectType
     HappinessYield    
 }
 
-[Serializable]
 public class BuildingEffect
 {
     public BuildingEffect(BuildingEffectType effectType, EffectOperation effectOperation, float effectMagnitude, int priority, Action<object> applyFunction)
@@ -44,12 +44,12 @@ public class BuildingEffect
         this.functionName = functionName;
     }
     
-    public BuildingEffectType effectType;
-    public EffectOperation effectOperation;
-    public float effectMagnitude;
-    public int priority;
-    public Action<Building>? applyFunction;
-    public String functionName = "";
+    public BuildingEffectType effectType { get; set; }
+    public EffectOperation effectOperation { get; set; }
+    public float effectMagnitude { get; set; }
+    public int priority { get; set; }
+    public Action<Building>? applyFunction { get; set; }
+    public String functionName { get; set; } = "";
 
     public void ApplyEffect(Building building)
     {
@@ -65,43 +65,44 @@ public class BuildingEffect
         {
             if (effectType == BuildingEffectType.ProductionCost)
             {
-                ApplyOperation(ref building.yields.production);
+                building.productionCost = ApplyOperation(building.productionCost);
             }
             else if (effectType == BuildingEffectType.GoldCost)
             {
-                ApplyOperation(ref building.goldCost);
+                building.goldCost = ApplyOperation(building.goldCost);
             }
             else if (effectType == BuildingEffectType.MaintenanceCost)
             {
-                ApplyOperation(ref building.maintenanceCost);
+                building.maintenanceCost = ApplyOperation(building.maintenanceCost);
             }
             else if (effectType == BuildingEffectType.FoodYield)
             {
-                ApplyOperation(ref building.yields.food);
+                building.yields.food = ApplyOperation(building.yields.food);
             }
             else if (effectType == BuildingEffectType.ProductionYield)
             {
-                ApplyOperation(ref building.yields.production);
+                building.yields.production = ApplyOperation(building.yields.production);
             }
             else if (effectType == BuildingEffectType.GoldYield)
             {
-                ApplyOperation(ref building.yields.gold);
+                building.yields.gold = ApplyOperation(building.yields.gold);
             }
             else if (effectType == BuildingEffectType.ScienceYield)
             {
-                ApplyOperation(ref building.yields.science);
+                building.yields.science = ApplyOperation(building.yields.science);
             }
             else if (effectType == BuildingEffectType.CultureYield)
             {
-                ApplyOperation(ref building.yields.culture);
+                building.yields.culture = ApplyOperation(building.yields.culture);
             }
             else if (effectType == BuildingEffectType.HappinessYield)
             {
-                ApplyOperation(ref building.yields.happiness);
+                building.yields.happiness = ApplyOperation(building.yields.happiness);
             }
+
         }
     }
-    void ApplyOperation(ref float property)
+    float ApplyOperation(float property)
     {
         switch (effectOperation)
         {
@@ -118,6 +119,7 @@ public class BuildingEffect
                 property -= effectMagnitude;
                 break;
         }
+        return property;
     }
     void ProcessFunctionString(String functionString, Building building)
     {

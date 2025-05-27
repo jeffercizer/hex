@@ -5,25 +5,26 @@ using System.Diagnostics;
 using System.Data;
 using Godot;
 using System.Text;
+using System.IO;
 
 [Serializable]
 public class District
 {
 
-    public int id;
-    public List<Building> buildings;
-    public List<Building> defenses;
-    public Hex hex;
-    public bool isCityCenter;
-    public bool isUrban;
-    public bool hasWalls;
-    public int cityID;
-    public List<Hex> visibleHexes = new();
-    public float health = 0.0f;
-    public float maxHealth = 0.0f;
-    public int maxBuildings = 1;
-    public int maxDefenses = 1;
-    public int turnsUntilHealing = 0;
+    public int id { get; set; }
+    public List<Building> buildings { get; set; }
+    public List<Building> defenses { get; set; }
+    public Hex hex { get; set; }
+    public bool isCityCenter { get; set; }
+    public bool isUrban { get; set; }
+    public bool hasWalls { get; set; }
+    public int cityID { get; set; }
+    public List<Hex> visibleHexes { get; set; } = new();
+    public float health { get; set; } = 0.0f;
+    public float maxHealth{ get; set; } = 0.0f;
+    public int maxBuildings { get; set; }  = 1;
+    public int maxDefenses { get; set; } = 1;
+    public int turnsUntilHealing { get; set; } = 0;
 
     public District(GameHex gameHex, String initialString, bool isCityCenter, bool isUrban, int cityID)
     {
@@ -34,6 +35,20 @@ public class District
     public District(GameHex gameHex, bool isCityCenter, bool isUrban, int cityID)
     {
         SetupDistrict(gameHex, isCityCenter, isUrban, cityID);
+    }
+
+    public District()
+    {
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static District Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<District>(reader);
     }
 
     private void SetupDistrict(GameHex gameHex, bool isCityCenter, bool isUrban, int cityID)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using Godot;
+using System.IO;
 
 public enum UnitEffectType
 {
@@ -21,8 +22,6 @@ public enum EffectOperation
     Add,
     Subtract,
 }
-
-[Serializable]
 public class UnitEffect
 {
     //priority is 0-100 (100 most important)
@@ -47,15 +46,21 @@ public class UnitEffect
     {
         this.functionName = functionName;
     }
-
-    public UnitEffectType effectType;
-    public EffectOperation effectOperation;
-    public TerrainMoveType terrainMoveType;
-    public float effectMagnitude;
-    public int priority;
-    public Action<int>? applyFunction;
-    public String functionName = "";
     
+    private UnitEffect()
+    {
+        //used for loading
+    }
+
+    public UnitEffectType effectType { get; set; }
+    public EffectOperation effectOperation { get; set; }
+    public TerrainMoveType terrainMoveType { get; set; }
+    public float effectMagnitude { get; set; }
+    public int priority { get; set; }
+    public Action<int>? applyFunction { get; set; }
+    public String functionName { get; set; } = "";
+
+
     public bool Apply(int unitID, float combatPower = 0.0f, GameHex abilityTarget = null)
     {
         if (applyFunction != null)
@@ -78,15 +83,15 @@ public class UnitEffect
         {
             if(effectType == UnitEffectType.MovementSpeed)
             {
-                ApplyOperation(ref Global.gameManager.game.unitDictionary[unitID].movementSpeed);
+                Global.gameManager.game.unitDictionary[unitID].movementSpeed = ApplyOperation(Global.gameManager.game.unitDictionary[unitID].movementSpeed);
             }
             else if(effectType == UnitEffectType.SightRange)
             {
-                ApplyOperation(ref Global.gameManager.game.unitDictionary[unitID].sightRange);
+                Global.gameManager.game.unitDictionary[unitID].sightRange = ApplyOperation(Global.gameManager.game.unitDictionary[unitID].sightRange);
             }
             else if(effectType == UnitEffectType.SightRange)
             {
-                ApplyOperation(ref Global.gameManager.game.unitDictionary[unitID].combatStrength);
+                Global.gameManager.game.unitDictionary[unitID].combatStrength = ApplyOperation(Global.gameManager.game.unitDictionary[unitID].combatStrength);
             }
             else if(effectType == UnitEffectType.MovementCosts)
             {
@@ -127,7 +132,7 @@ public class UnitEffect
             return true;
         }
     }
-    void ApplyOperation(ref float property)
+    float ApplyOperation(float property)
     {
         switch (effectOperation)
         {
@@ -144,6 +149,7 @@ public class UnitEffect
                 property -= effectMagnitude;
                 break;
         }
+        return property;
     }
     bool ProcessFunctionString(String functionString, int unitID, float combatPower, GameHex abilityTarget = null)
     {

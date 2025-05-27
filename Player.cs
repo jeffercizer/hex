@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using Godot;
+using System.IO;
 
 [Serializable]
 public class Player
@@ -44,28 +45,32 @@ public class Player
         this.allowedUnits = new();
         Global.gameManager.game.teamManager.AddTeam(teamNum, 50);
     }
-    public int teamNum;
-    public bool turnFinished;
-    public Dictionary<Hex, int> visibleGameHexDict;
-    public Dictionary<Hex, bool> seenGameHexDict;
-    public List<Hex> visibilityChangedList;
-    public Dictionary<int, int> cityGrowthDictionary;
-    public List<ResearchQueueType> queuedResearch;
-    public Dictionary<String, ResearchQueueType> partialResearchDictionary;
-    public List<Unit> unitList;
-    public List<City> cityList;
-    public List<(UnitEffect, UnitClass)> unitResearchEffects;
-    public List<(BuildingEffect, String)> buildingResearchEffects;
-    public HashSet<String> allowedBuildings;
-    public HashSet<String> allowedUnits;
-    public Dictionary<Hex, ResourceType> unassignedResources;
-    public float strongestUnitBuilt = 0.0f;
 
-    private float goldTotal;
-    private float scienceTotal;
-    private float cultureTotal;
-    private float happinessTotal;
-    private float influenceTotal;
+    public Player()
+    {
+        //used for loading
+    }
+    public int teamNum { get; set; }
+    public bool turnFinished { get; set; }
+    public Dictionary<Hex, int> visibleGameHexDict { get; set; } = new();
+    public Dictionary<Hex, bool> seenGameHexDict { get; set; } = new();
+    public List<Hex> visibilityChangedList { get; set; } = new();
+    public List<ResearchQueueType> queuedResearch { get; set; } = new();
+    public Dictionary<String, ResearchQueueType> partialResearchDictionary { get; set; } = new();
+    public List<Unit> unitList { get; set; } = new();
+    public List<City> cityList { get; set; } = new();
+    public List<(UnitEffect, UnitClass)> unitResearchEffects { get; set; } = new();
+    public List<(BuildingEffect, String)> buildingResearchEffects { get; set; } = new();
+    public HashSet<String> allowedBuildings { get; set; } = new();
+    public HashSet<String> allowedUnits { get; set; } = new();
+    public Dictionary<Hex, ResourceType> unassignedResources { get; set; } = new();
+    public float strongestUnitBuilt { get; set; } = 0.0f;
+
+    public float goldTotal { get; set; }
+    public float scienceTotal { get; set; }
+    public float cultureTotal { get; set; }
+    public float happinessTotal { get; set; }
+    public float influenceTotal { get; set; }
 
 
     public void SetGoldTotal(float goldTotal)
@@ -202,7 +207,7 @@ public class Player
         if(queuedResearch.Any())
         {
             float cost = queuedResearch[0].researchLeft;
-            queuedResearch[0].researchLeft -= scienceTotal;
+            queuedResearch[0].researchLeft -= (int)Math.Round(scienceTotal);
             scienceTotal -= cost;
             scienceTotal = Math.Max(0.0f, scienceTotal);
             if(queuedResearch[0].researchLeft <= 0)
@@ -346,18 +351,48 @@ public class Player
         SetInfluenceTotal(GetInfluenceTotal() + influence);
     }
 
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static Player Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<Player>(reader);
+    }
+
 }
 
 public class ResearchQueueType
 {
 
-    public ResearchQueueType(String researchType, float researchCost, float researchLeft)
+    public ResearchQueueType(String researchType, int researchCost, int researchLeft)
     {
         this.researchType = researchType;
         this.researchCost = researchCost;
         this.researchLeft = researchLeft;
     }
-    public String researchType;
-    public float researchCost;
-    public float researchLeft;
+    private ResearchQueueType()
+    {
+        //for loading
+    }
+    public String researchType { get; set; }
+    public int researchCost { get; set; }
+    public int researchLeft { get; set; }
+    public void Serialize(BinaryWriter writer)
+    {
+        writer.Write(researchType);
+        writer.Write(researchCost);
+        writer.Write(researchLeft);
+    }
+
+    public static ResearchQueueType Deserialize(BinaryReader reader)
+    {
+        return new ResearchQueueType(
+            reader.ReadString(),
+            reader.ReadInt32(),
+            reader.ReadInt32()
+        );
+    }
+
 }

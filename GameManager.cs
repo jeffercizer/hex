@@ -2,6 +2,9 @@ using Godot;
 using NetworkMessages;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+using Godot;
 using System.Linq;
 
 
@@ -15,6 +18,27 @@ public partial class GameManager: Node
     {
         instance = this;
         Global.gameManager = this;
+    }
+
+
+    public void SaveGame()
+    {
+        String filePath = "C:/Users/jeffe/Desktop/Stuff/HexGame/game_data.dat";
+        using (FileStream fs = new FileStream(filePath, FileMode.Create))
+        using (BinaryWriter writer = new BinaryWriter(fs))
+        {
+            game.Serialize(writer);
+        }
+        GD.Print("Game data saved!");
+    }
+
+    public Game LoadGame(String filePath)
+    {
+        using (FileStream fs = new FileStream(filePath, FileMode.Open))
+        using (BinaryReader reader = new BinaryReader(fs))
+        {
+            return Game.Deserialize(reader);
+        }
     }
 
     public void startGame()
