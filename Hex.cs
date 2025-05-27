@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Data;
 using System.Runtime;
 using Godot;
+using System.IO;
 
 public struct Point
 {
@@ -26,6 +27,23 @@ public struct Hex
         this.s = s;
         if (q + r + s != 0) throw new ArgumentException("q + r + s must be 0");
     }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        writer.Write(q);
+        writer.Write(r);
+        writer.Write(s);
+    }
+
+    public static Hex Deserialize(BinaryReader reader)
+    {
+        return new Hex(
+            reader.ReadInt32(),
+            reader.ReadInt32(),
+            reader.ReadInt32()
+        );
+    }
+
 
     public override string ToString()
     {

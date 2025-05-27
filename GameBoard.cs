@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using System.IO;
 
 [Serializable]
 public class GameBoard
@@ -24,12 +25,28 @@ public class GameBoard
         if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewGameBoard(this);
     }
 
-    public int id;
-    public Dictionary<Hex, GameHex> gameHexDict;
-    public int top;
-    public int bottom;
-    public int left;
-    public int right;
+    public int id { get; set; }
+    public Dictionary<Hex, GameHex> gameHexDict { get; set; }
+    public int top { get; set; }
+    public int bottom { get; set; }
+    public int left { get; set; }
+    public int right { get; set; }
+
+    public GameBoard()
+    {
+        //for loading
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static GameBoard Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<GameBoard>(reader);
+    }
+
 
     public void OnTurnStarted(int turnNumber)
     {

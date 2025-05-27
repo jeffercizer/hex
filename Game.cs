@@ -7,20 +7,32 @@ using Godot;
 using System.Diagnostics.Metrics;
 using System.Threading;
 using NetworkMessages;
+using System.IO;
 
 [Serializable]
 public class Game
 {
-    public GameBoard? mainGameBoard;
-    public Dictionary<int, Player> playerDictionary;
-    public Dictionary<int, City> cityDictionary;
-    public Dictionary<int, Unit> unitDictionary;
-    public HashSet<String> builtWonders;
-    public TeamManager? teamManager;
-    public TurnManager turnManager;
+    public GameBoard? mainGameBoard { get; set; }
+    public Dictionary<int, Player> playerDictionary { get; set; }
+    public Dictionary<int, City> cityDictionary { get; set; }
+    public Dictionary<int, Unit> unitDictionary { get; set; }
+    public HashSet<String> builtWonders { get; set; } 
+    public TeamManager? teamManager { get; set; }
+    public TurnManager turnManager { get; set; }
     public GraphicManager graphicManager;
-    int currentID = 0;
-    public int localPlayerTeamNum;
+    private int currentID = 0;
+
+    public int CurrentID
+    {
+        get => currentID;
+        set => currentID = value;
+    }
+    public int localPlayerTeamNum { get; set; }
+
+    //blank used for loading a game
+    public Game()
+    {
+    }
 
     public Game(String mapName, int localPlayerTeamNum)
     {
@@ -28,9 +40,9 @@ public class Game
         this.localPlayerTeamNum = localPlayerTeamNum;
         this.playerDictionary = new();
         this.cityDictionary = new();
+        this.unitDictionary = new();
         this.turnManager = new TurnManager();
         this.teamManager = new TeamManager();
-        turnManager.game = this;
         GameBoard mainBoard = new GameBoard(GetUniqueID(), 0, 0);
         Dictionary<Hex, GameHex> gameHexDict = new();
         String mapData = System.IO.File.ReadAllText(mapName + ".map");
@@ -151,6 +163,16 @@ public class Game
     {
         return Interlocked.Increment(ref currentID);
     }
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static Game Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<Game>(reader);
+    }
+
 }
 
 // Tests
@@ -809,22 +831,12 @@ struct GameTests
     }
 
 
-
     static public void Complain(String name)
     {
         Console.WriteLine("FAIL " + name);
         GD.Print("FAIL " + name);
     }
 
-}
-
-
-struct GameMain
-{
-    static public void Main()
-    {
-        GameTests.TestAll();
-    }
 }
 
 //things to test

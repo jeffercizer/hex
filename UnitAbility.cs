@@ -5,19 +5,21 @@ using System.Diagnostics;
 using System.Data;
 using System.Formats.Asn1;
 using Godot;
+using System.IO;
 
+[Serializable]
 public class UnitAbility
 {
-    public String name;
-    public UnitEffect effect;
-    public int usingUnitID;
-    public float combatPower;
-    public int currentCharges;
-    public int maxChargesPerTurn; //-1 means no reset... we use the charge then its gone I think is the idea
-    public int range;
-    public String iconPath;
-    public TargetSpecification validTargetTypes;
-    
+    public String name { get; set; }
+    public UnitEffect effect { get; set; }
+    public int usingUnitID { get; set; }
+    public float combatPower { get; set; }
+    public int currentCharges { get; set; }
+    public int maxChargesPerTurn { get; set; } //-1 means no reset... we use the charge then its gone I think is the idea
+    public int range { get; set; }
+    public String iconPath { get; set; }
+    public TargetSpecification validTargetTypes { get; set; }
+
     public UnitAbility(int usingUnitID, UnitEffect effect, float combatPower = 0.0f, int maxChargesPerTurn = 1, int range = 0, TargetSpecification validTargetTypes = null, String iconPath = "")
     {
         this.usingUnitID = usingUnitID;
@@ -34,6 +36,20 @@ public class UnitAbility
         }
         this.validTargetTypes = validTargetTypes;
     }
+    public UnitAbility()
+    {
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static UnitAbility Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<UnitAbility>(reader);
+    }
+
 
     public void ResetAbilityUses()
     {

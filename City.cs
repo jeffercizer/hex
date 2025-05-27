@@ -6,6 +6,7 @@ using System.Data;
 using Godot;
 using System.Reflection;
 using NetworkMessages;
+using System.IO;
 
 public enum ProductionType
 {
@@ -13,9 +14,16 @@ public enum ProductionType
     Unit,
 }
 
+[Serializable]
 public class ProductionQueueType
 {
-
+    public String name { get; set; }
+    public String buildingType { get; set; }
+    public String unitType { get; set; }
+    public GameHex targetGameHex { get; set; }
+    public float productionLeft { get; set; }
+    public float productionCost { get; set; }
+    public String productionIconPath { get; set; }
     public ProductionQueueType(String name, String buildingType, String unitType, GameHex targetGameHex, float productionCost, float productionLeft)
     {
         this.name = name;
@@ -46,13 +54,22 @@ public class ProductionQueueType
         }
         return false;
     }
-    public String name;
-    public String buildingType;
-    public String unitType;
-    public GameHex targetGameHex;
-    public float productionLeft;
-    public float productionCost;
-    public String productionIconPath;
+
+    public ProductionQueueType()
+    {
+
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static ProductionQueueType Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<ProductionQueueType>(reader);
+    }
+
 }
 
 
@@ -92,38 +109,38 @@ public class City
         SetBaseHexYields();
 
     }
-    public int id;
-    public int teamNum;
-    public String name;
-    public bool isCapital;
-    public bool wasCapital;
-    public int originalCapitalTeamID;
-    public int maxDistrictSize;
-    public List<District> districts;
-    public Hex hex;
-    public Yields yields;
-    public int citySize;
-    public int naturalPopulation;
-    public float foodToGrow;
-    public float foodStockpile;
-    public float productionOverflow;
-    public Yields flatYields;
-    public Yields roughYields;
-    public Yields mountainYields;
-    public Yields coastalYields;
-    public Yields oceanYields;
-    public Yields desertYields;
-    public Yields plainsYields;
-    public Yields grasslandYields;
-    public Yields tundraYields;
-    public Yields arcticYields;
-    public List<ProductionQueueType> productionQueue;
-    public Dictionary<string, ProductionQueueType> partialProductionDictionary;
-    public Dictionary<Hex, ResourceType> heldResources;
-    public HashSet<Hex> heldHexes;
-    public int baseMaxResourcesHeld;
-    public int maxResourcesHeld;
-    public int readyToExpand;
+    public int id { get; set; }
+    public int teamNum { get; set; }
+    public String name { get; set; }
+    public bool isCapital { get; set; }
+    public bool wasCapital { get; set; }
+    public int originalCapitalTeamID { get; set; }
+    public int maxDistrictSize { get; set; }
+    public List<District> districts { get; set; } = new();
+    public Hex hex { get; set; }
+    public Yields yields { get; set; }
+    public int citySize { get; set; }
+    public int naturalPopulation { get; set; }
+    public float foodToGrow{ get; set; }
+    public float foodStockpile{ get; set; }
+    public float productionOverflow{ get; set; }
+    public Yields flatYields{ get; set; }
+    public Yields roughYields{ get; set; }
+    public Yields mountainYields{ get; set; }
+    public Yields coastalYields{ get; set; }
+    public Yields oceanYields{ get; set; }
+    public Yields desertYields{ get; set; }
+    public Yields plainsYields{ get; set; }
+    public Yields grasslandYields{ get; set; }
+    public Yields tundraYields{ get; set; }
+    public Yields arcticYields{ get; set; }
+    public List<ProductionQueueType> productionQueue{ get; set; } = new();
+    public Dictionary<string, ProductionQueueType> partialProductionDictionary{ get; set; } = new();
+    public Dictionary<Hex, ResourceType> heldResources{ get; set; } = new();
+    public HashSet<Hex> heldHexes{ get; set; } = new();
+    public int baseMaxResourcesHeld{ get; set; }
+    public int maxResourcesHeld{ get; set; }
+    public int readyToExpand{ get; set; }
 
     private void AddCityCenter(bool isCapital)
     {
@@ -935,6 +952,20 @@ public class City
     public void AddArcticYields(GameHex gameHex)
     {
         gameHex.yields += arcticYields;
+    }
+
+    public City()
+    {
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static City Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<City>(reader);
     }
 
 }

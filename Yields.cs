@@ -3,8 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
+using System.IO;
 
-public struct Yields
+public class Yields
 {
     public float food;
     public float production;
@@ -28,4 +29,18 @@ public struct Yields
             influence = a.influence + b.influence
         };
     }
+    public Yields()
+    {
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static Yields Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<Yields>(reader);
+    }
+
 }

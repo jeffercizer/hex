@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Data;
 using System.Formats.Asn1;
 using Godot;
+using System.IO;
 public enum TerrainMoveType
 {
     Flat,
@@ -23,7 +24,28 @@ public enum TerrainMoveType
 [Serializable]
 public class Unit
 {
-
+    public String name { get; set; }
+    public int id { get; set; }
+    public String unitType { get; set; }
+    public Dictionary<TerrainMoveType, float> movementCosts { get; set; } = new();
+    public Dictionary<TerrainMoveType, float> sightCosts { get; set; } = new();
+    public Hex hex { get; set; }
+    public float movementSpeed { get; set; } = 2.0f;
+    public float remainingMovement { get; set; } = 2.0f;
+    public float sightRange { get; set; } = 3.0f;
+    public float health { get; set; } = 100.0f;
+    public float combatStrength { get; set; } = 10.0f;
+    public float maintenanceCost { get; set; } = 1.0f;
+    public int maxAttackCount { get; set; } = 1;
+    public int attacksLeft { get; set; } = 1;
+    public int healingFactor { get; set; }
+    public int teamNum { get; set; }
+    public UnitClass unitClass { get; set; }
+    public List<Hex>? currentPath { get; set; } = new();
+    public List<Hex> visibleHexes { get; set; } = new();
+    public List<UnitEffect> effects { get; set; } = new();
+    public List<UnitAbility> abilities { get; set; } = new();
+    public bool isTargetEnemy { get; set; }
     public Unit(String unitType, int id, int teamNum)
     {
         this.id = id;
@@ -60,6 +82,7 @@ public class Unit
 
     }
 
+
     public void SpawnSetup(GameHex targetGameHex)
     {
         hex = targetGameHex.hex;
@@ -76,28 +99,7 @@ public class Unit
         if (Global.gameManager.game.TryGetGraphicManager(out GraphicManager manager)) manager.NewUnit(this);
     }
 
-    public String name;
-    public int id;
-    public String unitType;
-    public Dictionary<TerrainMoveType, float> movementCosts;
-    public Dictionary<TerrainMoveType, float> sightCosts;
-    public Hex hex;
-    public float movementSpeed = 2.0f;
-    public float remainingMovement = 2.0f;
-    public float sightRange = 3.0f;
-    public float health = 100.0f;
-    public float combatStrength = 10.0f;
-    public float maintenanceCost = 1.0f;
-    public int maxAttackCount = 1;
-    public int attacksLeft = 1;
-    public int healingFactor;
-    public int teamNum;
-    public UnitClass unitClass;
-    public List<Hex>? currentPath = new();
-    public List<Hex> visibleHexes = new();
-    public List<UnitEffect> effects = new();
-    public List<UnitAbility> abilities = new();
-    public bool isTargetEnemy;
+
 
     public void OnTurnStarted(int turnNumber)
     {
@@ -758,4 +760,20 @@ public class Unit
         //if the end is unreachable return an empty path
         return new List<Hex>();
     }
+
+    public Unit()
+    {
+        //used for loading
+    }
+
+    public void Serialize(BinaryWriter writer)
+    {
+        Serializer.Serialize(writer, this);
+    }
+
+    public static Unit Deserialize(BinaryReader reader)
+    {
+        return Serializer.Deserialize<Unit>(reader);
+    }
+
 }
